@@ -1,0 +1,166 @@
+---
+import { ShieldCheck, Construction, CheckCircle2, QrCode, Users, Building2, GraduationCap, MapPin, TrendingUp } from 'lucide-react';
+import HeroFicha from './HeroFicha.astro';
+import Breadcrumb from './Breadcrumb.astro';
+import SidebarForm from './SidebarForm.astro';
+import FaqAccordion from './FaqAccordion.astro';
+import ProcesoSteps from './ProcesoSteps.astro';
+import MobileCtaBar from './MobileCtaBar.astro';
+import ContactModal from './ContactModal.astro';
+
+const { perfil } = Astro.props;
+const quienesIcons = [Users, Building2, GraduationCap];
+const oportunidadesIcons = [MapPin, TrendingUp];
+---
+
+<div class="bg-slate-50 min-h-screen pb-24 lg:pb-0">
+
+    <HeroFicha perfil={perfil} badgeLabel="Certificación Privada" ctaLabel="Solicitar Certificación" ctaIcon={Construction} whatsapp>
+        <ShieldCheck slot="badge-icon" size={14} />
+    </HeroFicha>
+
+    <Breadcrumb title={perfil.title} />
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid lg:grid-cols-3 gap-12">
+            <div class="lg:col-span-2 space-y-16">
+
+                <section class="space-y-4 text-slate-700 leading-relaxed">
+                    <p class="text-xl font-bold text-slate-900 leading-snug">{perfil.heroHook}</p>
+                    {perfil.heroParagraphs.map((p) => <p class="text-base">{p}</p>)}
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 !mt-6">
+                        <h2 class="text-base font-bold text-slate-900 mb-2">{perfil.intro.title}</h2>
+                        <p class="text-slate-600 text-[15px] leading-relaxed">{perfil.intro.text}</p>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 text-[15px] text-amber-900">
+                        <span class="font-bold">¿Necesitas certificar otro equipo o perfil?</span> {perfil.necesitasOtro}
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-3">{perfil.aMedida.title}</h2>
+                    <p class="text-slate-700 leading-relaxed text-base">{perfil.aMedida.text}</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4">¿Qué incluye la certificación?</h2>
+                    <p class="text-slate-700 leading-relaxed text-base mb-4">{perfil.incluye.intro}</p>
+                    <ul class="grid sm:grid-cols-2 gap-2.5 mb-3">
+                        {perfil.incluye.items.map((it) => (
+                            <li class="flex items-start gap-2.5 text-[15px] text-slate-700 bg-white border border-slate-200 rounded-lg px-4 py-2.5">
+                                <CheckCircle2 size={16} className="text-amber-500 mt-0.5 shrink-0" /> {it}
+                            </li>
+                        ))}
+                    </ul>
+                    <p class="text-slate-500 text-sm leading-relaxed">{perfil.incluye.note}</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-5">¿Quiénes pueden solicitar este servicio?</h2>
+                    <div class="grid sm:grid-cols-3 gap-4">
+                        {perfil.quienesPueden.map((item, index) => {
+                            const Icon = quienesIcons[index];
+                            return (
+                                <div class="bg-white border border-slate-200 rounded-xl p-5 text-center">
+                                    <div class="w-11 h-11 mx-auto bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center mb-3 text-[#0B1E40]">
+                                        <Icon size={20} />
+                                    </div>
+                                    <h3 class="font-bold text-base text-slate-900 mb-1.5">{item.title}</h3>
+                                    <p class="text-slate-600 text-[13px] leading-relaxed">{item.text}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-8">¿Cómo es el proceso?</h2>
+                    <ProcesoSteps steps={perfil.proceso} />
+                </section>
+
+                <section class="bg-[#0B1E40] text-white rounded-2xl p-7">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                            <QrCode size={22} />
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-extrabold mb-3">{perfil.verificables.title}</h2>
+                            <p class="text-slate-300 leading-relaxed text-[15px]">{perfil.verificables.text}</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4">¿Por qué certificar tus competencias?</h2>
+                    <p class="text-slate-700 leading-relaxed text-base mb-4">{perfil.porQueCertificar.intro}</p>
+                    <ul class="grid sm:grid-cols-2 gap-2.5">
+                        {perfil.porQueCertificar.items.map((it) => (
+                            <li class="flex items-start gap-3 bg-white border border-slate-200 rounded-xl p-3.5 text-[15px] text-slate-700 font-medium">
+                                <ShieldCheck size={16} className="text-amber-500 mt-0.5 shrink-0" /> {it}
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+
+                <section class="space-y-8">
+                    {perfil.oportunidades.map((block, index) => {
+                        const Icon = oportunidadesIcons[index];
+                        return (
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                    <Icon size={20} />
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-extrabold text-slate-900 mb-2">{block.title}</h3>
+                                    <p class="text-slate-600 leading-relaxed text-[15px]">{block.text}</p>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-6">Preguntas frecuentes</h2>
+                    <FaqAccordion faq={perfil.faq} />
+                </section>
+
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="lg:sticky lg:top-28">
+                    <SidebarForm icon={Construction} title="Solicitar Certificación" ctaLabel="Cotizar certificación" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {/* CIERRE */}
+    <section class="bg-[#0B1E40] text-white py-16 border-t-4 border-amber-500">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mb-6">
+                <Construction size={22} className="text-amber-400" />
+            </div>
+            <h2 class="text-2xl md:text-3xl font-extrabold mb-6">{perfil.cierre.title}</h2>
+            <ul class="text-left inline-block space-y-2 mb-6">
+                {perfil.cierre.items.map((it) => (
+                    <li class="flex items-start gap-2.5 text-blue-100 text-[15px]">
+                        <CheckCircle2 size={15} className="text-amber-400 mt-0.5 shrink-0" /> {it}
+                    </li>
+                ))}
+            </ul>
+            <p class="text-blue-100/85 leading-relaxed mb-9 max-w-2xl mx-auto text-base">{perfil.cierre.closing}</p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button type="button" data-open-form class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-[#0B1E40] font-bold text-sm uppercase tracking-widest px-7 py-3.5 rounded-xl transition-all shadow-lg">
+                    Solicitar Certificación
+                </button>
+                <a href="https://wa.me/56912345678" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm uppercase tracking-widest px-7 py-3.5 rounded-xl transition-all backdrop-blur-sm">
+                    Contactar por WhatsApp
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <MobileCtaBar icon={Construction} label="Solicitar certificación" />
+    <ContactModal title="Solicitar Certificación" ctaLabel="Enviar solicitud" />
+
+</div>

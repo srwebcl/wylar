@@ -1,0 +1,169 @@
+---
+import { ShieldCheck, XCircle, GraduationCap, Activity, AlertTriangle, Zap, Heart } from 'lucide-react';
+import HeroFicha from './HeroFicha.astro';
+import Breadcrumb from './Breadcrumb.astro';
+import SidebarForm from './SidebarForm.astro';
+import FaqAccordion from './FaqAccordion.astro';
+import ProcesoSteps from './ProcesoSteps.astro';
+import MobileCtaBar from './MobileCtaBar.astro';
+import ContactModal from './ContactModal.astro';
+
+const { perfil } = Astro.props;
+const HeroIcon = perfil.id === 'cuidador' ? Heart : Zap;
+---
+
+<div class="bg-slate-50 min-h-screen pb-24 lg:pb-0">
+
+    <HeroFicha perfil={perfil} badgeLabel="Certificación ChileValora" ctaLabel={perfil.heroCta} ctaIcon={HeroIcon}>
+        <ShieldCheck slot="badge-icon" size={14} className="text-cyan-400" />
+    </HeroFicha>
+
+    <Breadcrumb title={perfil.title} />
+
+    {/* CONTENIDO + PANEL LATERAL — una sola estructura para toda la ficha,
+        así el formulario queda realmente fijo mientras se lee, no solo
+        durante una sección. */}
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid lg:grid-cols-3 gap-12">
+            <div class="lg:col-span-2 space-y-16">
+
+                {/* El gancho narrativo, ahora en una columna de lectura cómoda */}
+                <section class="space-y-4 text-slate-700 leading-relaxed">
+                    <p class="text-xl font-bold text-slate-900 leading-snug">{perfil.heroHook}</p>
+                    {perfil.heroParagraphs.map((p) => <p class="text-base">{p}</p>)}
+                </section>
+
+                {/* IMPORTANTE */}
+                <section class="grid sm:grid-cols-2 gap-5">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                        <div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center mb-4">
+                            <XCircle size={20} />
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 mb-2.5">Esto NO es un curso</h3>
+                        <p class="text-slate-600 text-[15px] leading-relaxed">{perfil.importante.noEsCurso}</p>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+                            <GraduationCap size={20} />
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 mb-2.5">No necesitas tener un título</h3>
+                        <p class="text-slate-600 text-[15px] leading-relaxed mb-2.5">{perfil.importante.tituloIntro}</p>
+                        <ul class="space-y-1 mb-2.5">
+                            {perfil.importante.tituloBullets.map((b) => (
+                                <li class="flex items-start gap-2 text-[15px] text-slate-600">
+                                    <span class="mt-2 w-1 h-1 rounded-full bg-slate-400 shrink-0"></span> {b}
+                                </li>
+                            ))}
+                        </ul>
+                        <p class="text-slate-600 text-[15px] leading-relaxed">{perfil.importante.tituloClosing}</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4">¿Qué es esta certificación?</h2>
+                    <p class="text-slate-700 leading-relaxed text-base">{perfil.queEs}</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4">¿Quiénes pueden certificarse?</h2>
+                    <p class="text-slate-700 leading-relaxed text-base mb-4">{perfil.quienesPueden.intro}</p>
+                    <ul class="grid sm:grid-cols-2 gap-x-6 gap-y-2.5 mb-4">
+                        {perfil.quienesPueden.bullets.map((b) => (
+                            <li class="flex items-start gap-2.5 text-[15px] text-slate-600">
+                                <ShieldCheck size={16} className="text-blue-600 mt-0.5 shrink-0" /> {b}
+                            </li>
+                        ))}
+                    </ul>
+                    <p class="text-slate-700 leading-relaxed text-base font-medium">{perfil.quienesPueden.closing}</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-2 flex items-center gap-2.5">
+                        <Activity size={22} className="text-blue-600" /> ¿Qué se evalúa?
+                    </h2>
+                    <p class="text-slate-700 leading-relaxed text-base mb-5">{perfil.queSeEvaluaIntro}</p>
+                    <div class="space-y-3">
+                        {perfil.ucls.map((ucl, index) => (
+                            <div class="bg-white p-5 rounded-xl border border-slate-200 flex gap-4">
+                                <div class="bg-slate-100 text-[#0B1E40] w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                    {index + 1}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-base mb-1.5">{ucl.title}</h4>
+                                    <p class="text-slate-600 text-[15px] leading-relaxed">{ucl.description}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {perfil.alert && (
+                    <section class="bg-blue-50 border border-blue-100 rounded-2xl p-6 flex flex-col sm:flex-row items-start gap-4">
+                        <div class="bg-blue-600 text-white p-3 rounded-full flex-shrink-0">
+                            <AlertTriangle size={20} />
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-[#0B1E40] mb-1.5">{perfil.alert.title}</h3>
+                            <p class="text-slate-700 leading-relaxed text-[15px]">{perfil.alert.description}</p>
+                        </div>
+                    </section>
+                )}
+
+                <section>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-8">¿Cómo es el proceso?</h2>
+                    <ProcesoSteps steps={perfil.proceso} />
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-5">¿Por qué certificar tus competencias?</h2>
+                    <ul class="grid sm:grid-cols-2 gap-3 mb-5">
+                        {perfil.porQueCertificar.bullets.map((b) => (
+                            <li class="flex items-start gap-3 bg-white border border-slate-200 rounded-xl p-4 text-[15px] text-slate-700 font-medium">
+                                <ShieldCheck size={17} className="text-blue-600 mt-0.5 shrink-0" /> {b}
+                            </li>
+                        ))}
+                    </ul>
+                    <p class="text-slate-600 leading-relaxed text-base">{perfil.porQueCertificar.closing}</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-6">Preguntas frecuentes</h2>
+                    <FaqAccordion faq={perfil.faq} />
+                </section>
+
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="lg:sticky lg:top-28">
+                    <SidebarForm icon={HeroIcon} title="Solicitar Evaluación" ctaLabel="Cotizar este perfil" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {/* CIERRE — jerarquía clara: la pregunta-gancho destaca del resto del
+        texto de apoyo, en vez de un bloque de párrafos todos iguales. */}
+    <section class="bg-gradient-to-br from-[#0B1E40] to-blue-900 text-white py-16">
+        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="w-12 h-12 mx-auto rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-6">
+                <HeroIcon size={22} />
+            </div>
+            <h2 class="text-2xl md:text-3xl font-extrabold mb-4">{perfil.cierre.title}</h2>
+            <p class="text-xl font-bold leading-snug mb-4">{perfil.cierre.paragraphs[0]}</p>
+            <div class="space-y-3 text-blue-100/85 leading-relaxed mb-9 text-base">
+                {perfil.cierre.paragraphs.slice(1).map((p) => <p>{p}</p>)}
+            </div>
+            <button
+                type="button"
+                data-open-form
+                class="inline-flex items-center gap-2 bg-white text-[#0B1E40] font-bold text-sm uppercase tracking-widest px-7 py-3.5 rounded-xl transition-all shadow-lg hover:bg-slate-50"
+            >
+                {perfil.cierre.cta}
+            </button>
+        </div>
+    </section>
+
+    <MobileCtaBar icon={HeroIcon} label={perfil.heroCta} />
+    <ContactModal title="Solicitar Evaluación" ctaLabel="Enviar solicitud" />
+
+</div>
