@@ -1,0 +1,62 @@
+---
+const logos = [
+    { src: "/logos-clientes/chilevalora.png", alt: "ChileValora" },
+    { src: "/logos-clientes/sence.png", alt: "SENCE" },
+    { src: "/images/logo-strom.svg", alt: "Strom" },
+    { src: "/images/Logo-Posiciona.webp", alt: "Posiciona" },
+    { src: "/logos-clientes/isudamericana.png", alt: "Sudamericana" },
+    { src: "/logos-clientes/movilockers.webp", alt: "Movilockers" }
+];
+---
+
+<div class="overflow-hidden relative w-full lg:w-[650px] flex items-center group/carousel">
+    <!-- Fades en los bordes para un efecto suave -->
+    <div class="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+    <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+    
+    <div class="flex w-max animate-infinite-scroll">
+        <!-- Primer Grupo -->
+        <div class="flex items-center justify-around gap-16 px-8 min-w-max">
+            {logos.map((logo) => (
+                <img 
+                    src={logo.src} 
+                    alt={logo.alt} 
+                    class="h-12 md:h-14 object-contain grayscale-0 hover:grayscale transition-all duration-300 cursor-pointer opacity-90 hover:opacity-50" 
+                />
+            ))}
+        </div>
+        <!-- Segundo Grupo (Duplicado exacto) -->
+        <div class="flex items-center justify-around gap-16 px-8 min-w-max">
+            {logos.map((logo) => (
+                <img 
+                    src={logo.src} 
+                    alt={logo.alt} 
+                    class="h-12 md:h-14 object-contain grayscale-0 hover:grayscale transition-all duration-300 cursor-pointer opacity-90 hover:opacity-50" 
+                />
+            ))}
+        </div>
+        <!-- Tercer Grupo (Para asegurar el loop en pantallas grandes) -->
+        <div class="flex items-center justify-around gap-16 px-8 min-w-max">
+            {logos.map((logo) => (
+                <img 
+                    src={logo.src} 
+                    alt={logo.alt} 
+                    class="h-12 md:h-14 object-contain grayscale-0 hover:grayscale transition-all duration-300 cursor-pointer opacity-90 hover:opacity-50" 
+                />
+            ))}
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(-33.333333%)); }
+    }
+    .animate-infinite-scroll {
+        animation: scroll 20s linear infinite;
+    }
+    .group\/carousel:hover .animate-infinite-scroll {
+        animation-play-state: paused;
+    }
+</style>

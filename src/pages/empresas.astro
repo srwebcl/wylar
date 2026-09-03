@@ -1,0 +1,179 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ContactForm from '../components/ContactForm.jsx';
+import CatalogoPerfiles from '../components/CatalogoPerfiles.jsx';
+import { Building2, CheckCircle2, ShieldCheck, ArrowRight, ArrowDown, Activity, Award, Zap } from 'lucide-react';
+---
+
+<Layout title="Servicios para Empresas | Wylar">
+    <div class="animate-in fade-in duration-700 bg-slate-50 overflow-hidden">
+
+        {/* HERO */}
+        <section id="inicio" class="relative min-h-[60vh] md:min-h-[65vh] flex items-center bg-[#050B14] overflow-hidden border-b border-white/10">
+            <div class="absolute inset-0">
+                <img src="/images/catalog_rigger.jpg" alt="Operación industrial certificada" class="w-full h-full object-cover" />
+            </div>
+            <div class="absolute inset-0 bg-[#0B1E40]/80"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#050B14] via-transparent to-[#050B14]/50"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 md:py-24">
+                <div class="flex flex-col items-center text-center max-w-4xl mx-auto">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#0B1E40] to-[#122b59] text-white shadow-xl mb-8 border border-white/10">
+                        <Building2 size={16} className="text-cyan-400" />
+                        <span class="text-xs font-bold uppercase tracking-widest">Portal Empresas</span>
+                    </div>
+
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-6 text-white">
+                        Estándar <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-cyan-300">Operacional</span>
+                    </h1>
+
+                    <p class="text-lg md:text-xl text-white/80 leading-relaxed font-medium max-w-3xl mb-10">
+                        Certificamos las competencias técnicas de su capital humano directamente en faena. Asegure el cumplimiento normativo sin detener su producción.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center gap-4">
+                        <a href="#contacto" class="bg-gradient-to-r from-[#0B1E40] to-blue-900 hover:from-blue-900 hover:to-blue-700 text-white font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                            Cotizar Proyecto <ArrowRight size={18} />
+                        </a>
+                        <a href="#proceso" class="bg-white hover:bg-slate-50 text-[#0B1E40] font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+                            Ver cómo funciona <ArrowDown size={18} />
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* MÉTRICAS */}
+        <section class="bg-white py-24 border-b border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 divide-y md:divide-y-0 md:divide-x divide-slate-200 text-center">
+                    <div class="pt-8 md:pt-0">
+                        <div class="text-5xl font-black text-[#0B1E40] mb-2 tracking-tight">100%</div>
+                        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">Cobertura Nacional</div>
+                    </div>
+                    <div class="pt-8 md:pt-0">
+                        <div class="text-5xl font-black text-[#0B1E40] mb-2 tracking-tight">SENCE</div>
+                        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">Franquicia Tributaria</div>
+                    </div>
+                    <div class="pt-8 md:pt-0">
+                        <div class="text-5xl font-black text-[#0B1E40] mb-2 tracking-tight">In-Situ</div>
+                        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">Evaluación en Terreno</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* CÓMO FUNCIONA */}
+        <div id="proceso" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+            <div class="text-center mb-20 relative">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-100 rounded-full blur-[80px] -z-10"></div>
+                <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6">Certificación sin detener su operación</h2>
+                <p class="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                    Un proceso pensado para faena: nos adaptamos a sus turnos, protocolos de seguridad y plazos de producción.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 relative">
+                <div class="hidden md:block absolute top-24 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-blue-100 via-blue-300 to-blue-100 -z-10"></div>
+
+                <div class="bg-white p-10 rounded-[2rem] border border-slate-100 text-center shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] hover:-translate-y-2 transition-all duration-300 group">
+                    <div class="w-20 h-20 mx-auto bg-white border-4 border-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-blue-900/5 group-hover:scale-110 transition-transform">
+                        <Activity size={32} />
+                    </div>
+                    <div class="inline-block px-4 py-1 rounded-full bg-slate-100 text-slate-500 font-black text-sm mb-4">PASO 1</div>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4">Diagnóstico</h3>
+                    <p class="text-slate-600 leading-relaxed">Levantamos con usted qué perfiles y cuántos trabajadores necesita certificar.</p>
+                </div>
+
+                <div class="bg-white p-10 rounded-[2rem] border border-slate-100 text-center shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] hover:-translate-y-2 transition-all duration-300 group">
+                    <div class="w-20 h-20 mx-auto bg-white border-4 border-cyan-50 text-cyan-600 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-cyan-900/5 group-hover:scale-110 transition-transform">
+                        <ShieldCheck size={32} />
+                    </div>
+                    <div class="inline-block px-4 py-1 rounded-full bg-slate-100 text-slate-500 font-black text-sm mb-4">PASO 2</div>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4">Evaluación en Terreno</h3>
+                    <p class="text-slate-600 leading-relaxed">Vamos a su faena, con sus turnos y protocolos de seguridad, sin detener la operación.</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-blue-600 to-[#0B1E40] p-10 rounded-[2rem] text-center shadow-[0_20px_50px_-10px_rgba(11,30,64,0.4)] hover:-translate-y-2 transition-all duration-300 group relative overflow-hidden text-white">
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                    <div class="w-20 h-20 mx-auto bg-white/10 backdrop-blur-sm border-4 border-white/20 text-white rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                        <Award size={32} />
+                    </div>
+                    <div class="inline-block px-4 py-1 rounded-full bg-white/20 text-white font-black text-sm mb-4">PASO 3</div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Certificación y Reportería</h3>
+                    <p class="text-blue-100 leading-relaxed">Recibe los certificados oficiales y un reporte listo para sus procesos de licitación y cumplimiento.</p>
+                </div>
+            </div>
+        </div>
+
+        {/* BENEFICIOS */}
+        <section id="beneficios" class="bg-white py-24 relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col lg:flex-row gap-16 items-center">
+                    <div class="w-full lg:w-1/2">
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-bold tracking-widest uppercase mb-6">
+                            <Zap size={16} /> Continuidad Operacional
+                        </div>
+                        <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-8 leading-tight">
+                            Evaluación técnica <span class="text-blue-600">integral para su operación.</span>
+                        </h2>
+                        <div class="space-y-6">
+                            <div class="flex gap-5">
+                                <div class="bg-blue-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-blue-600">
+                                    <Activity size={24} />
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-xl text-slate-900 mb-2">Mitigación de Riesgos</h4>
+                                    <p class="text-slate-600 leading-relaxed">Aseguramos que su personal cumple con el estándar de la industria, previniendo accidentes y fallas operacionales por impericia técnica.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-5">
+                                <div class="bg-cyan-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-cyan-600">
+                                    <ShieldCheck size={24} />
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-xl text-slate-900 mb-2">Respaldo ante Licitaciones</h4>
+                                    <p class="text-slate-600 leading-relaxed">Las nóminas de trabajadores certificados (ChileValora, AWS, entre otros) otorgan puntaje adicional crítico en licitaciones públicas y privadas.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-5">
+                                <div class="bg-amber-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-amber-600">
+                                    <CheckCircle2 size={24} />
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-xl text-slate-900 mb-2">Franquicia Tributaria SENCE</h4>
+                                    <p class="text-slate-600 leading-relaxed">Nuestros procesos de evaluación son imputables a la Franquicia SENCE: recupere hasta el 100% de la inversión.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full lg:w-1/2 relative">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-cyan-400 rounded-3xl transform rotate-3 scale-105 opacity-20 blur-lg"></div>
+                        <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2070&auto=format&fit=crop" alt="Operación industrial" class="relative rounded-3xl shadow-2xl object-cover h-[500px] w-full" />
+                        <div class="absolute -bottom-8 -left-8 bg-white p-6 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-4">
+                            <div class="bg-green-100 text-green-600 p-3 rounded-full"><Zap size={24} /></div>
+                            <div>
+                                <div class="font-black text-xl text-slate-900">72 hrs</div>
+                                <div class="text-sm font-medium text-slate-500">Despliegue Nacional</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* CATÁLOGO DE PERFILES */}
+        <div id="perfiles" class="bg-white">
+            <CatalogoPerfiles client:load title="Perfiles Disponibles B2B" subtitle="Revise el catálogo de especialidades técnicas habilitadas para evaluación." />
+        </div>
+
+        {/* FORMULARIO */}
+        <ContactForm
+            client:idle
+            title="Solicite una propuesta técnica"
+            subtitle="Complete el formulario detallando la cantidad de evaluados y la ubicación de su faena. Un asesor corporativo lo contactará a la brevedad."
+            preselectedContext="empresas"
+        />
+    </div>
+</Layout>
