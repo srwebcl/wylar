@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Paleta de marca Wylar (misma que el sitio público) */
+  --color-navy-950: #050B14;
+  --color-navy-900: #0B1E40;
+  --color-navy-800: #122b59;
+  --color-cyan-400: #22d3ee;
+  --color-cyan-600: #0891b2;
+  --color-amber-500: #f59e0b;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Glassmorphism utility classes */
+.glass-panel {
+  @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl;
+}
+
+.glass-card {
+  @apply bg-white/90 backdrop-blur-sm border border-slate-100 shadow-sm rounded-xl transition-all duration-300 hover:shadow-md;
+}
+
+/* Custom scrollbar for better UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

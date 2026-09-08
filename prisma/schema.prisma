@@ -1,0 +1,93 @@
+// Schema de base de datos del CRM de Wylar.
+//
+// Usa PostgreSQL (Neon vía Vercel Marketplace) — es lo que permite
+// desplegar en Vercel sin fricción. La URL de conexión no va aquí (Prisma
+// 7): se define en prisma.config.ts + DATABASE_URL (ver .env.example).
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  // ADMIN | COMERCIAL — ADMIN además administra el equipo (/equipo).
+  role         String   @default("COMERCIAL")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  assignedLeads Lead[]         @relation("AssignedLeads")
+  activities    LeadActivity[]
+
+  @@map("users")
+}
+
+model Lead {
+  id   Int    @id @default(autoincrement())
+  // Código de referencia visible, ej. LEAD-1001 (se completa tras el insert, ver src/actions/leads.ts).
+  code String @unique
+
+  // PERSONA | EMPRESA | INSTITUCION — a qué portal/audiencia de wylar.cl corresponde.
+  type String
+
+  name    String
+  email   String
+  phone   String
+  // Nombre de la empresa/institución (solo aplica si type != PERSONA).
+  company String?
+
+  // Qué certificación/perfil busca (ej. "Instalador Eléctrico Clase D", "Rigger").
+  certificationInterest String?
+  // Mensaje/consulta libre que dejó el cliente en el formulario, si lo hubo.
+  message                String? @db.Text
+
+  // Canal de origen detectado automáticamente: WEB | FACEBOOK | INSTAGRAM | WHATSAPP | OTRO
+  source       String
+  // Detalle crudo usado para detectar el origen (referrer, utm_source/medium/campaign) — trazabilidad.
+  sourceDetail String? @db.Text
+
+  // Estado del embudo de ventas: NUEVO | EN_ATENCION | SEGUIMIENTO | CERRADO
+  status String @default("NUEVO")
+
+  assignedToId Int?
+  assignedTo   User? @relation("AssignedLeads", fields: [assignedToId], references: [id])
+
+  createdAt DateTime @default(now())
+  // Se completa automáticamente en la primera gestión o cambio de estado
+  // (ver src/actions/leads.ts) — permite auditar el tiempo de respuesta.
+  firstAttendedAt DateTime?
+  closedAt        DateTime?
+
+  activities LeadActivity[]
+
+  @@index([status])
+  @@index([assignedToId])
+  @@index([source])
+  @@map("leads")
+}
+
+model LeadActivity {
+  id     Int  @id @default(autoincrement())
+  lead   Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId Int
+
+  // Autor de la entrada; null = acción automática del sistema.
+  user       User?  @relation(fields: [userId], references: [id])
+  userId     Int?
+  // Copia plana del nombre, para que el historial no dependa de que el usuario siga existiendo.
+  authorName String
+
+  // NOTA | LLAMADA | WHATSAPP | EMAIL | REUNION | CREACION | CAMBIO_ESTADO | ASIGNACION
+  type String
+  text String @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+  @@map("lead_activities")
+}
