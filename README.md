@@ -49,7 +49,18 @@ Las 3 páginas de portal (`/personas`, `/instituciones`, `/empresas`) comparten 
 
 `/otec` redirige de forma permanente a `/instituciones` (configurado en `astro.config.mjs`) para no romper enlaces antiguos.
 
+## CRM (captura de leads)
+
+Los formularios del sitio (`ContactForm.jsx`, y el modal/formulario lateral de cada ficha de certificación) envían los leads directamente al [Wylar CRM](../wylar-crm) — un proyecto Next.js aparte, ver `src/lib/crm.js`. No hay digitación manual: cada envío crea la ficha del prospecto sola, con su canal de origen detectado automáticamente (Facebook, Instagram, WhatsApp, Web u Otro).
+
+Variable de entorno necesaria (`.env`, o configurada en el hosting de este sitio):
+
+```
+PUBLIC_CRM_API_URL="https://<tu-deploy-de-wylar-crm>.vercel.app/api/public/leads"
+```
+
+Sin esta variable, los formularios apuntan a un dominio de ejemplo y el envío falla mostrando un mensaje de error en pantalla (no rompe la página). Ver `wylar-crm/README.md`, sección "Conectar wylar.cl", para el resto de la configuración (CORS del lado del CRM, etc.).
+
 ## Notas
 
-- El formulario de contacto (`ContactForm.jsx`) todavía no está conectado a un backend/servicio de envío real — al enviarlo solo muestra una confirmación en pantalla. Falta integrar un proveedor (p. ej. un endpoint propio, Formspree, Resend, etc.) antes de production.
-- No hay variables de entorno ni claves de API en uso actualmente.
+- No hay más variables de entorno ni claves de API en uso, aparte de `PUBLIC_CRM_API_URL` arriba.

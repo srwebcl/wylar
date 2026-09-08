@@ -128,7 +128,7 @@ const oportunidadesIcons = [MapPin, TrendingUp];
 
             <div class="lg:col-span-1">
                 <div class="lg:sticky lg:top-28">
-                    <SidebarForm icon={Construction} title="Solicitar Certificación" ctaLabel="Cotizar certificación" />
+                    <SidebarForm icon={Construction} title="Solicitar Certificación" ctaLabel="Cotizar certificación" certificationInterest={perfil.title} />
                 </div>
             </div>
         </div>
@@ -161,6 +161,6 @@ const oportunidadesIcons = [MapPin, TrendingUp];
     </section>
 
     <MobileCtaBar icon={Construction} label="Solicitar certificación" />
-    <ContactModal title="Solicitar Certificación" ctaLabel="Enviar solicitud" />
+    <ContactModal title="Solicitar Certificación" ctaLabel="Enviar solicitud" certificationInterest={perfil.title} />
 
 </div>

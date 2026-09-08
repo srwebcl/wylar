@@ -171,7 +171,7 @@ const quienesIcons = [Users, Building2, GraduationCap];
 
             <div class="lg:col-span-1">
                 <div class="lg:sticky lg:top-28">
-                    <SidebarForm icon={Wrench} title="Solicitar Cotización" ctaLabel="Cotizar calificación" />
+                    <SidebarForm icon={Wrench} title="Solicitar Cotización" ctaLabel="Cotizar calificación" certificationInterest={perfil.title} />
                 </div>
             </div>
         </div>
@@ -204,6 +204,6 @@ const quienesIcons = [Users, Building2, GraduationCap];
     </section>
 
     <MobileCtaBar icon={Wrench} label="Solicitar cotización" />
-    <ContactModal title="Solicitar Cotización" ctaLabel="Enviar solicitud" />
+    <ContactModal title="Solicitar Cotización" ctaLabel="Enviar solicitud" certificationInterest={perfil.title} />
 
 </div>

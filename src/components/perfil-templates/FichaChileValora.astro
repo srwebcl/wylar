@@ -135,7 +135,7 @@ const HeroIcon = perfil.id === 'cuidador' ? Heart : Zap;
 
             <div class="lg:col-span-1">
                 <div class="lg:sticky lg:top-28">
-                    <SidebarForm icon={HeroIcon} title="Solicitar Evaluación" ctaLabel="Cotizar este perfil" />
+                    <SidebarForm icon={HeroIcon} title="Solicitar Evaluación" ctaLabel="Cotizar este perfil" certificationInterest={perfil.title} />
                 </div>
             </div>
         </div>
@@ -164,6 +164,6 @@ const HeroIcon = perfil.id === 'cuidador' ? Heart : Zap;
     </section>
 
     <MobileCtaBar icon={HeroIcon} label={perfil.heroCta} />
-    <ContactModal title="Solicitar Evaluación" ctaLabel="Enviar solicitud" />
+    <ContactModal title="Solicitar Evaluación" ctaLabel="Enviar solicitud" certificationInterest={perfil.title} />
 
 </div>

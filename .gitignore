@@ -28,3 +28,5 @@ pnpm-debug.log*
 # raw design/source assets — logos en .ai/.pdf, documentos internos, prototipos
 # y muestras de certificados con datos personales reales. No debe subirse al repo.
 base/
+.vercel
+.env*
