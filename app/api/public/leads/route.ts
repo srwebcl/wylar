@@ -1,28 +1,11 @@
 import { createLeadFromPublicForm } from '@/actions/leads';
+import { corsHeaders } from '@/lib/publicApi';
 
 // Módulo de Captura de Oportunidades: endpoint público (sin sesión) que
 // consumen los formularios de wylar.cl (ContactForm, y los formularios de
 // cada ficha de certificación) para crear el lead automáticamente — sin
 // digitación manual del equipo comercial. Ver README.md, sección
 // "Conectar wylar.cl", para el snippet que usa el sitio.
-
-function allowedOrigins(): string[] {
-    return (process.env.PUBLIC_FORM_ORIGINS ?? '')
-        .split(',')
-        .map((o) => o.trim())
-        .filter(Boolean);
-}
-
-function corsHeaders(origin: string | null): HeadersInit {
-    const allowed = allowedOrigins();
-    const allowOrigin = origin && allowed.includes(origin) ? origin : allowed[0] || '';
-    return {
-        'Access-Control-Allow-Origin': allowOrigin,
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        Vary: 'Origin',
-    };
-}
 
 export async function OPTIONS(request: Request) {
     return new Response(null, { status: 204, headers: corsHeaders(request.headers.get('origin')) });

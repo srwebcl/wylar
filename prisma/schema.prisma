@@ -21,8 +21,9 @@ model User {
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
 
-  assignedLeads Lead[]         @relation("AssignedLeads")
-  activities    LeadActivity[]
+  assignedLeads      Lead[]         @relation("AssignedLeads")
+  activities         LeadActivity[]
+  issuedCertificates Certificate[]
 
   @@map("users")
 }
@@ -44,7 +45,7 @@ model Lead {
   // Qué certificación/perfil busca (ej. "Instalador Eléctrico Clase D", "Rigger").
   certificationInterest String?
   // Mensaje/consulta libre que dejó el cliente en el formulario, si lo hubo.
-  message                String? @db.Text
+  message               String? @db.Text
 
   // Canal de origen detectado automáticamente: WEB | FACEBOOK | INSTAGRAM | WHATSAPP | OTRO
   source       String
@@ -57,13 +58,14 @@ model Lead {
   assignedToId Int?
   assignedTo   User? @relation("AssignedLeads", fields: [assignedToId], references: [id])
 
-  createdAt DateTime @default(now())
+  createdAt       DateTime  @default(now())
   // Se completa automáticamente en la primera gestión o cambio de estado
   // (ver src/actions/leads.ts) — permite auditar el tiempo de respuesta.
   firstAttendedAt DateTime?
   closedAt        DateTime?
 
-  activities LeadActivity[]
+  activities   LeadActivity[]
+  certificates Certificate[]
 
   @@index([status])
   @@index([assignedToId])
@@ -90,4 +92,165 @@ model LeadActivity {
 
   @@index([leadId])
   @@map("lead_activities")
+}
+
+// --- Módulo de Catálogo ---
+//
+// Perfiles/certificaciones que se exhiben en wylar.cl (GET /api/public/catalog
+// y /perfil/[slug]). Hoy wylar.cl tiene esto hardcodeado en su propio
+// src/data/perfiles.js, repartido en 3 plantillas de ficha muy distintas
+// entre sí (CHILEVALORA, SOLDADURA, OPERADORES — ver
+// src/lib/constants.ts#PROFILE_SECTION_SPECS). En vez de modelar cada bloque
+// de contenido (FAQ, pasos, "quiénes pueden", procesos de soldadura,
+// posiciones, normas, etc.) como una tabla propia — que daría ~15-20 tablas
+// casi idénticas para solo 4 perfiles — se usa un patrón de
+// sección/ítem genérico pero 100% relacional (nada en JSON): cada bloque de
+// contenido es una fila de ProfileSection, y sus viñetas/tarjetas son filas
+// de ProfileSectionItem. Qué claves de sección existen y qué forma tiene
+// cada una está definido por plantilla en PROFILE_SECTION_SPECS, que es lo
+// que genera el formulario de administración en /catalogo.
+model Profile {
+  id Int @id @default(autoincrement())
+
+  // Identificador en la URL de wylar.cl, ej. "electricista" → /perfil/electricista.
+  slug String @unique
+
+  // CHILEVALORA | SOLDADURA | OPERADORES — determina qué secciones aplican
+  // y qué plantilla de ficha usa wylar.cl (ver PROFILE_SECTION_SPECS).
+  templateType String
+
+  title       String
+  description String @db.Text
+  image       String
+
+  category  String
+  sector    String
+  subsector String
+  nivel     String
+  // Vigencia de la certificación, ej. "2 años" (no aplica a ChileValora).
+  vigencia  String?
+
+  // personas | empresas | otec — a quién se dirige, puede tener varios.
+  target        String[]
+  isChileValora Boolean  @default(false)
+  isFeatured    Boolean  @default(false)
+  active        Boolean  @default(true)
+
+  heroHook       String   @db.Text
+  heroParagraphs String[]
+  heroCta        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sections     ProfileSection[]
+  faqs         ProfileFaq[]
+  certificates Certificate[]
+
+  @@index([templateType])
+  @@index([active])
+  @@map("profiles")
+}
+
+// Un bloque de contenido con nombre (ej. "queEs", "proceso", "normas",
+// "posiciones" — ver PROFILE_SECTION_SPECS para el listado completo por
+// plantilla). Los campos sueltos (title/text/intro/closing/note) cubren los
+// distintos "envoltorios" que usa cada bloque en el dato original; los que
+// no aplican quedan null.
+model ProfileSection {
+  id        Int     @id @default(autoincrement())
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId Int
+
+  key   String
+  order Int    @default(0)
+
+  title   String?
+  text    String? @db.Text
+  intro   String? @db.Text
+  closing String? @db.Text
+  note    String? @db.Text
+
+  items ProfileSectionItem[]
+
+  @@unique([profileId, key])
+  @@map("profile_sections")
+}
+
+// Una fila de una sección: puede ser una viñeta simple (solo `text`), una
+// tarjeta con título ({title, text} — ej. UCLs, pasos del proceso, "quiénes
+// pueden"), o un ítem con código ({code, text} — ej. procesos de soldadura
+// SMAW/GMAW) o agrupado ({group, text} — ej. posiciones placa/tubería).
+model ProfileSectionItem {
+  id        Int            @id @default(autoincrement())
+  section   ProfileSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  sectionId Int
+  order     Int            @default(0)
+
+  group String?
+  code  String?
+  title String?
+  text  String? @db.Text
+
+  @@index([sectionId])
+  @@map("profile_section_items")
+}
+
+model ProfileFaq {
+  id        Int     @id @default(autoincrement())
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId Int
+  order     Int     @default(0)
+
+  question String @db.Text
+  answer   String @db.Text
+
+  @@index([profileId])
+  @@map("profile_faqs")
+}
+
+// --- Módulo de Certificados ---
+//
+// Certificados emitidos a personas (ligados o no a un Lead cerrado). Se
+// consultan públicamente por RUT o código desde wylar.cl/validador
+// (GET /api/public/certificates/validate) y se pueden descargar en PDF
+// (GET /api/public/certificates/[code]/pdf, generado al vuelo con
+// @react-pdf/renderer — no se guarda ningún archivo, así el PDF nunca queda
+// desactualizado respecto a estos datos).
+model Certificate {
+  id Int @id @default(autoincrement())
+
+  // Código único de validación, ej. "WYL-2026-XYZ". Es lo que se busca en
+  // el validador junto con el RUT (ver src/lib/certificateCode.ts).
+  code String @unique
+
+  holderName String
+  holderRut  String
+
+  profile            Profile? @relation(fields: [profileId], references: [id])
+  profileId          Int?
+  // Copias planas del título y la categoría al momento de emitir, para que
+  // el certificado no cambie si el perfil del catálogo se edita o borra
+  // después.
+  certificationTitle String
+  // Etiqueta mostrada en el validador, ej. "Certificación ChileValora" o
+  // "Calificación Técnica" (ver PROFILE_SECTION_SPECS / categoryLabel).
+  categoryLabel      String
+
+  issueDate  DateTime
+  // Vigencia; null = no vence (ej. certificaciones ChileValora). El estado
+  // "Vigente"/"Vencido" que ve el validador se calcula en el momento a
+  // partir de esta fecha, no se almacena.
+  expiryDate DateTime?
+
+  lead   Lead? @relation(fields: [leadId], references: [id])
+  leadId Int?
+
+  issuedBy   User? @relation(fields: [issuedById], references: [id])
+  issuedById Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([holderRut])
+  @@map("certificates")
 }

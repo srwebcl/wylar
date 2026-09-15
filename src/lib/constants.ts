@@ -78,6 +78,27 @@ export function roleLabel(value: string): string {
     return ROLES.find((r) => r.value === value)?.label ?? value;
 }
 
+// Módulo de Certificados: el estado (Vigente/Vencido) nunca se guarda en la
+// BD — se deriva de expiryDate en el momento de la consulta, tanto en el
+// CRM como en el validador público, para que nunca quede desactualizado.
+export type CertificateStatus = 'VIGENTE' | 'VENCIDO' | 'SIN_VENCIMIENTO';
+
+export function certificateStatus(expiryDate: Date | null): CertificateStatus {
+    if (!expiryDate) return 'SIN_VENCIMIENTO';
+    return expiryDate.getTime() >= Date.now() ? 'VIGENTE' : 'VENCIDO';
+}
+
+export function certificateStatusLabel(status: CertificateStatus): string {
+    switch (status) {
+        case 'VIGENTE':
+            return 'Vigente';
+        case 'VENCIDO':
+            return 'Vencido';
+        default:
+            return 'Sin vencimiento';
+    }
+}
+
 /** Formatea una duración en milisegundos como texto legible corto, ej. "2h 15min" o "3 días". */
 export function formatDuration(ms: number): string {
     if (ms < 0) ms = 0;

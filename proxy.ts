@@ -5,10 +5,11 @@ import { jwtVerify } from 'jose';
 // Nota: en Next.js 16 el proxy (ex-middleware) siempre corre en runtime
 // Node.js — no hace falta (ni se permite) declarar `runtime` aquí.
 
-// Rutas públicas: login, salud, y la API pública que consume el sitio
-// wylar.cl para crear leads (Módulo de Captura de Oportunidades) — esa
-// ruta hace su propia validación de origen (CORS), no depende de cookie
-// de sesión, así que exigirle sesión acá la dejaría inalcanzable.
+// Rutas públicas: login, salud, y las APIs públicas que consume el sitio
+// wylar.cl (captura de leads, catálogo, validador de certificados — todas
+// bajo app/api/public/*). Cada una hace su propia validación de origen
+// (CORS), no depende de cookie de sesión, así que exigirle sesión acá las
+// dejaría inalcanzables.
 const PUBLIC_PREFIXES = ['/login', '/api/health', '/api/public'];
 
 const PUBLIC_STATIC_FILES = ['/favicon.svg', '/logo-wylar.webp'];

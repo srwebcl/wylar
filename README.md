@@ -13,6 +13,9 @@ Es un proyecto separado del sitio [wylar](../wylar) (Astro, 100% estático) — 
 | 2. Captura de Oportunidades — sincronización web→CRM automática, rastreo de origen | ✅ Implementado (`app/api/public/leads`) |
 | 3. Gestión Comercial — ficha única, tablero de estados (embudo), asignación de responsables | ✅ Implementado (`/`, `/leads`, `/leads/[id]`) |
 | 4. Seguimiento y Control — bitácora de gestiones, auditoría de tiempos de respuesta | ✅ Implementado (ficha del lead) |
+| 5. Dashboard — métricas y gráficos del embudo, orígenes, catálogo y certificados | ✅ Implementado (`/dashboard`) |
+| 6. Catálogo — administración de los perfiles/certificaciones que se exhiben en wylar.cl | ✅ Implementado (`/catalogo`, `app/api/public/catalog`) |
+| 7. Certificados — emisión (con PDF descargable) y validador público por RUT/código | ✅ Implementado (`/certificados`, `app/api/public/certificates/*`) |
 | 1. Filtro y Atención Automática (WhatsApp) — menú 24/7, derivación inteligente | ⏳ No implementado todavía |
 
 El módulo de WhatsApp quedó pendiente a propósito: requiere una cuenta de **WhatsApp Business API** (Meta Cloud API o Twilio) con número verificado, que no se puede provisionar desde acá. El modelo de datos ya está listo para recibirlo (`Lead.source = "WHATSAPP"` ya existe como canal, ver [Fase 2: WhatsApp](#fase-2-módulo-whatsapp-pendiente) más abajo con el punto de integración sugerido).
@@ -81,6 +84,14 @@ Para que funcione en producción, quedan dos pasos una vez desplegado este proye
 
 Mientras esa variable no esté configurada, los formularios apuntan a un dominio de ejemplo (`https://crm.wylar.cl/...`) que no existe — los envíos fallarán mostrando el mensaje de error ya contemplado en la UI (no rompen la página).
 
+### Catálogo y certificados (`/catalogo`, `/validador`)
+
+Además de la captura de leads, wylar.cl puede consumir dos APIs públicas más (mismo `PUBLIC_FORM_ORIGINS`, sin variable adicional):
+
+- `GET /api/public/catalog` (o `?slug=<slug>` para un solo perfil) — perfiles activos del catálogo, con sus secciones y FAQ, para pintar `/catalogo` y `/perfil/[slug]` en vez de usar el `src/data/perfiles.js` hardcodeado que tiene hoy.
+- `GET /api/public/certificates/validate?code=<código>` (o `?rut=<rut>`) — para `/validador`: devuelve los certificados que coincidan (puede haber más de uno por RUT), con estado Vigente/Vencido calculado al momento de la consulta.
+- `GET /api/public/certificates/<código>/pdf` — el PDF descargable del certificado (se genera al vuelo, no se persiste ningún archivo).
+
 ## Fase 2: Módulo WhatsApp (pendiente)
 
 Cuando exista la cuenta de WhatsApp Business API, el punto de integración natural es:
@@ -91,12 +102,12 @@ Cuando exista la cuenta de WhatsApp Business API, el punto de integración natur
 
 ## Estructura
 
-- `app/(app)/` — páginas internas protegidas: `/` (tablero/embudo), `/leads` (listado y filtros), `/leads/[id]` (ficha única + bitácora), `/equipo` (solo administradores).
-- `app/api/public/leads/` — API pública (sin sesión) que consume wylar.cl.
+- `app/(app)/` — páginas internas protegidas: `/` (tablero/embudo), `/leads` (listado y filtros), `/leads/[id]` (ficha única + bitácora), `/dashboard` (métricas), `/catalogo` (CRUD de perfiles), `/certificados` (emisión), `/equipo` (solo administradores).
+- `app/api/public/` — APIs públicas (sin sesión) que consume wylar.cl: `leads`, `catalog`, `certificates/validate`, `certificates/[code]/pdf`.
 - `app/login/` — login del equipo.
-- `src/actions/` — Server Actions (leads, usuarios, sesión).
-- `src/lib/` — Prisma client, autenticación (cookie firmada + bcrypt), catálogos/constantes, filtros de búsqueda.
-- `src/components/` — UI (tablero kanban, ficha del lead, tabla de prospectos, gestión de equipo).
+- `src/actions/` — Server Actions (leads, catálogo, certificados, usuarios, sesión).
+- `src/lib/` — Prisma client, autenticación (cookie firmada + bcrypt), catálogos/constantes, filtros de búsqueda, `catalogSpec.ts` (especificación de secciones del catálogo por plantilla), `publicApi.ts` (CORS compartido).
+- `src/components/` — UI (tablero kanban, ficha del lead, tabla de prospectos, gestión de equipo, dashboard, editor de perfiles del catálogo, gestión de certificados).
 - `prisma/schema.prisma` — modelo de datos. `prisma/seed.ts` — datos de ejemplo.
 - `proxy.ts` — protección de rutas (equivalente al histórico `middleware.ts`).
 
@@ -106,3 +117,4 @@ Cuando exista la cuenta de WhatsApp Business API, el punto de integración natur
 - Sesión vía cookie `httpOnly` firmada (JWT), sin dependencias externas de autenticación.
 - La API pública de captura de leads valida origen (CORS restringido a `PUBLIC_FORM_ORIGINS`), incluye un campo honeypot anti-spam, y solo puede **crear** leads — no leer ni modificar nada.
 - Un usuario desactivado (`/equipo`) pierde el acceso de inmediato, sin esperar a que expire su sesión.
+- El validador de certificados (`/api/public/certificates/validate`) expone el RUT completo del titular — es una decisión de producto, no un descuido: el propio flujo del validador en wylar.cl busca por RUT o código, así que ocultarlo rompería la función. No expone ningún otro dato personal (email, teléfono) ni permite listar certificados sin conocer uno de los dos identificadores.
