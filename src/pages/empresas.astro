@@ -2,7 +2,55 @@
 import Layout from '../layouts/Layout.astro';
 import ContactForm from '../components/ContactForm.jsx';
 import CatalogoPerfiles from '../components/CatalogoPerfiles.jsx';
-import { Building2, CheckCircle2, ShieldCheck, ArrowRight, ArrowDown, Activity, Award, Zap } from 'lucide-react';
+import FaqAccordion from '../components/perfil-templates/FaqAccordion.astro';
+import { Building2, CheckCircle2, ShieldCheck, ArrowRight, ArrowDown, Activity, Award, Zap, Landmark, MapPin, HeartHandshake, FileCheck } from 'lucide-react';
+
+const QUE_GANA_SU_EMPRESA = [
+    'Reconoce y respalda formalmente las competencias de sus trabajadores.',
+    'Fortalece el perfil laboral de su equipo.',
+    'Demuestra ante clientes y mandantes que quienes realizan sus servicios cuentan con competencias certificadas.',
+    'Fortalece su propuesta de valor y diferenciación.',
+    'Identifica oportunidades para fortalecer las competencias de su equipo.',
+];
+
+const FAQ_EMPRESAS = [
+    {
+        q: '¿Qué es la Evaluación y Certificación de Competencias Laborales?',
+        a: 'Es un proceso mediante el cual se evalúan las competencias que una persona ha desarrollado en el trabajo, de acuerdo con un perfil ocupacional establecido por ChileValora. Cuando la persona demuestra las competencias requeridas, obtiene una Certificación de Competencias Laborales.',
+    },
+    {
+        q: '¿Qué requisitos debe cumplir un trabajador para certificarse?',
+        a: 'Depende del perfil ocupacional. En términos generales, debe contar con experiencia y/o conocimientos relacionados con las competencias del perfil y cumplir sus condiciones específicas, incluyendo licencias habilitantes u otras exigencias cuando corresponda. Antes de iniciar el proceso, WYLAR realiza una entrevista inicial y revisión de antecedentes (CV, documento de identidad, respaldos de experiencia, licencias habilitantes) para verificar su elegibilidad.',
+    },
+    {
+        q: '¿Cuánto dura la evaluación?',
+        a: 'Como referencia, la evaluación contempla habitualmente una evaluación de conocimientos y una evaluación práctica, con una duración aproximada de 3 horas cada una. Ambas pueden realizarse el mismo día o en jornadas diferentes, según corresponda.',
+    },
+    {
+        q: '¿En cuánto tiempo está disponible la certificación?',
+        a: 'La evaluación y la certificación son etapas diferentes. Como referencia, la certificación puede demorar aproximadamente 40 días después de realizada la evaluación, considerando las etapas de revisión y validación de ChileValora. Este plazo puede variar, ya que no depende exclusivamente de WYLAR.',
+    },
+    {
+        q: '¿Dónde se realiza la evaluación?',
+        a: 'Puede realizarse en las instalaciones de la empresa, en el lugar de trabajo, en dependencias de WYLAR o en otro lugar adecuado para el proceso, según las condiciones del perfil.',
+    },
+    {
+        q: '¿WYLAR puede realizar procesos en otras regiones?',
+        a: 'Sí. WYLAR cuenta con cobertura nacional y puede coordinar procesos de evaluación y certificación en distintas comunas y regiones.',
+    },
+    {
+        q: '¿WYLAR realiza capacitación?',
+        a: 'No. WYLAR es un Centro de Evaluación y Certificación de Competencias Laborales acreditado por ChileValora; evaluamos y certificamos, no capacitamos. Si un trabajador necesita capacitación antes de certificarse, deberá realizarla con un OTEC.',
+    },
+    {
+        q: '¿Cuánto cuesta certificar a un trabajador?',
+        a: 'El valor depende del perfil ocupacional, sus unidades de competencia y las características de cada proceso, incluyendo condiciones de ejecución, traslado y lugar de la evaluación. Consúltenos y le entregaremos una propuesta según las necesidades de su empresa.',
+    },
+    {
+        q: '¿Puede mi empresa certificar a personas que no son trabajadores?',
+        a: 'Sí. La Franquicia Tributaria contempla el Precontrato, que permite financiar la evaluación y certificación de personas que no mantienen actualmente un vínculo laboral con la empresa — una alternativa para apoyar la empleabilidad de personas de la comunidad, proveedores locales o potenciales futuros trabajadores.',
+    },
+];
 ---
 
 <Layout title="Servicios para Empresas | Wylar">
@@ -24,11 +72,14 @@ import { Building2, CheckCircle2, ShieldCheck, ArrowRight, ArrowDown, Activity, 
                     </div>
 
                     <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-6 text-white">
-                        Estándar <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-cyan-300">Operacional</span>
+                        Certifique las <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-cyan-300">competencias</span> de sus trabajadores
                     </h1>
 
-                    <p class="text-lg md:text-xl text-white/80 leading-relaxed font-medium max-w-3xl mb-10">
-                        Certificamos las competencias técnicas de su capital humano directamente en faena. Asegure el cumplimiento normativo sin detener su producción.
+                    <p class="text-lg md:text-xl text-white/80 leading-relaxed font-medium max-w-3xl mb-4">
+                        Sus trabajadores son parte fundamental del valor que entrega su empresa. La Evaluación y Certificación de Competencias Laborales (EyCCL) permite reconocer formalmente sus competencias y contar con un respaldo que fortalece su propuesta frente a clientes, mandantes y nuevas oportunidades de negocio.
+                    </p>
+                    <p class="text-base md:text-lg text-cyan-200 font-bold leading-relaxed max-w-3xl mb-10">
+                        Su equipo también es parte de su propuesta de valor. Demuestre sus competencias.
                     </p>
 
                     <div class="flex flex-col sm:flex-row items-center gap-4">
@@ -63,13 +114,13 @@ import { Building2, CheckCircle2, ShieldCheck, ArrowRight, ArrowDown, Activity, 
             </div>
         </section>
 
-        {/* CÓMO FUNCIONA */}
+        {/* CÓMO FUNCIONA — Evaluación y certificación: son etapas diferentes */}
         <div id="proceso" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
             <div class="text-center mb-20 relative">
                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-100 rounded-full blur-[80px] -z-10"></div>
-                <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6">Certificación sin detener su operación</h2>
+                <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6">Evaluación y certificación: son etapas diferentes</h2>
                 <p class="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-                    Un proceso pensado para faena: nos adaptamos a sus turnos, protocolos de seguridad y plazos de producción.
+                    Evaluarse puede tomar una jornada. Recibir la certificación es parte de un proceso posterior — le informamos los plazos estimados en cada etapa.
                 </p>
             </div>
 
@@ -80,18 +131,18 @@ import { Building2, CheckCircle2, ShieldCheck, ArrowRight, ArrowDown, Activity, 
                     <div class="w-20 h-20 mx-auto bg-white border-4 border-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-blue-900/5 group-hover:scale-110 transition-transform">
                         <Activity size={32} />
                     </div>
-                    <div class="inline-block px-4 py-1 rounded-full bg-slate-100 text-slate-500 font-black text-sm mb-4">PASO 1</div>
-                    <h3 class="text-2xl font-bold text-slate-900 mb-4">Diagnóstico</h3>
-                    <p class="text-slate-600 leading-relaxed">Levantamos con usted qué perfiles y cuántos trabajadores necesita certificar.</p>
+                    <div class="inline-block px-4 py-1 rounded-full bg-slate-100 text-slate-500 font-black text-sm mb-4">~3 HORAS</div>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4">Evaluación de Conocimientos</h3>
+                    <p class="text-slate-600 leading-relaxed">Una evaluación teórica con duración aproximada de 3 horas, según el perfil a certificar.</p>
                 </div>
 
                 <div class="bg-white p-10 rounded-[2rem] border border-slate-100 text-center shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] hover:-translate-y-2 transition-all duration-300 group">
                     <div class="w-20 h-20 mx-auto bg-white border-4 border-cyan-50 text-cyan-600 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-cyan-900/5 group-hover:scale-110 transition-transform">
                         <ShieldCheck size={32} />
                     </div>
-                    <div class="inline-block px-4 py-1 rounded-full bg-slate-100 text-slate-500 font-black text-sm mb-4">PASO 2</div>
-                    <h3 class="text-2xl font-bold text-slate-900 mb-4">Evaluación en Terreno</h3>
-                    <p class="text-slate-600 leading-relaxed">Vamos a su faena, con sus turnos y protocolos de seguridad, sin detener la operación.</p>
+                    <div class="inline-block px-4 py-1 rounded-full bg-slate-100 text-slate-500 font-black text-sm mb-4">~3 HORAS</div>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4">Evaluación Práctica</h3>
+                    <p class="text-slate-600 leading-relaxed">Se realiza el mismo día o en una jornada diferente, según la disponibilidad de su equipo.</p>
                 </div>
 
                 <div class="bg-gradient-to-br from-blue-600 to-[#0B1E40] p-10 rounded-[2rem] text-center shadow-[0_20px_50px_-10px_rgba(11,30,64,0.4)] hover:-translate-y-2 transition-all duration-300 group relative overflow-hidden text-white">
@@ -99,9 +150,9 @@ import { Building2, CheckCircle2, ShieldCheck, ArrowRight, ArrowDown, Activity, 
                     <div class="w-20 h-20 mx-auto bg-white/10 backdrop-blur-sm border-4 border-white/20 text-white rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
                         <Award size={32} />
                     </div>
-                    <div class="inline-block px-4 py-1 rounded-full bg-white/20 text-white font-black text-sm mb-4">PASO 3</div>
-                    <h3 class="text-2xl font-bold text-white mb-4">Certificación y Reportería</h3>
-                    <p class="text-blue-100 leading-relaxed">Recibe los certificados oficiales y un reporte listo para sus procesos de licitación y cumplimiento.</p>
+                    <div class="inline-block px-4 py-1 rounded-full bg-white/20 text-white font-black text-sm mb-4">~40 DÍAS</div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Revisión y Certificación</h3>
+                    <p class="text-blue-100 leading-relaxed">ChileValora revisa y valida los resultados; recibirá los certificados oficiales y un reporte para sus procesos.</p>
                 </div>
             </div>
         </div>
@@ -112,37 +163,36 @@ import { Building2, CheckCircle2, ShieldCheck, ArrowRight, ArrowDown, Activity, 
                 <div class="flex flex-col lg:flex-row gap-16 items-center">
                     <div class="w-full lg:w-1/2">
                         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-bold tracking-widest uppercase mb-6">
-                            <Zap size={16} /> Continuidad Operacional
+                            <Zap size={16} /> ¿Qué Gana su Empresa?
                         </div>
                         <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-8 leading-tight">
-                            Evaluación técnica <span class="text-blue-600">integral para su operación.</span>
+                            Su equipo también es <span class="text-blue-600">su propuesta de valor.</span>
                         </h2>
-                        <div class="space-y-6">
+                        <ul class="space-y-3 mb-8">
+                            {QUE_GANA_SU_EMPRESA.map((item) => (
+                                <li class="flex items-start gap-3 text-slate-700 leading-relaxed">
+                                    <CheckCircle2 size={18} className="text-blue-500 mt-0.5 shrink-0" /> {item}
+                                </li>
+                            ))}
+                        </ul>
+
+                        <div class="space-y-6 pt-4 border-t border-slate-100">
                             <div class="flex gap-5">
-                                <div class="bg-blue-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-blue-600">
-                                    <Activity size={24} />
+                                <div class="bg-amber-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-amber-600">
+                                    <Landmark size={24} />
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-xl text-slate-900 mb-2">Mitigación de Riesgos</h4>
-                                    <p class="text-slate-600 leading-relaxed">Aseguramos que su personal cumple con el estándar de la industria, previniendo accidentes y fallas operacionales por impericia técnica.</p>
+                                    <h4 class="font-bold text-xl text-slate-900 mb-2">Franquicia Tributaria SENCE</h4>
+                                    <p class="text-slate-600 leading-relaxed">Si su empresa es contribuyente de Primera Categoría ante el SII, cuenta con una planilla anual de remuneraciones imponibles superior a 35 UTM y mantiene pagadas las cotizaciones de sus trabajadores, puede financiar el proceso con Franquicia Tributaria — incluye alternativas de Precontrato y Postcontrato.</p>
                                 </div>
                             </div>
                             <div class="flex gap-5">
                                 <div class="bg-cyan-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-cyan-600">
-                                    <ShieldCheck size={24} />
+                                    <MapPin size={24} />
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-xl text-slate-900 mb-2">Respaldo ante Licitaciones</h4>
-                                    <p class="text-slate-600 leading-relaxed">Las nóminas de trabajadores certificados (ChileValora, AWS, entre otros) otorgan puntaje adicional crítico en licitaciones públicas y privadas.</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-5">
-                                <div class="bg-amber-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-amber-600">
-                                    <CheckCircle2 size={24} />
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-xl text-slate-900 mb-2">Franquicia Tributaria SENCE</h4>
-                                    <p class="text-slate-600 leading-relaxed">Nuestros procesos de evaluación son imputables a la Franquicia SENCE: recupere hasta el 100% de la inversión.</p>
+                                    <h4 class="font-bold text-xl text-slate-900 mb-2">Certificamos donde su empresa lo necesite</h4>
+                                    <p class="text-slate-600 leading-relaxed">Cobertura nacional. Las evaluaciones pueden realizarse en sus instalaciones, en el lugar de trabajo, en dependencias de WYLAR o en otro lugar adecuado, según el perfil.</p>
                                 </div>
                             </div>
                         </div>
@@ -154,11 +204,27 @@ import { Building2, CheckCircle2, ShieldCheck, ArrowRight, ArrowDown, Activity, 
                         <div class="absolute -bottom-8 -left-8 bg-white p-6 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-4">
                             <div class="bg-green-100 text-green-600 p-3 rounded-full"><Zap size={24} /></div>
                             <div>
-                                <div class="font-black text-xl text-slate-900">72 hrs</div>
-                                <div class="text-sm font-medium text-slate-500">Despliegue Nacional</div>
+                                <div class="font-black text-xl text-slate-900">¿Recursos propios?</div>
+                                <div class="text-sm font-medium text-slate-500">También puede evaluar sin Franquicia</div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        {/* IMPACTO EN LA COMUNIDAD */}
+        <section class="py-20 bg-gradient-to-br from-[#0B1E40] to-blue-900 relative overflow-hidden">
+            <div class="absolute -right-20 -top-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-[100px]"></div>
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative flex flex-col md:flex-row items-center gap-10">
+                <div class="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
+                    <HeartHandshake size={30} className="text-amber-400" />
+                </div>
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-4">Una oportunidad para generar impacto en su comunidad</h2>
+                    <p class="text-blue-100 leading-relaxed">
+                        La Franquicia Tributaria también contempla el <strong class="text-white">Precontrato</strong>, que permite financiar la evaluación y certificación de personas que no son actualmente trabajadoras de la empresa. Una oportunidad para apoyar a personas vulnerables de la comunidad, proveedores locales o futuros trabajadores, fortaleciendo su empleabilidad y generando impacto social en el entorno de su empresa — una forma concreta de convertir un beneficio de la empresa en inversión social y empleabilidad local.
+                    </p>
                 </div>
             </div>
         </section>
@@ -168,11 +234,24 @@ import { Building2, CheckCircle2, ShieldCheck, ArrowRight, ArrowDown, Activity, 
             <CatalogoPerfiles client:load title="Perfiles Disponibles B2B" subtitle="Revise el catálogo de especialidades técnicas habilitadas para evaluación." />
         </div>
 
+        {/* PREGUNTAS FRECUENTES */}
+        <section class="bg-slate-50 py-24 border-t border-slate-100">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 text-sm font-bold tracking-widest uppercase mb-6">
+                        <FileCheck size={16} /> Resolvemos sus Dudas
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900">Preguntas Frecuentes</h2>
+                </div>
+                <FaqAccordion faq={FAQ_EMPRESAS} />
+            </div>
+        </section>
+
         {/* FORMULARIO */}
         <ContactForm
             client:idle
-            title="Solicite una propuesta técnica"
-            subtitle="Complete el formulario detallando la cantidad de evaluados y la ubicación de su faena. Un asesor corporativo lo contactará a la brevedad."
+            title="¿Su Empresa Está Preparada?"
+            subtitle="Conversemos sobre las necesidades de su empresa y revisemos juntos las alternativas de certificación que pueden aportar valor a su organización."
             preselectedContext="empresas"
         />
     </div>

@@ -5,7 +5,8 @@ import { submitLead } from '../lib/crm.js';
 // Motivo de contacto -> tipo de lead + certificación de interés para el CRM.
 const MOTIVO_META = {
     empresas: { type: 'EMPRESA', certificationInterest: 'Cotización para empresas' },
-    otec: { type: 'INSTITUCION', certificationInterest: 'Alianza para instituciones de educación' },
+    otec: { type: 'INSTITUCION', certificationInterest: 'Alianza con OTEC / Organismo de Capacitación' },
+    instituciones: { type: 'INSTITUCION', certificationInterest: 'Alianza para instituciones de educación' },
     electricista: { type: 'PERSONA', certificationInterest: 'Instalador Eléctrico Clase D' },
     cuidador: { type: 'PERSONA', certificationInterest: 'Cuidador(a) de Personas Mayores' },
     otro: { type: 'PERSONA', certificationInterest: null },
@@ -145,7 +146,8 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
                                     <select name="motivo" defaultValue={preselectedContext} className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all cursor-pointer" required>
                                         <option value="" disabled>Seleccione el servicio...</option>
                                         <option value="empresas">Cotización para Empresas (Múltiples trabajadores)</option>
-                                        <option value="otec">Alianza para Instituciones de Educación</option>
+                                        <option value="otec">Alianza para OTEC / Organismos de Capacitación</option>
+                                        <option value="instituciones">Alianza para Instituciones de Educación</option>
                                         <option value="electricista">Evaluación Individual: Instalador Eléctrico Clase D</option>
                                         <option value="cuidador">Evaluación Individual: Cuidador/a de Personas</option>
                                         <option value="otro">Otras consultas</option>

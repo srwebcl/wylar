@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Building2, ArrowRight, ShieldCheck, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, Building2, ArrowRight, ShieldCheck, Handshake, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const AUDIENCIAS = [
     {
@@ -31,6 +31,21 @@ const AUDIENCIAS = [
             'Doble valor: aprendizaje + certificación oficial',
         ],
         ctaLabel: 'Portal Instituciones',
+    },
+    {
+        key: 'otec',
+        pillLabel: 'Somos OTEC',
+        icon: Handshake,
+        href: '/otec',
+        gradient: 'bg-gradient-to-br from-[#0B1E40] via-[#0B1E40] to-[#3b0764]',
+        glow: 'shadow-[0_30px_70px_-20px_rgba(139,92,246,0.45)]',
+        headline: 'Coordine la certificación de sus participantes',
+        bullets: [
+            'Coordinamos y ejecutamos el proceso, curso a curso',
+            'Nos trasladamos a la comuna donde dicta sus cursos',
+            'Compatible con Becas Laborales, Reinvéntate y otros programas',
+        ],
+        ctaLabel: 'Portal OTEC',
     },
     {
         key: 'empresa',
@@ -71,7 +86,7 @@ export default function Portales() {
                     <h2 className="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight">
                         Elige cómo quieres <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0B1E40] to-blue-800">Certificarte</span>
                     </h2>
-                    <p className="text-base md:text-lg text-slate-600">En Wylar contamos con soluciones especializadas para Personas, Instituciones de Educación o Empresas. Selecciona el perfil que más se adecúa a tu búsqueda y descubre el proceso.</p>
+                    <p className="text-base md:text-lg text-slate-600">En Wylar contamos con soluciones especializadas para Personas, Instituciones de Educación, OTEC o Empresas. Selecciona el perfil que más se adecúa a tu búsqueda y descubre el proceso.</p>
                 </div>
 
                 <div className="max-w-3xl mx-auto">

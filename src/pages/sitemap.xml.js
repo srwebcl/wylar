@@ -7,6 +7,7 @@ export async function GET({ request }) {
     '/empresas',
     '/personas',
     '/instituciones',
+    '/otec',
     '/catalogo',
     '/chilevalora',
     '/perfil/electricista',

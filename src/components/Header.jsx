@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Building2, Mail, Phone, ShieldCheck, Menu, X } from 'lucide-react';
+import { Users, Building2, Mail, Phone, ShieldCheck, Handshake, Menu, X } from 'lucide-react';
 
 export default function Header({ currentPath = '/' }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -21,15 +21,18 @@ export default function Header({ currentPath = '/' }) {
             <div className="bg-gradient-to-r from-[#050B14] via-[#0B1E40] to-[#050B14] text-slate-300 text-[13px] py-1 hidden md:block border-b border-white/5 relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center relative z-10">
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4 lg:gap-5">
                         <span className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Portal:</span>
-                        <a href="/personas" className={`flex items-center gap-2 px-4 py-1.5 rounded-full transition-all duration-300 ${isActive('/personas') ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
+                        <a href="/personas" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/personas') ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
                             <Users size={14} /> Personas
                         </a>
-                        <a href="/instituciones" className={`flex items-center gap-2 px-4 py-1.5 rounded-full transition-all duration-300 ${isActive('/instituciones') ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
+                        <a href="/instituciones" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/instituciones') ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
                             <ShieldCheck size={14} /> Instituciones de Educación
                         </a>
-                        <a href="/empresas" className={`flex items-center gap-2 px-4 py-1.5 rounded-full transition-all duration-300 ${isActive('/empresas') ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
+                        <a href="/otec" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/otec') ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
+                            <Handshake size={14} /> OTEC
+                        </a>
+                        <a href="/empresas" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/empresas') ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
                             <Building2 size={14} /> Empresas
                         </a>
                     </div>
@@ -99,6 +102,7 @@ export default function Header({ currentPath = '/' }) {
                         <div className="text-xs font-black text-blue-500 uppercase tracking-widest px-3 mb-2">Portales de Atención</div>
                         <a href="/personas" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><Users size={24} className="text-blue-600" /> Personas</a>
                         <a href="/instituciones" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><ShieldCheck size={24} className="text-amber-500" /> Instituciones de Educación</a>
+                        <a href="/otec" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><Handshake size={24} className="text-violet-500" /> OTEC</a>
                         <a href="/empresas" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><Building2 size={24} className="text-blue-600" /> Empresas</a>
                         
                         <div className="mt-8 pb-12">
