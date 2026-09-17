@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowRight, ShieldCheck, Wrench, Users, Construction, Filter, Search } from 'lucide-react';
-import { perfiles } from '../data/perfiles.js';
 
 const getCategoryIcon = (category) => {
     switch(category) {
@@ -11,7 +10,7 @@ const getCategoryIcon = (category) => {
     }
 };
 
-export default function CatalogoInteractivo() {
+export default function CatalogoInteractivo({ perfiles = [] }) {
     const [filterTipo, setFilterTipo] = useState('all');
     const [filterPublico, setFilterPublico] = useState('all');
     const [filterArea, setFilterArea] = useState('all');

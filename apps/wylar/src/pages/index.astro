@@ -5,7 +5,12 @@ import ContactForm from "../components/ContactForm.jsx";
 import HeroSlider from "../components/HeroSlider.jsx";
 import Portales from "../components/Portales.jsx";
 import LogoCarousel from "../components/LogoCarousel.astro";
+import { getCatalogList } from "../lib/catalog.js";
+import { getHeroSlides } from "../lib/hero.js";
 import { ShieldCheck, Target, MapPin, BadgeCheck } from "lucide-react";
+
+const perfiles = await getCatalogList();
+const heroSlides = await getHeroSlides();
 ---
 
 <Layout title="Wylar - Certificadora de Competencias Laborales">
@@ -15,11 +20,11 @@ import { ShieldCheck, Target, MapPin, BadgeCheck } from "lucide-react";
       class="relative bg-[#050B14] min-h-[85vh] flex items-center border-b border-white/10 overflow-hidden"
     >
       {/* Hero Slider: slide principal + perfiles destacados del catálogo */}
-      <HeroSlider client:only="react" />
+      <HeroSlider client:only="react" customSlides={heroSlides} perfiles={perfiles} />
     </section>
 
     {/* CATÁLOGO DE PERFILES */}
-    <CatalogoPerfiles client:load featuredOnly={true} />
+    <CatalogoPerfiles client:load perfiles={perfiles} featuredOnly={true} />
 
     {/* TRUST STRIP - ESTADÍSTICAS Y LOGOS */}
     <section class="bg-white border-b border-slate-100 py-10">

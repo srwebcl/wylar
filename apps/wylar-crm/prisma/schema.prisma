@@ -254,3 +254,30 @@ model Certificate {
   @@index([holderRut])
   @@map("certificates")
 }
+
+// --- Módulo de Hero (Home de wylar.cl) ---
+//
+// Slides personalizados del hero de wylar.cl (GET /api/public/hero-slides).
+// El sitio les agrega automáticamente, a continuación, un slide por cada
+// perfil del catálogo marcado como destacado (Profile.isFeatured) — esos no
+// se administran acá, se administran marcando/desmarcando el perfil en
+// /catalogo (ver README de wylar-crm).
+model HeroSlide {
+  id     Int     @id @default(autoincrement())
+  order  Int     @default(0)
+  active Boolean @default(true)
+
+  image          String
+  eyebrowLead    String
+  eyebrowAccent  String
+  title          String
+  titleHighlight String
+  description    String @db.Text
+  ctaLabel       String
+  ctaHref        String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("hero_slides")
+}

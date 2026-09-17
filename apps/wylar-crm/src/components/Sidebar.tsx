@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { KanbanSquare, ListChecks, Users, LogOut, MessageCircle, LayoutDashboard, BookOpen, ShieldCheck } from 'lucide-react';
+import { KanbanSquare, ListChecks, Users, LogOut, MessageCircle, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal } from 'lucide-react';
 import clsx from 'clsx';
 import { logoutAction } from '@/actions/auth';
 import { Logo } from '@/components/Logo';
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
     { href: '/leads', label: 'Prospectos', icon: ListChecks, match: (p: string) => p.startsWith('/leads'), adminOnly: false },
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: (p: string) => p === '/dashboard', adminOnly: false },
     { href: '/catalogo', label: 'Catálogo', icon: BookOpen, match: (p: string) => p.startsWith('/catalogo'), adminOnly: false },
+    { href: '/hero', label: 'Hero del Home', icon: GalleryHorizontal, match: (p: string) => p.startsWith('/hero'), adminOnly: false },
     { href: '/certificados', label: 'Certificados', icon: ShieldCheck, match: (p: string) => p.startsWith('/certificados'), adminOnly: false },
     { href: '/equipo', label: 'Equipo', icon: Users, match: (p: string) => p === '/equipo', adminOnly: true },
 ];

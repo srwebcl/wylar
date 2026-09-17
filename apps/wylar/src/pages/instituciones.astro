@@ -2,7 +2,10 @@
 import Layout from '../layouts/Layout.astro';
 import ContactForm from '../components/ContactForm.jsx';
 import CatalogoPerfiles from '../components/CatalogoPerfiles.jsx';
+import { getCatalogList } from '../lib/catalog.js';
 import { GraduationCap, Layers, FileCheck, Award, ArrowDown, ArrowRight, ShieldCheck, CheckCircle2, BookOpen } from 'lucide-react';
+
+const perfiles = await getCatalogList();
 
 const QUE_PODEMOS_HACER = [
     'Identificar perfiles ChileValora relacionados con sus carreras.',
@@ -169,7 +172,7 @@ const QUE_PODEMOS_HACER = [
 
         {/* CATÁLOGO DE PERFILES */}
         <div id="perfiles">
-            <CatalogoPerfiles client:load title="Perfiles para sus Estudiantes" subtitle="Estos son los perfiles ChileValora que puede incorporar en la trayectoria formativa de sus carreras." />
+            <CatalogoPerfiles client:load perfiles={perfiles} title="Perfiles para sus Estudiantes" subtitle="Estos son los perfiles ChileValora que puede incorporar en la trayectoria formativa de sus carreras." />
         </div>
 
         {/* FORMULARIO */}

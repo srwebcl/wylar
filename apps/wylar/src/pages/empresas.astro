@@ -3,7 +3,10 @@ import Layout from '../layouts/Layout.astro';
 import ContactForm from '../components/ContactForm.jsx';
 import CatalogoPerfiles from '../components/CatalogoPerfiles.jsx';
 import FaqAccordion from '../components/perfil-templates/FaqAccordion.astro';
+import { getCatalogList } from '../lib/catalog.js';
 import { Building2, CheckCircle2, ShieldCheck, ArrowRight, ArrowDown, Activity, Award, Zap, Landmark, MapPin, HeartHandshake, FileCheck } from 'lucide-react';
+
+const perfiles = await getCatalogList();
 
 const QUE_GANA_SU_EMPRESA = [
     'Reconoce y respalda formalmente las competencias de sus trabajadores.',
@@ -225,7 +228,7 @@ const FAQ_EMPRESAS = [
 
         {/* CATÁLOGO DE PERFILES */}
         <div id="perfiles" class="bg-white">
-            <CatalogoPerfiles client:load title="Perfiles Disponibles B2B" subtitle="Revise el catálogo de especialidades técnicas habilitadas para evaluación." />
+            <CatalogoPerfiles client:load perfiles={perfiles} title="Perfiles Disponibles B2B" subtitle="Revise el catálogo de especialidades técnicas habilitadas para evaluación." />
         </div>
 
         {/* PREGUNTAS FRECUENTES */}

@@ -123,3 +123,20 @@ export const certificateSchema = z.object({
 });
 
 export type CertificateInput = z.infer<typeof certificateSchema>;
+
+// --- Módulo de Hero (Home de wylar.cl) ---
+
+export const heroSlideSchema = z.object({
+    order: z.coerce.number().int().default(0),
+    active: z.boolean().default(true),
+    image: z.string().trim().min(1, 'Falta la imagen (URL o ruta).').max(500),
+    eyebrowLead: z.string().trim().min(1, 'Falta el texto de la etiqueta (ej. "Centro Acreditado").').max(80),
+    eyebrowAccent: z.string().trim().min(1, 'Falta el texto destacado de la etiqueta (ej. "ChileValora").').max(80),
+    title: z.string().trim().min(1, 'Falta el título.').max(120),
+    titleHighlight: z.string().trim().min(1, 'Falta la parte destacada del título.').max(120),
+    description: z.string().trim().min(1, 'Falta la descripción.').max(500),
+    ctaLabel: z.string().trim().min(1, 'Falta el texto del botón.').max(60),
+    ctaHref: z.string().trim().min(1, 'Falta el destino del botón (ej. /catalogo).').max(300),
+});
+
+export type HeroSlideInput = z.infer<typeof heroSlideSchema>;

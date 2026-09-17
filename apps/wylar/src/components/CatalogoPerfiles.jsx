@@ -1,6 +1,5 @@
 import React from 'react';
 import { ArrowRight, ShieldCheck, Wrench, Users, Construction, BookOpen } from 'lucide-react';
-import { perfiles } from '../data/perfiles.js';
 
 const getCategoryIcon = (category) => {
     switch(category) {
@@ -11,9 +10,9 @@ const getCategoryIcon = (category) => {
     }
 };
 
-export default function CatalogoPerfiles({ featuredOnly = false, title = '', subtitle = '' }) {
-    
-    const displayedPerfiles = featuredOnly 
+export default function CatalogoPerfiles({ perfiles = [], featuredOnly = false, title = '', subtitle = '' }) {
+
+    const displayedPerfiles = featuredOnly
         ? perfiles.filter(p => p.isFeatured)
         : perfiles;
 

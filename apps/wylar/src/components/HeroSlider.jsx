@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Users, ArrowRight, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
-import { perfiles } from '../data/perfiles.js';
 
-// Slide 1: el hero principal (se mantiene igual a la versión estática anterior)
-const MAIN_SLIDE = {
+// Slide de respaldo si el CRM todavía no tiene ningún slide de hero cargado
+// (ver Módulo de Hero del CRM — /hero — y src/lib/hero.js).
+const FALLBACK_SLIDE = {
     id: 'main',
     image: '/images/hero_principal.jpg',
     categoryLabel: 'Presentación',
@@ -11,41 +11,39 @@ const MAIN_SLIDE = {
     eyebrowAccent: 'ChileValora',
     title: 'Certificamos tus',
     titleHighlight: 'competencias laborales.',
-    description: (
-        <>
-            <strong className="font-semibold text-cyan-300">Evaluamos y certificamos lo que sabes hacer</strong> con
-            procesos confiables y respaldo oficial. Para personas, empresas e instituciones de educación en todo
-            Chile.
-        </>
-    ),
+    description: 'Evaluamos y certificamos lo que sabes hacer con procesos confiables y respaldo oficial. Para personas, empresas e instituciones de educación en todo Chile.',
     ctaLabel: 'Quiero Certificarme',
     ctaHref: '/#portales',
-    ctaIcon: Users,
 };
 
-// Slides 2-5: los perfiles destacados del catálogo (antes solo "de apoyo" en el fondo del hero)
-const PROFILE_SLIDES = perfiles
-    .filter((p) => p.isFeatured)
-    .map((p) => ({
-        id: p.id,
-        image: p.image,
-        categoryLabel: p.category,
-        eyebrowLead: p.isChileValora ? 'Centro Acreditado' : 'Certificación',
-        eyebrowAccent: p.isChileValora ? 'ChileValora' : 'Privada Wylar',
-        title: 'Certifícate como',
-        titleHighlight: p.title,
-        description: p.description,
-        ctaLabel: 'Ver perfil completo',
-        ctaHref: p.link,
-        ctaIcon: ArrowRight,
-    }));
-
-const slides = [MAIN_SLIDE, ...PROFILE_SLIDES];
 const AUTOPLAY_MS = 5500;
 
-export default function HeroSlider() {
+// `customSlides` viene del Módulo de Hero del CRM (editable desde /hero);
+// `perfiles` es el catálogo (Módulo de Catálogo) — los perfiles marcados
+// como destacados se agregan automáticamente como slides adicionales,
+// después de los slides personalizados.
+export default function HeroSlider({ customSlides = [], perfiles = [] }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
+
+    const mainSlides = (customSlides.length > 0 ? customSlides : [FALLBACK_SLIDE]).map((s) => ({ ...s, ctaIcon: Users }));
+    const profileSlides = perfiles
+        .filter((p) => p.isFeatured)
+        .map((p) => ({
+            id: p.id,
+            image: p.image,
+            categoryLabel: p.category,
+            eyebrowLead: p.isChileValora ? 'Centro Acreditado' : 'Certificación',
+            eyebrowAccent: p.isChileValora ? 'ChileValora' : 'Privada Wylar',
+            title: 'Certifícate como',
+            titleHighlight: p.title,
+            description: p.description,
+            ctaLabel: 'Ver perfil completo',
+            ctaHref: p.link,
+            ctaIcon: ArrowRight,
+        }));
+
+    const slides = [...mainSlides, ...profileSlides];
 
     const goTo = (i) => setCurrentIndex(((i % slides.length) + slides.length) % slides.length);
 

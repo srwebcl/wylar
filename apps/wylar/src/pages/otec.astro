@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import ContactForm from "../components/ContactForm.jsx";
 import CatalogoPerfiles from "../components/CatalogoPerfiles.jsx";
+import { getCatalogList } from "../lib/catalog.js";
 import {
   Handshake,
   MapPin,
@@ -20,6 +21,8 @@ const PROGRAMAS = [
   "Capacitación en Oficios / Fórmate para el Trabajo",
   "Proyecto +R (Reinserción)",
 ];
+
+const perfiles = await getCatalogList();
 ---
 
 <Layout title="Alianzas para OTEC | Wylar">
@@ -372,6 +375,7 @@ const PROGRAMAS = [
     <div id="perfiles">
       <CatalogoPerfiles
         client:load
+        perfiles={perfiles}
         title="Perfiles para sus Participantes"
         subtitle="Estas son las certificaciones que puede coordinar para los participantes de sus cursos y programas."
       />

@@ -2,6 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import CatalogoInteractivo from '../components/CatalogoInteractivo.jsx';
 import ContactForm from '../components/ContactForm.jsx';
+import { getCatalogList } from '../lib/catalog.js';
+
+const perfiles = await getCatalogList();
 ---
 
 <Layout title="Certificaciones | Wylar">
@@ -38,7 +41,7 @@ import ContactForm from '../components/ContactForm.jsx';
         </section>
 
         {/* COMPONENTE INTERACTIVO */}
-        <CatalogoInteractivo client:load />
+        <CatalogoInteractivo client:load perfiles={perfiles} />
         
         {/* FORMULARIO */}
         <ContactForm 

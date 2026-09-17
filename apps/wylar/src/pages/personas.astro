@@ -2,7 +2,10 @@
 import Layout from '../layouts/Layout.astro';
 import ContactForm from '../components/ContactForm.jsx';
 import CatalogoPerfiles from '../components/CatalogoPerfiles.jsx';
+import { getCatalogList } from '../lib/catalog.js';
 import { Users, FileCheck, Award, ArrowDown, ArrowRight, ShieldCheck, CheckCircle2, Compass } from 'lucide-react';
+
+const perfiles = await getCatalogList();
 ---
 
 <Layout title="Certificación para Personas | Wylar">
@@ -148,7 +151,7 @@ import { Users, FileCheck, Award, ArrowDown, ArrowRight, ShieldCheck, CheckCircl
 
         {/* CATÁLOGO DE PERFILES */}
         <div id="perfiles">
-            <CatalogoPerfiles client:load title="Perfiles de Evaluación" subtitle="Selecciona el área en la que deseas certificarte para iniciar el proceso de postulación." />
+            <CatalogoPerfiles client:load perfiles={perfiles} title="Perfiles de Evaluación" subtitle="Selecciona el área en la que deseas certificarte para iniciar el proceso de postulación." />
         </div>
 
         {/* FORMULARIO */}

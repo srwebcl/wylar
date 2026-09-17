@@ -1,11 +1,12 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { perfiles } from '../../data/perfiles.js';
+import { getAllPerfilesDetalle } from '../../lib/catalog.js';
 import FichaChileValora from '../../components/perfil-templates/FichaChileValora.astro';
 import FichaSoldadura from '../../components/perfil-templates/FichaSoldadura.astro';
 import FichaOperadores from '../../components/perfil-templates/FichaOperadores.astro';
 
-export function getStaticPaths() {
+export async function getStaticPaths() {
+    const perfiles = await getAllPerfilesDetalle();
     return perfiles.map(perfil => ({
         params: { id: perfil.id },
         props: { perfil }
