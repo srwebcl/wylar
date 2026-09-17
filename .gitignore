@@ -1,0 +1,8 @@
+# Red de seguridad a nivel raíz — cada app ya tiene su propio .gitignore
+# con sus reglas específicas; esto solo cubre basura común si algo se
+# ejecuta por error desde la raíz del monorepo.
+.DS_Store
+node_modules/
+.vercel
+*.env
+*.env.*
