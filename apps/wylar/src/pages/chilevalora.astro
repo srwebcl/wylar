@@ -1,0 +1,247 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ShieldCheck, Target, Users, BookOpen, CheckCircle2, ChevronRight, FileText, Settings, FileCheck, Award, Zap, Heart, MapPin, Mail } from 'lucide-react';
+---
+
+<Layout title="Sobre el Sistema ChileValora | Wylar">
+    <div class="animate-in fade-in duration-1000 bg-white">
+        
+        {/* Page Header - STANDARD PREMIUM */}
+        <section class="relative pt-24 pb-20 overflow-hidden bg-slate-50">
+            {/* Background elements */}
+            <div class="absolute inset-0 w-full h-full">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-cyan-50/30"></div>
+                <div class="absolute top-0 -left-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/40 via-transparent to-transparent -z-10 rotate-12"></div>
+                <div class="absolute top-0 right-0 w-1/2 h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-cyan-100/30 via-transparent to-transparent -z-10"></div>
+                {/* Subtle Grid */}
+                <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] -z-10"></div>
+            </div>
+            
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="flex flex-col items-center text-center max-w-4xl mx-auto">
+                    {/* Badge */}
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0B1E40] text-white shadow-xl shadow-blue-900/20 mb-8 border border-blue-800/50">
+                        <img src="/logos-clientes/chilevalora.png" alt="ChileValora Logo" class="h-5 object-contain invert brightness-0" />
+                        <span class="text-xs font-bold uppercase tracking-widest">Información Institucional</span>
+                    </div>
+
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#0B1E40] tracking-tight leading-tight mb-6">
+                        Certificación con <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-blue-800 to-[#0B1E40]">Validez Nacional</span>
+                    </h1>
+                    
+                    <p class="text-lg md:text-xl text-slate-600 leading-relaxed font-medium max-w-3xl">
+                        Wylar, Centro de Evaluación y Certificación de Competencias Laborales acreditado por ChileValora.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        {/* CONTENT LAYOUT */}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="flex flex-col lg:flex-row gap-16">
+                
+                {/* SIDEBAR NAVIGATION (Sticky) */}
+                <aside class="lg:w-1/4 hidden lg:block">
+                    <div class="sticky top-[120px] bg-slate-50 border border-slate-100 p-6 rounded-2xl">
+                        <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Contenido</h4>
+                        <ul class="space-y-2 text-sm font-bold text-slate-600">
+                            <li><a href="#que-es" class="flex items-center gap-2 p-2 hover:bg-white hover:text-blue-600 rounded-lg transition-colors"><ChevronRight size={16}/> ¿Qué es ChileValora?</a></li>
+                            <li><a href="#wylar-centro" class="flex items-center gap-2 p-2 hover:bg-white hover:text-blue-600 rounded-lg transition-colors"><ChevronRight size={16}/> Wylar Centro Acreditado</a></li>
+                            <li><a href="#proceso" class="flex items-center gap-2 p-2 hover:bg-white hover:text-blue-600 rounded-lg transition-colors"><ChevronRight size={16}/> Proceso Paso a Paso</a></li>
+                            <li><a href="#documentacion" class="flex items-center gap-2 p-2 hover:bg-white hover:text-blue-600 rounded-lg transition-colors"><ChevronRight size={16}/> Documentación Necesaria</a></li>
+                            <li><a href="#certificaciones" class="flex items-center gap-2 p-2 hover:bg-white hover:text-blue-600 rounded-lg transition-colors"><ChevronRight size={16}/> Certificaciones Disponibles</a></li>
+                            <li><a href="#faq" class="flex items-center gap-2 p-2 hover:bg-white hover:text-blue-600 rounded-lg transition-colors"><ChevronRight size={16}/> Preguntas Frecuentes</a></li>
+                            <li><a href="#contacto" class="flex items-center gap-2 p-2 hover:bg-white hover:text-blue-600 rounded-lg transition-colors"><ChevronRight size={16}/> Contacto</a></li>
+                        </ul>
+                    </div>
+                </aside>
+
+                {/* MAIN CONTENT */}
+                <main class="lg:w-3/4 space-y-20">
+                    
+                    {/* 1. QUÉ ES */}
+                    <section id="que-es">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                                <ShieldCheck size={24} />
+                            </div>
+                            <h2 class="text-3xl font-black text-[#0B1E40]">1. ¿Qué es ChileValora?</h2>
+                        </div>
+                        <div class="prose prose-lg text-slate-600 max-w-none">
+                            <p>
+                                ChileValora es la Comisión del Sistema Nacional de Certificación de Competencias Laborales, un servicio público creado al alero de la Ley N.º 20.267. Su función principal es reconocer formalmente las competencias laborales de las personas, independientemente de cómo las hayan adquirido y de si cuentan o no con un título o grado académico.
+                            </p>
+                        </div>
+                    </section>
+
+                    {/* 2. WYLAR CENTRO */}
+                    <section id="wylar-centro" class="bg-[#0B1E40] text-white p-10 md:p-12 rounded-[2rem] shadow-2xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-96 h-96 bg-blue-500/20 rounded-full blur-[80px]"></div>
+                        
+                        <div class="relative z-10">
+                            <h2 class="text-3xl font-black mb-6">2. Wylar - Centro de Evaluación y Certificación</h2>
+                            <p class="text-lg text-slate-300 mb-8 leading-relaxed">
+                                Somos un Centro acreditado por ChileValora con validez nacional. El proceso oficial del Sistema Nacional de Certificación de Competencias Laborales te permite demostrar, a través de evidencia, las capacidades necesarias para un desempeño laboral de calidad.
+                            </p>
+                            
+                            <h3 class="text-xl font-bold mb-4 text-cyan-400">Nuestra Promesa:</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-center gap-3">
+                                    <CheckCircle2 className="text-cyan-400 flex-shrink-0" size={20} />
+                                    <span class="text-slate-300 font-medium">3 etapas claras y definidas.</span>
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <CheckCircle2 className="text-cyan-400 flex-shrink-0" size={20} />
+                                    <span class="text-slate-300 font-medium">Documentación simple.</span>
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <CheckCircle2 className="text-cyan-400 flex-shrink-0" size={20} />
+                                    <span class="text-slate-300 font-medium">Acompañamiento en cada etapa del proceso.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    {/* 3. PROCESO */}
+                    <section id="proceso">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
+                                <Settings size={24} />
+                            </div>
+                            <h2 class="text-3xl font-black text-[#0B1E40]">3. El Proceso de Certificación (Paso a Paso)</h2>
+                        </div>
+                        <div class="prose prose-lg text-slate-600 max-w-none mb-8">
+                            <p>
+                                El proceso asegura la demostración práctica de tus habilidades y se divide en tres etapas fundamentales:
+                            </p>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow relative">
+                                <div class="absolute -top-4 -left-4 w-10 h-10 bg-blue-600 text-white font-black flex items-center justify-center rounded-xl shadow-lg">1</div>
+                                <h3 class="text-lg font-bold text-slate-900 mb-3 mt-2">Elegibilidad</h3>
+                                <p class="text-sm text-slate-600 leading-relaxed">
+                                    <strong class="text-slate-800">(Evaluación y Entrevista):</strong> Postulas con tus antecedentes y revisamos que tu experiencia calce con el perfil deseado. Esta etapa incluye una entrevista donde conversamos sobre tu trayectoria.
+                                </p>
+                            </div>
+                            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow relative">
+                                <div class="absolute -top-4 -left-4 w-10 h-10 bg-blue-600 text-white font-black flex items-center justify-center rounded-xl shadow-lg">2</div>
+                                <h3 class="text-lg font-bold text-slate-900 mb-3 mt-2">Aplicación de Instrumentos</h3>
+                                <p class="text-sm text-slate-600 leading-relaxed">
+                                    <strong class="text-slate-800">(Revisión de Evidencias):</strong> Un evaluador/a habilitado por ChileValora aplica los instrumentos del perfil y revisa tus evidencias directas; es decir, evalúa lo que sabes hacer directamente en la práctica.
+                                </p>
+                            </div>
+                            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow relative">
+                                <div class="absolute -top-4 -left-4 w-10 h-10 bg-blue-600 text-white font-black flex items-center justify-center rounded-xl shadow-lg">3</div>
+                                <h3 class="text-lg font-bold text-slate-900 mb-3 mt-2">Certificación</h3>
+                                <p class="text-sm text-slate-600 leading-relaxed">
+                                    <strong class="text-slate-800">(Resultados y Ceremonia):</strong> Recibes el resultado de tu evaluación. Si apruebas, se te entrega tu certificado oficial con validez nacional en una ceremonia de certificación.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 4. DOCUMENTACIÓN */}
+                    <section id="documentacion">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+                                <FileCheck size={24} />
+                            </div>
+                            <h2 class="text-3xl font-black text-[#0B1E40]">4. Documentación Necesaria</h2>
+                        </div>
+                        <div class="prose prose-lg text-slate-600 max-w-none">
+                            <p>
+                                Para postular, necesitas presentar los siguientes antecedentes que respaldan tu experiencia. <br/><strong class="text-blue-600">(Nota: Si te falta alguno o tienes dudas sobre cómo conseguirlo, te orientamos sin compromiso).</strong>
+                            </p>
+                            <ul class="bg-slate-50 border border-slate-100 p-8 rounded-2xl space-y-4 font-medium mt-6">
+                                <li class="flex items-start gap-3"><CheckCircle2 className="text-emerald-500 flex-shrink-0 mt-0.5" size={20} /> Cédula de identidad vigente.</li>
+                                <li class="flex items-start gap-3"><CheckCircle2 className="text-emerald-500 flex-shrink-0 mt-0.5" size={20} /> Currículum Vitae actualizado.</li>
+                                <li class="flex items-start gap-3"><CheckCircle2 className="text-emerald-500 flex-shrink-0 mt-0.5" size={20} /> Títulos técnicos o profesionales (relacionados con el perfil al que postulas).</li>
+                                <li class="flex items-start gap-3"><CheckCircle2 className="text-emerald-500 flex-shrink-0 mt-0.5" size={20} /> Certificados de cursos de capacitación o formación asociados al perfil.</li>
+                                <li class="flex items-start gap-3"><CheckCircle2 className="text-emerald-500 flex-shrink-0 mt-0.5" size={20} /> Cartas de referencia o recomendación laboral (emitidas por empresas o personas naturales).</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    {/* 5. PERFILES */}
+                    <section id="certificaciones">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center">
+                                <Award size={24} />
+                            </div>
+                            <h2 class="text-3xl font-black text-[#0B1E40]">5. Certificaciones Disponibles (Perfiles)</h2>
+                        </div>
+                        <p class="text-lg text-slate-600 mb-8">Actualmente, puedes certificarte con nosotros en las siguientes especialidades:</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <a href="/perfil/electricista" class="group flex items-center gap-4 bg-white border border-slate-200 p-4 rounded-xl hover:shadow-lg transition-all hover:border-cyan-400">
+                                <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Zap size={24} />
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Instalador Eléctrico Clase D</h4>
+                                    <span class="text-xs font-bold text-cyan-600 uppercase tracking-widest flex items-center gap-1 mt-1"><ShieldCheck size={12}/> Acreditado</span>
+                                </div>
+                            </a>
+                            <a href="/perfil/cuidador" class="group flex items-center gap-4 bg-white border border-slate-200 p-4 rounded-xl hover:shadow-lg transition-all hover:border-cyan-400">
+                                <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Heart size={24} />
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Cuidador de Personas Mayores</h4>
+                                    <span class="text-xs font-bold text-cyan-600 uppercase tracking-widest flex items-center gap-1 mt-1"><ShieldCheck size={12}/> Acreditado</span>
+                                </div>
+                            </a>
+                        </div>
+                    </section>
+
+                    {/* 6. FAQ */}
+                    <section id="faq">
+                        <div class="border-t border-slate-200 pt-12">
+                            <h2 class="text-2xl font-black text-[#0B1E40] mb-8">6. Preguntas Frecuentes</h2>
+                            
+                            <div class="space-y-6">
+                                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:border-blue-300 transition-colors">
+                                    <h3 class="text-lg font-bold text-slate-900 mb-3">¿Qué pasa si no tengo todos los documentos al postular?</h3>
+                                    <p class="text-slate-600">Puedes postular con lo que tengas y completar la documentación durante el proceso. Te orientamos sobre cómo conseguir certificados de experiencia laboral, incluso si tu empleador anterior ya no existe.</p>
+                                </div>
+                                
+                                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:border-blue-300 transition-colors">
+                                    <h3 class="text-lg font-bold text-slate-900 mb-3">¿La evaluación es solo teórica?</h3>
+                                    <p class="text-slate-600">No. Combinamos pruebas teóricas, prácticas y observación en terreno. La evaluación está diseñada para verificar competencias reales en la práctica, no la memorización de manuales.</p>
+                                </div>
+                                
+                                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:border-blue-300 transition-colors">
+                                    <h3 class="text-lg font-bold text-slate-900 mb-3">¿Qué pasa si no apruebo?</h3>
+                                    <p class="text-slate-600">Recibes un informe detallado con tus áreas de mejora. Puedes volver a rendir la evaluación tras un período de preparación. Conversaremos contigo para definir el mejor camino según tu caso particular.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 7. CONTACTO */}
+                    <section id="contacto">
+                        <div class="bg-blue-50 border border-blue-100 p-10 rounded-2xl relative overflow-hidden group">
+                            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-colors"></div>
+                            
+                            <h2 class="text-2xl font-black text-[#0B1E40] mb-4 relative z-10">7. Información de Contacto</h2>
+                            <p class="text-slate-600 mb-6 relative z-10">Si estás listo para empezar o quieres revisar tu elegibilidad sin compromiso, puedes contactarnos a través de los siguientes canales:</p>
+                            
+                            <div class="flex flex-col sm:flex-row gap-6 relative z-10">
+                                <div class="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex-1">
+                                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 shrink-0"><MapPin size={24} /></div>
+                                    <span class="font-bold text-slate-800 text-sm">Alameda N° 252, Metro Universidad Católica, Santiago.</span>
+                                </div>
+                                <div class="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex-1">
+                                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 shrink-0"><Mail size={24} /></div>
+                                    <div>
+                                        <div class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Escríbenos</div>
+                                        <a href="mailto:contacto@wylar.cl" class="font-black text-slate-800 hover:text-blue-600 transition-colors">contacto@wylar.cl</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </div>
+</Layout>

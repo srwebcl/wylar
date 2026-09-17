@@ -1,0 +1,24 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { perfiles } from '../../data/perfiles.js';
+import FichaChileValora from '../../components/perfil-templates/FichaChileValora.astro';
+import FichaSoldadura from '../../components/perfil-templates/FichaSoldadura.astro';
+import FichaOperadores from '../../components/perfil-templates/FichaOperadores.astro';
+
+export function getStaticPaths() {
+    return perfiles.map(perfil => ({
+        params: { id: perfil.id },
+        props: { perfil }
+    }));
+}
+
+const { perfil } = Astro.props;
+---
+
+<Layout title={`${perfil.title} | Wylar`}>
+    <div class="animate-in fade-in duration-500">
+        {perfil.type === 'soldadura' && <FichaSoldadura perfil={perfil} />}
+        {perfil.type === 'operadores' && <FichaOperadores perfil={perfil} />}
+        {(!perfil.type || perfil.type === 'chilevalora') && <FichaChileValora perfil={perfil} />}
+    </div>
+</Layout>

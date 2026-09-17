@@ -1,0 +1,18 @@
+---
+// Barra de acción fija, solo en mobile: como ahí no cabe un panel lateral
+// permanente, esta barra reemplaza esa función — siempre visible, sin
+// depender de la posición de scroll, y abre el mismo modal que el resto
+// de los CTA de la página (no un formulario aparte).
+const { icon: Icon, label } = Astro.props;
+---
+
+<div class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+    <button
+        type="button"
+        data-open-form
+        class="w-full flex items-center justify-center gap-2.5 bg-[#0B1E40] hover:bg-blue-900 text-white font-bold text-sm py-3.5 rounded-xl transition-colors shadow-lg"
+    >
+        <Icon size={17} />
+        {label}
+    </button>
+</div>

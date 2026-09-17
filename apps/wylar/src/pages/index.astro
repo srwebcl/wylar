@@ -1,0 +1,155 @@
+---
+import Layout from "../layouts/Layout.astro";
+import CatalogoPerfiles from "../components/CatalogoPerfiles.jsx";
+import ContactForm from "../components/ContactForm.jsx";
+import HeroSlider from "../components/HeroSlider.jsx";
+import Portales from "../components/Portales.jsx";
+import LogoCarousel from "../components/LogoCarousel.astro";
+import { ShieldCheck, Target, MapPin, BadgeCheck } from "lucide-react";
+---
+
+<Layout title="Wylar - Certificadora de Competencias Laborales">
+  <div class="animate-in fade-in duration-700">
+    {/* HERO SECTION - SLIDER CON FOTO A LA VISTA */}
+    <section
+      class="relative bg-[#050B14] min-h-[85vh] flex items-center border-b border-white/10 overflow-hidden"
+    >
+      {/* Hero Slider: slide principal + perfiles destacados del catálogo */}
+      <HeroSlider client:only="react" />
+    </section>
+
+    {/* CATÁLOGO DE PERFILES */}
+    <CatalogoPerfiles client:load featuredOnly={true} />
+
+    {/* TRUST STRIP - ESTADÍSTICAS Y LOGOS */}
+    <section class="bg-white border-b border-slate-100 py-10">
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-10"
+      >
+        <LogoCarousel />
+        <div class="hidden lg:block w-px h-12 bg-slate-200"></div>
+        <div class="flex items-center gap-10 text-center lg:text-left">
+          <div>
+            <div class="text-3xl font-black text-[#0B1E40]">+5.000</div>
+            <div
+              class="text-xs font-bold text-slate-500 uppercase tracking-widest"
+            >
+              Certificados Emitidos
+            </div>
+          </div>
+          <div>
+            <div class="text-3xl font-black text-[#0B1E40]">Cobertura</div>
+            <div
+              class="text-xs font-bold text-slate-500 uppercase tracking-widest"
+            >
+              a nivel Nacional
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* PORTALES DE ATENCIÓN (PARA QUIÉN ESTÁ DESTINADO) */}
+    <Portales client:load />
+
+    <section class="py-24 bg-slate-50 relative">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div
+          class="text-center max-w-3xl mx-auto mb-16 flex flex-col items-center"
+        >
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-8 h-px bg-blue-600/30"></span>
+            <span
+              class="flex items-center gap-2 text-blue-700 text-sm font-bold tracking-[0.2em] uppercase"
+            >
+              <Target size={16} /> Estándar de Excelencia
+            </span>
+            <span class="w-8 h-px bg-blue-600/30"></span>
+          </div>
+          <h2
+            class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight"
+          >
+            ¿Por qué certificar con <span
+              class="text-transparent bg-clip-text bg-gradient-to-r from-[#0B1E40] to-blue-800"
+              >Wylar?</span
+            >
+          </h2>
+          <p class="text-base md:text-lg text-slate-600">
+            Evaluamos las competencias de cada persona de manera objetiva, con
+            procesos claros y estándares reconocidos.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {/* Sello 1 - Estándar ChileValora */}
+          <div class="text-center px-4">
+            <div
+              class="w-28 h-28 mx-auto mb-6 rounded-full border-2 border-dashed border-amber-400/70 p-2"
+            >
+              <div
+                class="w-full h-full rounded-full bg-[#0B1E40] flex items-center justify-center"
+              >
+                <ShieldCheck size={30} strokeWidth={1.5} className="text-white" />
+              </div>
+            </div>
+            <h3 class="text-lg font-bold text-[#0B1E40] mb-3">
+              Estándar ChileValora
+            </h3>
+            <p class="text-slate-600 leading-relaxed">
+              Alineados con el catálogo nacional, asegurando que las
+              evaluaciones sean objetivas, confiables y con validez en todo el
+              territorio nacional.
+            </p>
+          </div>
+
+          {/* Sello 2 - Evaluamos donde tú estás */}
+          <div class="text-center px-4">
+            <div
+              class="w-28 h-28 mx-auto mb-6 rounded-full border-2 border-dashed border-amber-400/70 p-2"
+            >
+              <div
+                class="w-full h-full rounded-full bg-[#0B1E40] flex items-center justify-center"
+              >
+                <MapPin size={30} strokeWidth={1.5} className="text-white" />
+              </div>
+            </div>
+            <h3 class="text-lg font-bold text-[#0B1E40] mb-3">
+              Evaluamos donde tú estás
+            </h3>
+            <p class="text-slate-600 leading-relaxed">
+              En terreno, con tus tiempos y turnos: evaluamos en tus
+              instalaciones, no solo en una sala de clases.
+            </p>
+          </div>
+
+          {/* Sello 3 - Evaluadores habilitados */}
+          <div class="text-center px-4">
+            <div
+              class="w-28 h-28 mx-auto mb-6 rounded-full border-2 border-dashed border-amber-400/70 p-2"
+            >
+              <div
+                class="w-full h-full rounded-full bg-[#0B1E40] flex items-center justify-center"
+              >
+                <BadgeCheck size={30} strokeWidth={1.5} className="text-white" />
+              </div>
+            </div>
+            <h3 class="text-lg font-bold text-[#0B1E40] mb-3">
+              Evaluadores habilitados
+            </h3>
+            <p class="text-slate-600 leading-relaxed">
+              Cada evaluador/a está acreditado y auditado directamente por
+              ChileValora, lo que garantiza la calidad del proceso.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* FORMULARIO */}
+    <ContactForm
+      client:idle
+      subtitle="Cuéntanos qué necesitas y te ayudaremos a encontrar la mejor opción de certificación."
+      preselectedContext=""
+    />
+  </div>
+</Layout>

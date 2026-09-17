@@ -1,0 +1,23 @@
+---
+// Acordeón de preguntas frecuentes, reutilizado por las 3 plantillas de ficha.
+// Usa <details>/<summary> nativos: cero JS, funciona igual en las 3 fichas.
+const { faq = [] } = Astro.props;
+---
+
+<div class="space-y-3">
+    {faq.map((item) => (
+        <details class="group bg-white border border-slate-200 rounded-xl open:border-blue-200 open:shadow-sm transition-colors">
+            <summary class="flex items-center justify-between gap-4 p-5 cursor-pointer list-none font-bold text-slate-900 text-base leading-snug">
+                <span>{item.q}</span>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"
+                    class="shrink-0 text-slate-400 group-open:rotate-180 group-open:text-blue-600 transition-transform duration-300"
+                >
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
+            </summary>
+            <p class="px-5 pb-5 text-slate-600 leading-relaxed text-[15px]">{item.a}</p>
+        </details>
+    ))}
+</div>
