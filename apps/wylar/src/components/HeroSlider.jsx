@@ -91,7 +91,7 @@ export default function HeroSlider() {
             <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#050B14] via-[#050B14]/60 to-transparent z-[15]"></div>
 
             {/* CONTENT LAYER */}
-            <div className="max-w-7xl mx-auto pl-4 pr-4 sm:pl-6 sm:pr-6 md:pl-24 md:pr-8 lg:pl-28 lg:pr-8 relative z-20 w-full pt-10 pb-24 sm:pt-16 sm:pb-28 md:py-32">
+            <div className="max-w-7xl mx-auto pl-4 pr-4 sm:pl-6 sm:pr-6 md:pl-24 md:pr-8 lg:pl-28 lg:pr-8 relative z-20 w-full pt-10 pb-24 sm:pt-16 sm:pb-28 md:py-32 -mt-8 md:-mt-12 lg:-mt-16">
                 <div className="max-w-2xl mx-auto md:mx-0 text-center md:text-left">
                     <div className="flex justify-center md:justify-start mb-4 sm:mb-6 md:mb-8">
                         <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-gradient-to-r from-[#0B1E40] to-[#122b59] shadow-lg text-white text-sm font-bold tracking-wide border border-white/10">
