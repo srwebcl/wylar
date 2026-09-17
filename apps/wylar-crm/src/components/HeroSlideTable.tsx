@@ -13,6 +13,13 @@ interface Row {
     active: boolean;
 }
 
+const SITE_ORIGIN = 'https://wylar.vercel.app';
+
+/** Las rutas relativas (ej. /images/foo.jpg) son del sitio wylar.cl, no del CRM — hay que resolverlas contra ese dominio para previsualizarlas acá. */
+function previewSrc(image: string): string {
+    return image.startsWith('/') ? `${SITE_ORIGIN}${image}` : image;
+}
+
 export function HeroSlideTable({ slides }: { slides: Row[] }) {
     const [, startTransition] = useTransition();
 
@@ -68,7 +75,7 @@ export function HeroSlideTable({ slides }: { slides: Row[] }) {
                             <td className="px-5 py-3.5">
                                 <div className="flex items-center gap-3">
                                     <div className="w-16 h-10 rounded-lg overflow-hidden bg-slate-100 shrink-0 flex items-center justify-center">
-                                        {s.image ? <img src={s.image} alt="" className="w-full h-full object-cover" /> : <ImageOff size={16} className="text-slate-300" />}
+                                        {s.image ? <img src={previewSrc(s.image)} alt="" className="w-full h-full object-cover" /> : <ImageOff size={16} className="text-slate-300" />}
                                     </div>
                                     <p className="font-bold text-slate-900">
                                         {s.title} <span className="text-slate-500 font-medium">{s.titleHighlight}</span>
