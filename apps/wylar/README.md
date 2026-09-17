@@ -64,3 +64,5 @@ Sin esta variable, los formularios apuntan a un dominio de ejemplo y el envío f
 ## Notas
 
 - No hay más variables de entorno ni claves de API en uso, aparte de `PUBLIC_CRM_API_URL` arriba.
+
+<!-- prueba de auto-deploy: 2026-09-17 10:12 -->

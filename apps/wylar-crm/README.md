@@ -118,3 +118,5 @@ Cuando exista la cuenta de WhatsApp Business API, el punto de integración natur
 - La API pública de captura de leads valida origen (CORS restringido a `PUBLIC_FORM_ORIGINS`), incluye un campo honeypot anti-spam, y solo puede **crear** leads — no leer ni modificar nada.
 - Un usuario desactivado (`/equipo`) pierde el acceso de inmediato, sin esperar a que expire su sesión.
 - El validador de certificados (`/api/public/certificates/validate`) expone el RUT completo del titular — es una decisión de producto, no un descuido: el propio flujo del validador en wylar.cl busca por RUT o código, así que ocultarlo rompería la función. No expone ningún otro dato personal (email, teléfono) ni permite listar certificados sin conocer uno de los dos identificadores.
+
+<!-- prueba de auto-deploy: 2026-09-17 10:12 -->
