@@ -4,241 +4,378 @@ import ContactForm from '../components/ContactForm.jsx';
 import CatalogoPerfiles from '../components/CatalogoPerfiles.jsx';
 import FaqAccordion from '../components/perfil-templates/FaqAccordion.astro';
 import { getCatalogList } from '../lib/catalog.js';
-import { Building2, CheckCircle2, ShieldCheck, ArrowRight, ArrowDown, Activity, Award, Zap, Landmark, MapPin, HeartHandshake, FileCheck } from 'lucide-react';
+import {
+  Building2,
+  CheckCircle2,
+  ArrowUpRight,
+  Star,
+  PlusCircle,
+  BadgeCheck,
+  Settings2,
+  Landmark,
+  FileSignature,
+  FileCheck,
+  Wallet,
+  MapPin,
+  Activity,
+  SearchCheck,
+  Award,
+  Compass,
+  ClipboardList,
+  HeartHandshake,
+  Quote,
+  ArrowRight,
+  ArrowDown,
+} from 'lucide-react';
 
-const perfiles = await getCatalogList();
+const HERO_IMG = '/images/catalog_rigger.jpg';
 
-const QUE_GANA_SU_EMPRESA = [
-    'Reconoce y respalda formalmente las competencias de sus trabajadores.',
-    'Fortalece el perfil laboral de su equipo.',
-    'Demuestra ante clientes y mandantes que quienes realizan sus servicios cuentan con competencias certificadas.',
-    'Fortalece su propuesta de valor y diferenciación.',
-    'Identifica oportunidades para fortalecer las competencias de su equipo.',
+const QUE_GANA = [
+  { icon: CheckCircle2, title: 'Reconocimiento formal', text: 'Reconozca y respalde formalmente las competencias de sus trabajadores.' },
+  { icon: ArrowUpRight, title: 'Respaldo ante clientes', text: 'Puede demostrar ante clientes y mandantes que las personas que realizan sus servicios cuentan con competencias certificadas.' },
+  { icon: Star, title: 'Propuesta de valor', text: 'Fortalezca la propuesta de valor y diferenciación de su empresa.' },
+  { icon: PlusCircle, title: 'Fortalecimiento del equipo', text: 'Identifique oportunidades para fortalecer las competencias de su equipo.' },
+  { icon: BadgeCheck, title: 'Perfil laboral', text: 'Fortalezca el perfil laboral de las personas que forman parte de su organización.' },
+  { icon: Settings2, title: 'Proceso adaptado', text: 'Coordinamos la evaluación de acuerdo con las características y necesidades de su empresa.' },
+];
+
+const FRANQUICIA_REQUISITOS = [
+  { title: 'Primera Categoría', text: 'Entre las condiciones se encuentra ser contribuyente de Primera Categoría ante el SII.' },
+  { title: 'Planilla de remuneraciones', text: 'Contar con una planilla anual de remuneraciones imponibles superior a 35 UTM.' },
+  { title: 'Cotizaciones previsionales', text: 'Mantener pagadas las cotizaciones previsionales de sus trabajadores, de acuerdo con las condiciones vigentes de SENCE.' },
+];
+
+const FRANQUICIA_ALTERNATIVAS = [
+  { icon: Landmark, title: 'Franquicia Tributaria', text: 'Puede financiar procesos de evaluación y certificación si cumple los requisitos establecidos.', accent: 'from-cyan-400 to-blue-500' },
+  { icon: FileSignature, title: 'Precontrato', text: 'Contempla alternativas para personas que no son actualmente trabajadoras, bajo las condiciones establecidas por SENCE.', accent: 'from-blue-500 to-blue-700' },
+  { icon: FileCheck, title: 'Postcontrato', text: 'También contempla esta alternativa bajo las condiciones establecidas por SENCE.', accent: 'from-blue-700 to-blue-900' },
+  { icon: Wallet, title: 'Recursos propios', text: 'También puede realizar el proceso directamente, sin utilizar la Franquicia Tributaria.', accent: 'from-blue-900 to-[#0B1E40]' },
+];
+
+const COBERTURA_FEATURES = [
+  { title: 'En sus instalaciones', text: 'Las evaluaciones pueden realizarse en las instalaciones de la empresa.' },
+  { title: 'En el lugar de trabajo', text: 'También pueden desarrollarse en el lugar donde se desempeñan los trabajadores.' },
+  { title: 'En otras comunas o regiones', text: 'Si necesita certificar trabajadores en otra comuna o región, coordinamos el proceso donde se encuentre su equipo.' },
+];
+
+const ETAPAS = [
+  { icon: Activity, title: 'Evaluación', text: 'Se desarrollan las instancias de evaluación correspondientes al perfil y las condiciones del proceso.' },
+  { icon: SearchCheck, title: 'Revisión y validación', text: 'Una vez realizada la evaluación, comienza la etapa de revisión y validación de los resultados.' },
+  { icon: Award, title: 'Certificación', text: 'Posteriormente se completa la etapa de certificación. WYLAR informa y coordina con la empresa los tiempos correspondientes.' },
+];
+
+const ALIADO = [
+  { icon: Compass, title: 'Orientación', text: 'Le ayudamos a revisar las alternativas disponibles para su organización.' },
+  { icon: ClipboardList, title: 'Coordinación', text: 'Organizamos el proceso de acuerdo con las características de su empresa.' },
+  { icon: HeartHandshake, title: 'Acompañamiento', text: 'Mantenemos la coordinación y entregamos información sobre el avance del proceso.' },
 ];
 
 const FAQ_EMPRESAS = [
-    {
-        q: '¿Qué es la Evaluación y Certificación de Competencias Laborales?',
-        a: 'Es un proceso mediante el cual se evalúan las competencias que una persona ha desarrollado en el trabajo, de acuerdo con un perfil ocupacional establecido por ChileValora. Cuando la persona demuestra las competencias requeridas, obtiene una Certificación de Competencias Laborales.',
-    },
-    {
-        q: '¿Qué requisitos debe cumplir un trabajador para certificarse?',
-        a: 'Depende del perfil ocupacional. En términos generales, debe contar con experiencia y/o conocimientos relacionados con las competencias del perfil y cumplir sus condiciones específicas, incluyendo licencias habilitantes u otras exigencias cuando corresponda. Antes de iniciar el proceso, WYLAR realiza una entrevista inicial y revisión de antecedentes (CV, documento de identidad, respaldos de experiencia, licencias habilitantes) para verificar su elegibilidad.',
-    },
-    {
-        q: '¿Cuánto dura la evaluación?',
-        a: 'Como referencia, la evaluación contempla habitualmente una evaluación de conocimientos y una evaluación práctica, con una duración aproximada de 3 horas cada una. Ambas pueden realizarse el mismo día o en jornadas diferentes, según corresponda.',
-    },
-    {
-        q: '¿En cuánto tiempo está disponible la certificación?',
-        a: 'La evaluación y la certificación son etapas diferentes. Como referencia, la certificación puede demorar aproximadamente 40 días después de realizada la evaluación, considerando las etapas de revisión y validación de ChileValora. Este plazo puede variar, ya que no depende exclusivamente de WYLAR.',
-    },
-    {
-        q: '¿Dónde se realiza la evaluación?',
-        a: 'Puede realizarse en las instalaciones de la empresa, en el lugar de trabajo, en dependencias de WYLAR o en otro lugar adecuado para el proceso, según las condiciones del perfil.',
-    },
-    {
-        q: '¿WYLAR puede realizar procesos en otras regiones?',
-        a: 'Sí. WYLAR cuenta con cobertura nacional y puede coordinar procesos de evaluación y certificación en distintas comunas y regiones.',
-    },
-    {
-        q: '¿WYLAR realiza capacitación?',
-        a: 'No. WYLAR es un Centro de Evaluación y Certificación de Competencias Laborales acreditado por ChileValora; evaluamos y certificamos, no capacitamos. Si un trabajador necesita capacitación antes de certificarse, deberá realizarla con un OTEC.',
-    },
-    {
-        q: '¿Cuánto cuesta certificar a un trabajador?',
-        a: 'El valor depende del perfil ocupacional, sus unidades de competencia y las características de cada proceso, incluyendo condiciones de ejecución, traslado y lugar de la evaluación. Consúltenos y le entregaremos una propuesta según las necesidades de su empresa.',
-    },
-    {
-        q: '¿Puede mi empresa certificar a personas que no son trabajadores?',
-        a: 'Sí. La Franquicia Tributaria contempla el Precontrato, que permite financiar la evaluación y certificación de personas que no mantienen actualmente un vínculo laboral con la empresa — una alternativa para apoyar la empleabilidad de personas de la comunidad, proveedores locales o potenciales futuros trabajadores.',
-    },
+  { q: '¿Qué es la Evaluación y Certificación de Competencias Laborales?', a: 'Es un proceso mediante el cual se evalúan las competencias que una persona ha desarrollado en el trabajo, de acuerdo con un perfil ocupacional establecido por ChileValora. Cuando demuestra las competencias requeridas, obtiene una Certificación de Competencias Laborales.' },
+  { q: '¿Qué requisitos debe cumplir un trabajador?', a: 'Los requisitos dependen del perfil ocupacional. En términos generales, la persona debe contar con experiencia y/o conocimientos relacionados con las competencias del perfil y cumplir las condiciones específicas que este establezca, incluyendo, cuando corresponda, licencias habilitantes, requisitos legales u otras exigencias.' },
+  { q: '¿Cuánto dura la evaluación?', a: 'Depende del perfil y de las condiciones del proceso. Como referencia, en los procesos realizados por WYLAR, contempla habitualmente una evaluación de conocimientos y una evaluación práctica, con una duración aproximada de 3 horas cada una.' },
+  { q: '¿En cuánto tiempo está disponible la certificación?', a: 'La evaluación y la certificación son etapas diferentes. Como referencia, la certificación puede demorar aproximadamente 40 días después de realizada la evaluación, considerando las etapas de revisión y validación. El plazo puede variar porque el proceso también depende de las etapas de revisión y certificación de ChileValora.' },
+  { q: '¿Dónde se realiza la evaluación?', a: 'Puede realizarse en las instalaciones de la empresa, en el lugar de trabajo, en dependencias de WYLAR o en otro lugar adecuado para el proceso, según las condiciones del perfil.' },
+  { q: '¿WYLAR realiza capacitación?', a: 'No. WYLAR es un Centro de Evaluación y Certificación de Competencias Laborales acreditado por ChileValora. Nuestra función es evaluar y certificar las competencias laborales. La capacitación es un proceso diferente y debe ser realizada por un OTEC.' },
+  { q: '¿Cuánto cuesta certificar a un trabajador?', a: 'El valor depende del perfil ocupacional, sus unidades de competencia y las características de cada proceso. También pueden influir las condiciones de ejecución, traslado y lugar donde se realizará la evaluación. Consúltenos para recibir una propuesta.' },
 ];
+
+const perfiles = await getCatalogList();
 ---
 
-<Layout title="Servicios para Empresas | Wylar">
-    <div class="animate-in fade-in duration-700 bg-slate-50 overflow-hidden">
+<Layout title="Certificación para Empresas | Wylar">
+    <div class="animate-in fade-in duration-700 bg-slate-50">
 
         {/* HERO */}
         <section id="inicio" class="relative min-h-[60vh] md:min-h-[65vh] flex items-center bg-[#050B14] overflow-hidden border-b border-white/10">
             <div class="absolute inset-0">
-                <img src="/images/catalog_rigger.jpg" alt="Operación industrial certificada" class="w-full h-full object-cover" />
+                <img src={HERO_IMG} alt="Operación industrial certificada" class="w-full h-full object-cover" />
             </div>
             <div class="absolute inset-0 bg-[#0B1E40]/80"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-[#050B14] via-transparent to-[#050B14]/50"></div>
+            <div class="absolute top-0 right-0 w-[32rem] h-[32rem] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 md:py-24">
                 <div class="flex flex-col items-center text-center max-w-4xl mx-auto">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#0B1E40] to-[#122b59] text-white shadow-xl mb-8 border border-white/10">
-                        <Building2 size={16} className="text-cyan-400" />
-                        <span class="text-xs font-bold uppercase tracking-widest">Portal Empresas</span>
+                    <div class="inline-flex items-center gap-2.5 pl-2.5 pr-4 py-2 rounded-full bg-gradient-to-r from-[#0B1E40] to-[#122b59] text-white shadow-xl mb-8 border border-white/10">
+                        <span class="w-6 h-6 rounded-full bg-cyan-400/20 flex items-center justify-center shrink-0">
+                            <Building2 size={13} className="text-cyan-300" />
+                        </span>
+                        <span class="text-xs font-bold uppercase tracking-widest">Certificación para empresas</span>
                     </div>
 
                     <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-6 text-white">
-                        Certifique las <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-cyan-300">competencias</span> de sus trabajadores
+                        Certifique las <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-300">competencias</span> de sus trabajadores
                     </h1>
 
-                    <p class="text-lg md:text-xl text-white/80 leading-relaxed font-medium max-w-3xl mb-4">
-                        Sus trabajadores son parte fundamental del valor que entrega su empresa. La Evaluación y Certificación de Competencias Laborales (EyCCL) permite reconocer formalmente sus competencias y contar con un respaldo que fortalece su propuesta frente a clientes, mandantes y nuevas oportunidades de negocio.
-                    </p>
-                    <p class="text-base md:text-lg text-cyan-200 font-bold leading-relaxed max-w-3xl mb-10">
-                        Su equipo también es parte de su propuesta de valor. Demuestre sus competencias.
+                    <p class="text-lg md:text-xl text-white/80 leading-relaxed font-medium max-w-3xl mb-10">
+                        Sus trabajadores son parte fundamental del valor que entrega su empresa. La Evaluación y Certificación de Competencias Laborales permite reconocer formalmente sus competencias y contar con un respaldo que puede fortalecer su propuesta frente a clientes, mandantes y nuevas oportunidades de negocio.
                     </p>
 
                     <div class="flex flex-col sm:flex-row items-center gap-4">
-                        <a href="#contacto" class="bg-gradient-to-r from-[#0B1E40] to-blue-900 hover:from-blue-900 hover:to-blue-700 text-white font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
-                            Cotizar Proyecto <ArrowRight size={18} />
+                        <a href="#contacto" class="group bg-gradient-to-r from-[#0B1E40] to-blue-900 hover:from-blue-900 hover:to-blue-700 text-white font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-all shadow-lg shadow-blue-950/40 flex items-center justify-center gap-2">
+                            Solicitar orientación <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                         </a>
-                        <a href="#proceso" class="bg-white hover:bg-slate-50 text-[#0B1E40] font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
-                            Ver cómo funciona <ArrowDown size={18} />
+                        <a href="#franquicia" class="group bg-white hover:bg-slate-50 text-[#0B1E40] font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+                            Ver opciones de financiamiento <ArrowDown size={18} className="transition-transform group-hover:translate-y-0.5" />
                         </a>
                     </div>
                 </div>
             </div>
         </section>
 
-        {/* MÉTRICAS */}
-        <section class="bg-white py-24 border-b border-slate-100">
+        {/* ¿QUÉ GANA SU EMPRESA? */}
+        <section id="servicio" class="bg-white py-24 border-b border-slate-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 divide-y md:divide-y-0 md:divide-x divide-slate-200 text-center">
-                    <div class="pt-8 md:pt-0">
-                        <div class="text-5xl font-black text-[#0B1E40] mb-2 tracking-tight">100%</div>
-                        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">Cobertura Nacional</div>
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-bold tracking-widest uppercase mb-6">
+                        <Star size={16} /> ¿Qué gana su empresa?
                     </div>
-                    <div class="pt-8 md:pt-0">
-                        <div class="text-5xl font-black text-[#0B1E40] mb-2 tracking-tight">SENCE</div>
-                        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">Franquicia Tributaria</div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight">
+                        El valor de contar con <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#0B1E40] to-blue-800">competencias certificadas</span>
+                    </h2>
+                    <p class="text-base md:text-lg text-slate-600">
+                        La certificación permite reconocer formalmente las competencias de su equipo y respaldar sus capacidades ante distintos requerimientos de la empresa.
+                    </p>
+                </div>
+
+                <div class="relative max-w-3xl mx-auto bg-gradient-to-br from-[#0B1E40] to-[#122b59] rounded-2xl px-8 py-7 mb-16 text-center shadow-xl shadow-blue-900/20">
+                    <Quote size={32} className="absolute -top-3 left-1/2 -translate-x-1/2 text-cyan-400 bg-[#0B1E40] rounded-full p-1.5" />
+                    <p class="text-lg md:text-xl font-bold text-white leading-snug">
+                        Su equipo también es parte de su propuesta de valor.
+                        <span class="text-cyan-300"> Demuestre sus competencias.</span>
+                    </p>
+                </div>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {QUE_GANA.map((item, index) => (
+                        <div class="group relative bg-white p-8 rounded-2xl border border-slate-200 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)] hover:-translate-y-1 hover:shadow-xl hover:border-blue-200 transition-all overflow-hidden">
+                            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0B1E40] to-cyan-400 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></div>
+                            <span class="absolute top-6 right-7 text-3xl font-black text-slate-100 group-hover:text-blue-50 transition-colors select-none">{String(index + 1).padStart(2, '0')}</span>
+                            <div class="relative w-12 h-12 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl flex items-center justify-center text-blue-600 mb-5 ring-1 ring-blue-100">
+                                <item.icon size={22} />
+                            </div>
+                            <h3 class="relative text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
+                            <p class="relative text-slate-600 leading-relaxed text-[15px]">{item.text}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        {/* FRANQUICIA TRIBUTARIA SENCE */}
+        <section id="franquicia" class="bg-slate-50 py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-16 items-start">
+                    <div class="lg:sticky lg:top-32 bg-white rounded-[2rem] border border-slate-200 shadow-[0_20px_50px_-25px_rgba(11,30,64,0.3)] p-8 md:p-10 overflow-hidden relative">
+                        <div class="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-cyan-400/10 to-blue-600/10 rounded-full blur-2xl"></div>
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-bold tracking-widest uppercase mb-6">
+                            <Landmark size={16} /> Franquicia Tributaria SENCE
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight leading-tight">
+                            ¿Puede utilizar la Franquicia Tributaria para certificar?
+                        </h2>
+                        <p class="text-slate-600 leading-relaxed text-base md:text-lg mb-8">
+                            Si su empresa cumple con los requisitos establecidos por SENCE, puede utilizar la Franquicia Tributaria para financiar procesos de Evaluación y Certificación de Competencias Laborales.
+                        </p>
+                        <div class="space-y-3">
+                            {FRANQUICIA_REQUISITOS.map((item) => (
+                                <div class="group flex gap-3.5 bg-slate-50 border border-slate-200 rounded-xl p-3.5 hover:border-emerald-300 hover:bg-white transition-all">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                        <CheckCircle2 size={16} />
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-900 text-[13px]">{item.title}</h4>
+                                        <p class="text-slate-500 text-xs leading-relaxed">{item.text}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div class="h-1 w-16 rounded-full bg-gradient-to-r from-cyan-400 to-[#0B1E40] mt-8"></div>
                     </div>
-                    <div class="pt-8 md:pt-0">
-                        <div class="text-5xl font-black text-[#0B1E40] mb-2 tracking-tight">In-Situ</div>
-                        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">Evaluación en Terreno</div>
+
+                    <div class="relative">
+                        <div class="hidden sm:block absolute left-[3.75rem] top-10 bottom-10 w-px bg-gradient-to-b from-cyan-400 via-blue-600 to-[#0B1E40]"></div>
+                        <div class="space-y-5">
+                            {FRANQUICIA_ALTERNATIVAS.map((step, index) => (
+                                <div class="group relative flex gap-5 items-start bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-18px_rgba(11,30,64,0.25)] hover:shadow-[0_20px_40px_-18px_rgba(11,30,64,0.25)] hover:-translate-y-0.5 transition-all p-6 pl-7 overflow-hidden">
+                                    <div class={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${step.accent}`}></div>
+                                    <span class="absolute right-4 bottom-1 text-6xl font-black text-slate-50 group-hover:text-blue-50 transition-colors select-none leading-none">
+                                        {index + 1}
+                                    </span>
+                                    <div class={`relative z-10 w-14 h-14 rounded-2xl bg-gradient-to-br ${step.accent} text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-900/20`}>
+                                        <step.icon size={22} />
+                                    </div>
+                                    <div class="relative z-10 pt-1.5">
+                                        <h3 class="font-bold text-slate-900 mb-1.5">{step.title}</h3>
+                                        <p class="text-slate-600 text-[15px] leading-relaxed">{step.text}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        {/* CÓMO FUNCIONA — Evaluación y certificación: son etapas diferentes */}
-        <div id="proceso" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-            <div class="text-center mb-16 relative">
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-100 rounded-full blur-[80px] -z-10"></div>
-                <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6">Evaluación y certificación: son etapas diferentes</h2>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                <div class="bg-white p-10 rounded-[2rem] border border-slate-100 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)]">
-                    <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
-                        <Activity size={32} />
-                    </div>
-                    <h3 class="text-2xl font-bold text-slate-900 mb-4">La Evaluación</h3>
-                    <p class="text-slate-600 leading-relaxed mb-4">
-                        La evaluación puede desarrollarse en una jornada acotada, dependiendo del perfil y las condiciones del proceso.
-                    </p>
-                    <p class="text-slate-600 leading-relaxed">
-                        Como referencia, en los procesos realizados por WYLAR, la evaluación contempla habitualmente una evaluación de conocimientos y una evaluación práctica, con una duración aproximada de 3 horas cada una, pudiendo realizarse el mismo día o en jornadas diferentes, según corresponda.
-                    </p>
-                </div>
-
-                <div class="bg-gradient-to-br from-blue-600 to-[#0B1E40] p-10 rounded-[2rem] shadow-[0_20px_50px_-10px_rgba(11,30,64,0.4)] text-white relative overflow-hidden">
-                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-                    <div class="w-16 h-16 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-2xl flex items-center justify-center mb-6 relative z-10">
-                        <Award size={32} />
-                    </div>
-                    <h3 class="text-2xl font-bold text-white mb-4 relative z-10">La Certificación</h3>
-                    <p class="text-blue-100 leading-relaxed mb-4 relative z-10">
-                        Una vez realizada la evaluación, el proceso continúa con las etapas de revisión y certificación. Evaluarse puede tomar una jornada. Recibir la certificación es parte de un proceso posterior.
-                    </p>
-                    <p class="text-blue-100 leading-relaxed font-medium relative z-10">
-                        WYLAR informa y coordina con la empresa los tiempos correspondientes a cada proceso.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        {/* BENEFICIOS */}
-        <section id="beneficios" class="bg-white py-24 relative">
+        {/* COBERTURA NACIONAL */}
+        <section class="bg-white py-24 border-t border-slate-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col lg:flex-row gap-16 items-center">
                     <div class="w-full lg:w-1/2">
-                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-bold tracking-widest uppercase mb-6">
-                            <Zap size={16} /> ¿Qué Gana su Empresa?
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-100 text-cyan-700 text-sm font-bold tracking-widest uppercase mb-6">
+                            <MapPin size={16} /> Cobertura nacional
                         </div>
-                        <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-8 leading-tight">
-                            Su equipo también es <span class="text-blue-600">su propuesta de valor.</span>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 leading-tight">
+                            Certificamos donde su empresa <span class="text-blue-600">lo necesite.</span>
                         </h2>
-                        <ul class="space-y-3 mb-8">
-                            {QUE_GANA_SU_EMPRESA.map((item) => (
-                                <li class="flex items-start gap-3 text-slate-700 leading-relaxed">
-                                    <CheckCircle2 size={18} className="text-blue-500 mt-0.5 shrink-0" /> {item}
-                                </li>
+                        <p class="text-slate-700 leading-relaxed text-base mb-8">
+                            WYLAR cuenta con cobertura nacional y coordina los procesos de evaluación de acuerdo con las características de cada empresa.
+                        </p>
+                        <div class="space-y-3.5">
+                            {COBERTURA_FEATURES.map((item) => (
+                                <div class="group flex gap-4 bg-white border border-slate-200 rounded-2xl p-4 hover:border-emerald-300 hover:shadow-[0_10px_30px_-18px_rgba(16,185,129,0.4)] transition-all">
+                                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                        <CheckCircle2 size={18} />
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-900 text-[15px]">{item.title}</h4>
+                                        <p class="text-slate-500 text-sm">{item.text}</p>
+                                    </div>
+                                </div>
                             ))}
-                        </ul>
-
-                        <div class="space-y-6 pt-4 border-t border-slate-100">
-                            <div class="flex gap-5">
-                                <div class="bg-amber-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-amber-600">
-                                    <Landmark size={24} />
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-xl text-slate-900 mb-2">Franquicia Tributaria SENCE</h4>
-                                    <p class="text-slate-600 leading-relaxed">Si su empresa es contribuyente de Primera Categoría ante el SII, cuenta con una planilla anual de remuneraciones imponibles superior a 35 UTM y mantiene pagadas las cotizaciones de sus trabajadores, puede financiar el proceso con Franquicia Tributaria — incluye alternativas de Precontrato y Postcontrato.</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-5">
-                                <div class="bg-cyan-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-cyan-600">
-                                    <MapPin size={24} />
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-xl text-slate-900 mb-2">Certificamos donde su empresa lo necesite</h4>
-                                    <p class="text-slate-600 leading-relaxed">Cobertura nacional. Las evaluaciones pueden realizarse en sus instalaciones, en el lugar de trabajo, en dependencias de WYLAR o en otro lugar adecuado, según el perfil.</p>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
                     <div class="w-full lg:w-1/2 relative">
-                        <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-cyan-400 rounded-3xl transform rotate-3 scale-105 opacity-20 blur-lg"></div>
-                        <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2070&auto=format&fit=crop" alt="Operación industrial" class="relative rounded-3xl shadow-2xl object-cover h-[500px] w-full" />
-                        <div class="absolute -bottom-8 -left-8 bg-white p-6 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-4">
-                            <div class="bg-green-100 text-green-600 p-3 rounded-full"><Zap size={24} /></div>
-                            <div>
-                                <div class="font-black text-xl text-slate-900">¿Recursos propios?</div>
-                                <div class="text-sm font-medium text-slate-500">También puede evaluar sin Franquicia</div>
+                        <div class="absolute -inset-3 bg-gradient-to-br from-blue-600 to-[#0B1E40] rounded-[2.5rem] opacity-90 blur-none"></div>
+                        <div class="relative bg-gradient-to-br from-blue-600 to-[#0B1E40] rounded-[2rem] p-10 text-white shadow-2xl overflow-hidden min-h-[420px] flex flex-col justify-center">
+                            <div class="absolute -right-10 -top-10 w-56 h-56 bg-white/10 rounded-full blur-2xl"></div>
+                            <div class="absolute -bottom-10 -left-10 w-56 h-56 bg-cyan-400/10 rounded-full blur-2xl"></div>
+                            <div class="relative w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-6">
+                                <ArrowUpRight size={26} />
                             </div>
+                            <h3 class="relative text-2xl font-bold text-white mb-4">Una evaluación adaptada al proceso</h3>
+                            <p class="relative text-blue-100 leading-relaxed mb-4">
+                                La evaluación puede realizarse en una jornada acotada, dependiendo del perfil y las condiciones del proceso.
+                            </p>
+                            <p class="relative text-blue-100 leading-relaxed">
+                                Como referencia, en los procesos realizados por WYLAR, la evaluación contempla habitualmente una evaluación de conocimientos y una evaluación práctica, con una duración aproximada de 3 horas cada una. Pueden realizarse el mismo día o en jornadas diferentes, según corresponda.
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        {/* IMPACTO EN LA COMUNIDAD */}
-        <section class="py-20 bg-gradient-to-br from-[#0B1E40] to-blue-900 relative overflow-hidden">
-            <div class="absolute -right-20 -top-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-[100px]"></div>
-            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative flex flex-col md:flex-row items-center gap-10">
-                <div class="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
-                    <HeartHandshake size={30} className="text-amber-400" />
-                </div>
-                <div>
-                    <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-4">Una oportunidad para generar impacto en su comunidad</h2>
-                    <p class="text-blue-100 leading-relaxed">
-                        La Franquicia Tributaria también contempla el <strong class="text-white">Precontrato</strong>, que permite financiar la evaluación y certificación de personas que no son actualmente trabajadoras de la empresa. Una oportunidad para apoyar a personas vulnerables de la comunidad, proveedores locales o futuros trabajadores, fortaleciendo su empleabilidad y generando impacto social en el entorno de su empresa — una forma concreta de convertir un beneficio de la empresa en inversión social y empleabilidad local.
+        {/* EVALUACIÓN Y CERTIFICACIÓN: SON ETAPAS DIFERENTES */}
+        <section class="bg-slate-50 py-24 border-t border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-bold tracking-widest uppercase mb-6">
+                        <Activity size={16} /> Evaluación y certificación
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight">
+                        Son etapas diferentes
+                    </h2>
+                    <p class="text-base md:text-lg text-slate-600">
+                        Evaluarse puede tomar una jornada. Recibir la certificación es parte de un proceso posterior.
                     </p>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-[2rem] shadow-[0_10px_40px_-18px_rgba(11,30,64,0.15)] overflow-hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 divide-y divide-slate-100 sm:divide-y-0 sm:divide-x">
+                        {ETAPAS.map((item, index) => (
+                            <div class="group relative p-7 min-h-[210px] flex flex-col hover:bg-gradient-to-b hover:from-blue-50/60 hover:to-transparent transition-colors">
+                                <span class="absolute top-6 right-7 text-xs font-black text-slate-200 group-hover:text-blue-300 transition-colors">{String(index + 1).padStart(2, '0')}</span>
+                                <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 group-hover:bg-[#0B1E40] group-hover:text-cyan-300 transition-colors">
+                                    <item.icon size={20} />
+                                </div>
+                                <strong class="text-lg font-extrabold text-slate-900 leading-snug mb-2">{item.title}</strong>
+                                <span class="text-sm text-slate-500">{item.text}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
 
         {/* CATÁLOGO DE PERFILES */}
         <div id="perfiles" class="bg-white">
-            <CatalogoPerfiles client:load perfiles={perfiles} title="Perfiles Disponibles B2B" subtitle="Revise el catálogo de especialidades técnicas habilitadas para evaluación." />
+            <CatalogoPerfiles client:load perfiles={perfiles} title="Perfiles disponibles para su empresa" subtitle="Revise el catálogo de especialidades técnicas habilitadas para evaluación." />
         </div>
+
+        {/* UN ALIADO PARA SU EMPRESA */}
+        <section class="relative bg-[#050B14] py-24 overflow-hidden">
+            <div class="absolute inset-0">
+                <img src={HERO_IMG} alt="" class="w-full h-full object-cover opacity-25" />
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-b from-[#050B14] via-[#0B1E40]/90 to-[#050B14]"></div>
+            <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/15 rounded-full blur-[110px] pointer-events-none"></div>
+            <div class="absolute bottom-0 right-0 w-[28rem] h-[28rem] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+                <div class="max-w-2xl mb-14">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-cyan-300 text-sm font-bold tracking-widest uppercase mb-6 border border-white/10">
+                        <HeartHandshake size={16} /> Un aliado para su empresa
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-5 tracking-tight">
+                        Usted conoce las necesidades de su empresa. Nosotros conocemos el proceso.
+                    </h2>
+                    <p class="text-blue-100/85 text-base md:text-lg leading-relaxed">
+                        Coordinamos el proceso con su empresa, orientamos a sus trabajadores y buscamos que la certificación se desarrolle de manera clara, ordenada y acorde a sus necesidades.
+                    </p>
+                </div>
+
+                <div class="grid sm:grid-cols-3 gap-5">
+                    {ALIADO.map((item, index) => (
+                        <div class="group relative bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm hover:bg-white/[0.08] hover:border-cyan-400/30 hover:-translate-y-1 transition-all overflow-hidden">
+                            <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-400 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></div>
+                            <span class="absolute right-3 bottom-1 text-5xl font-black text-white/[0.05] group-hover:text-white/[0.08] transition-colors select-none leading-none">
+                                {index + 1}
+                            </span>
+                            <div class="relative w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 flex items-center justify-center mb-4 group-hover:bg-cyan-400/25 transition-colors">
+                                <item.icon size={18} />
+                            </div>
+                            <h4 class="relative font-bold text-white text-[15px] mb-1.5">{item.title}</h4>
+                            <p class="relative text-blue-100/70 text-sm leading-relaxed">{item.text}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        {/* IMPACTO EN SU COMUNIDAD */}
+        <section class="bg-white py-24 border-t border-slate-100">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-slate-50 border border-slate-200 rounded-[2rem] p-8 md:p-12 flex flex-col md:flex-row items-start gap-8">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/20">
+                        <HeartHandshake size={30} className="text-white" />
+                    </div>
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-bold tracking-widest uppercase mb-4">
+                            Impacto en su comunidad
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-[#0B1E40] mb-4">
+                            Una oportunidad para vincular certificación, empleabilidad e inversión social
+                        </h2>
+                        <p class="text-slate-600 leading-relaxed">
+                            La Franquicia Tributaria también contempla el Precontrato, que permite financiar la evaluación y certificación de personas que no son actualmente trabajadoras de la empresa, de acuerdo con las condiciones de SENCE. Esta alternativa puede permitir apoyar a personas de la comunidad, proveedores locales o futuros trabajadores, fortaleciendo su empleabilidad y generando impacto en el entorno de su empresa.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         {/* PREGUNTAS FRECUENTES */}
         <section class="bg-slate-50 py-24 border-t border-slate-100">
             <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 text-sm font-bold tracking-widest uppercase mb-6">
-                        <FileCheck size={16} /> Resolvemos sus Dudas
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-bold tracking-widest uppercase mb-6">
+                        <FileCheck size={16} /> Preguntas frecuentes
                     </div>
-                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900">Preguntas Frecuentes</h2>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] tracking-tight">Lo que su empresa necesita saber</h2>
                 </div>
                 <FaqAccordion faq={FAQ_EMPRESAS} />
             </div>
@@ -247,7 +384,7 @@ const FAQ_EMPRESAS = [
         {/* FORMULARIO */}
         <ContactForm
             client:idle
-            title="¿Su Empresa Está Preparada?"
+            title="¿Su empresa está preparada para dar valor a las competencias de su equipo?"
             subtitle="Conversemos sobre las necesidades de su empresa y revisemos juntos las alternativas de certificación que pueden aportar valor a su organización."
             preselectedContext="empresas"
         />

@@ -3,183 +3,276 @@ import Layout from '../layouts/Layout.astro';
 import ContactForm from '../components/ContactForm.jsx';
 import CatalogoPerfiles from '../components/CatalogoPerfiles.jsx';
 import { getCatalogList } from '../lib/catalog.js';
-import { GraduationCap, Layers, FileCheck, Award, ArrowDown, ArrowRight, ShieldCheck, CheckCircle2, BookOpen } from 'lucide-react';
+import {
+  GraduationCap,
+  Layers,
+  Briefcase,
+  Award,
+  ArrowDown,
+  ArrowRight,
+  CheckCircle2,
+  BadgeCheck,
+  Quote,
+  Search,
+  Lightbulb,
+  Route,
+  ClipboardList,
+  School,
+  Landmark,
+} from 'lucide-react';
+
+const HERO_IMG = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop';
+
+const SERVICIO = [
+  { icon: Layers, title: 'Salida intermedia', text: 'La certificación puede incorporarse como parte de la trayectoria formativa, de acuerdo con la carrera y los perfiles disponibles.' },
+  { icon: Briefcase, title: 'Durante la práctica', text: 'Los estudiantes pueden acceder a la certificación durante su práctica profesional, cuando corresponda.' },
+  { icon: Award, title: 'Al término de la carrera', text: 'La certificación puede formar parte de la etapa final de la trayectoria formativa del estudiante.' },
+];
+
+const RAP_FEATURES = [
+  { title: 'Reconocimiento o convalidación', text: 'De acuerdo con las condiciones establecidas por cada institución, puede contribuir al reconocimiento o convalidación de determinadas asignaturas o módulos.' },
+  { title: 'Trayectorias más flexibles', text: 'La certificación puede abrir nuevas posibilidades para conectar la formación con las competencias que el mundo laboral requiere.' },
+];
+
+const RAP_PASOS = [
+  { icon: Search, title: 'Identificar perfiles', text: 'Relacionamos perfiles ChileValora con las carreras de su institución.', accent: 'from-cyan-400 to-blue-500' },
+  { icon: Lightbulb, title: 'Detectar oportunidades', text: 'Revisamos dónde puede incorporarse la certificación para sus estudiantes.', accent: 'from-blue-500 to-blue-700' },
+  { icon: Route, title: 'Articular la formación', text: 'Exploramos alternativas de RAP y articulación cuando corresponda.', accent: 'from-blue-700 to-[#0B1E40]' },
+];
+
+const PROCESO = [
+  { icon: Search, title: 'Identificar perfiles ChileValora', text: 'Relacionar perfiles ocupacionales disponibles con las carreras que imparte su institución.' },
+  { icon: Lightbulb, title: 'Detectar oportunidades', text: 'Encontrar instancias donde la certificación pueda incorporarse a la trayectoria de los estudiantes.' },
+  { icon: ClipboardList, title: 'Coordinar procesos', text: 'Coordinar y ejecutar los procesos de evaluación y certificación.' },
+];
+
+const ALIANZA = [
+  { icon: School, title: 'CFT', text: 'Incorpore alternativas de certificación relacionadas con sus carreras.' },
+  { icon: GraduationCap, title: 'Institutos Profesionales', text: 'Explore oportunidades de certificación dentro de las trayectorias formativas.' },
+  { icon: Landmark, title: 'Universidades y liceos TP', text: 'Ayude a sus estudiantes a demostrar formalmente sus competencias.' },
+];
 
 const perfiles = await getCatalogList();
-
-const QUE_PODEMOS_HACER = [
-    'Identificar perfiles ChileValora relacionados con sus carreras.',
-    'Detectar oportunidades de certificación para sus estudiantes.',
-    'Incorporar certificaciones como salidas intermedias o al término de la carrera.',
-    'Vincular la certificación con procesos de RAP y articulación formativa, cuando corresponda.',
-    'Coordinar y ejecutar los procesos de evaluación y certificación.',
-];
 ---
 
 <Layout title="Alianzas para Instituciones de Educación | Wylar">
-    <div class="animate-in fade-in duration-700 bg-slate-50 overflow-hidden">
+    <div class="animate-in fade-in duration-700 bg-slate-50">
 
         {/* HERO */}
         <section id="inicio" class="relative min-h-[60vh] md:min-h-[65vh] flex items-center bg-[#050B14] overflow-hidden border-b border-white/10">
             <div class="absolute inset-0">
-                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop" alt="Estudiantes de carrera técnico-profesional" class="w-full h-full object-cover" />
+                <img src={HERO_IMG} alt="Estudiantes de carrera técnico-profesional" class="w-full h-full object-cover" />
             </div>
             <div class="absolute inset-0 bg-[#0B1E40]/80"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-[#050B14] via-transparent to-[#050B14]/50"></div>
+            <div class="absolute top-0 right-0 w-[32rem] h-[32rem] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 md:py-24">
                 <div class="flex flex-col items-center text-center max-w-4xl mx-auto">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#0B1E40] to-[#122b59] text-white shadow-xl mb-8 border border-white/10">
-                        <GraduationCap size={16} className="text-cyan-400" />
-                        <span class="text-xs font-bold uppercase tracking-widest">Portal Instituciones de Educación</span>
+                    <div class="inline-flex items-center gap-2.5 pl-2.5 pr-4 py-2 rounded-full bg-gradient-to-r from-[#0B1E40] to-[#122b59] text-white shadow-xl mb-8 border border-white/10">
+                        <span class="w-6 h-6 rounded-full bg-cyan-400/20 flex items-center justify-center shrink-0">
+                            <GraduationCap size={13} className="text-cyan-300" />
+                        </span>
+                        <span class="text-xs font-bold uppercase tracking-widest">Instituciones de educación</span>
                     </div>
 
                     <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-6 text-white">
-                        Conecte la formación con el <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-cyan-300">mundo laboral</span>
+                        Conecte la formación de sus estudiantes con el <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-300">mundo laboral</span>
                     </h1>
 
-                    <p class="text-lg md:text-xl text-white/80 leading-relaxed font-medium max-w-3xl mb-4">
+                    <p class="text-lg md:text-xl text-white/80 leading-relaxed font-medium max-w-3xl mb-10">
                         En WYLAR, como Centro de Evaluación y Certificación de Competencias Laborales acreditado por ChileValora, ayudamos a liceos técnico-profesionales, CFT, Institutos Profesionales y universidades a incorporar la certificación de competencias laborales como parte de la trayectoria formativa de sus estudiantes.
-                    </p>
-                    <p class="text-base md:text-lg text-cyan-200 font-bold leading-relaxed max-w-3xl mb-10">
-                        Porque hoy un estudiante puede hacer más que obtener un título: puede egresar con su título y, además, con sus competencias laborales certificadas.
                     </p>
 
                     <div class="flex flex-col sm:flex-row items-center gap-4">
-                        <a href="#contacto" class="bg-gradient-to-r from-[#0B1E40] to-blue-900 hover:from-blue-900 hover:to-blue-700 text-white font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
-                            Coordinar Alianza <ArrowRight size={18} />
+                        <a href="#contacto" class="group bg-gradient-to-r from-[#0B1E40] to-blue-900 hover:from-blue-900 hover:to-blue-700 text-white font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-all shadow-lg shadow-blue-950/40 flex items-center justify-center gap-2">
+                            Conversemos sobre su institución <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                         </a>
-                        <a href="#proceso" class="bg-white hover:bg-slate-50 text-[#0B1E40] font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
-                            Ver cómo funciona <ArrowDown size={18} />
+                        <a href="#servicio" class="group bg-white hover:bg-slate-50 text-[#0B1E40] font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+                            Conocer alternativas <ArrowDown size={18} className="transition-transform group-hover:translate-y-0.5" />
                         </a>
                     </div>
                 </div>
             </div>
         </section>
 
-        {/* MÉTRICAS */}
-        <section class="bg-white py-24 border-b border-slate-100">
+        {/* CERTIFICAR ANTES DE EGRESAR ES POSIBLE */}
+        <section id="servicio" class="bg-white py-24 border-b border-slate-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 divide-y md:divide-y-0 md:divide-x divide-slate-200 text-center">
-                    <div class="pt-8 md:pt-0">
-                        <div class="text-5xl font-black text-[#0B1E40] mb-2 tracking-tight">RAP</div>
-                        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">Reconocimiento de Aprendizajes Previos</div>
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-bold tracking-widest uppercase mb-6">
+                        <Award size={16} /> Certificación durante la formación
                     </div>
-                    <div class="pt-8 md:pt-0">
-                        <div class="text-5xl font-black text-[#0B1E40] mb-2 tracking-tight">Nacional</div>
-                        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">Validez del Certificado</div>
-                    </div>
-                    <div class="pt-8 md:pt-0">
-                        <div class="text-5xl font-black text-[#0B1E40] mb-2 tracking-tight">Título + Cert.</div>
-                        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">Doble Reconocimiento al Egresar</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        {/* CÓMO FUNCIONA */}
-        <div id="proceso" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-            <div class="max-w-4xl mx-auto bg-white p-10 md:p-14 rounded-[2rem] border border-slate-100 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden">
-                <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-cyan-50 rounded-full blur-3xl"></div>
-                
-                <div class="relative z-10">
-                    <h2 class="text-3xl md:text-5xl font-extrabold text-[#0B1E40] mb-8 text-center">
-                        Certificar antes de egresar es posible
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight">
+                        Certificar antes de <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#0B1E40] to-blue-800">egresar es posible</span>
                     </h2>
-                    
-                    <p class="text-lg md:text-xl text-slate-700 leading-relaxed mb-10 text-center">
-                        De acuerdo con la carrera y los perfiles ocupacionales disponibles, los estudiantes pueden acceder a procesos de certificación durante su formación, como:
+                    <p class="text-base md:text-lg text-slate-600">
+                        De acuerdo con la carrera y los perfiles ocupacionales disponibles, los estudiantes pueden acceder a procesos de certificación durante su formación.
                     </p>
+                </div>
 
-                    <div class="flex flex-col md:flex-row gap-6 justify-center mb-10">
-                        <div class="flex items-center gap-3 bg-slate-50 px-6 py-4 rounded-xl border border-slate-100">
-                            <Layers className="text-blue-600 shrink-0" size={24} />
-                            <span class="font-bold text-slate-800">Salida Intermedia</span>
+                <div class="relative max-w-3xl mx-auto bg-gradient-to-br from-[#0B1E40] to-[#122b59] rounded-2xl px-8 py-7 mb-16 text-center shadow-xl shadow-blue-900/20">
+                    <Quote size={32} className="absolute -top-3 left-1/2 -translate-x-1/2 text-cyan-400 bg-[#0B1E40] rounded-full p-1.5" />
+                    <p class="text-lg md:text-xl font-bold text-white leading-snug">
+                        Un estudiante puede egresar con su título y, además,
+                        <span class="text-cyan-300"> con sus competencias laborales certificadas.</span>
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    {SERVICIO.map((item, index) => (
+                        <div class="group relative bg-white p-8 rounded-2xl border border-slate-200 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)] hover:-translate-y-1 hover:shadow-xl hover:border-blue-200 transition-all overflow-hidden">
+                            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0B1E40] to-cyan-400 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></div>
+                            <span class="absolute top-6 right-7 text-3xl font-black text-slate-100 group-hover:text-blue-50 transition-colors select-none">{String(index + 1).padStart(2, '0')}</span>
+                            <div class="relative w-12 h-12 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl flex items-center justify-center text-blue-600 mb-5 ring-1 ring-blue-100">
+                                <item.icon size={22} />
+                            </div>
+                            <h3 class="relative text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
+                            <p class="relative text-slate-600 leading-relaxed text-[15px]">{item.text}</p>
                         </div>
-                        <div class="flex items-center gap-3 bg-slate-50 px-6 py-4 rounded-xl border border-slate-100">
-                            <FileCheck className="text-cyan-600 shrink-0" size={24} />
-                            <span class="font-bold text-slate-800">Práctica Profesional</span>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        {/* RAP — RECONOCIMIENTO DE APRENDIZAJES PREVIOS */}
+        <section class="bg-slate-50 py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-16 items-start">
+                    <div class="lg:sticky lg:top-32 bg-white rounded-[2rem] border border-slate-200 shadow-[0_20px_50px_-25px_rgba(11,30,64,0.3)] p-8 md:p-10 overflow-hidden relative">
+                        <div class="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-cyan-400/10 to-blue-600/10 rounded-full blur-2xl"></div>
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-bold tracking-widest uppercase mb-6">
+                            <BadgeCheck size={16} /> RAP — Reconocimiento de Aprendizajes Previos
                         </div>
-                        <div class="flex items-center gap-3 bg-slate-50 px-6 py-4 rounded-xl border border-slate-100">
-                            <Award className="text-amber-600 shrink-0" size={24} />
-                            <span class="font-bold text-slate-800">Término de la Carrera</span>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight leading-tight">
+                            Una certificación también puede formar parte de una estrategia de RAP
+                        </h2>
+                        <p class="text-slate-600 leading-relaxed text-base md:text-lg mb-8">
+                            En instituciones y carreras que cuentan con mecanismos de articulación, una certificación ChileValora puede ser reconocida como aprendizaje previo.
+                        </p>
+                        <div class="space-y-3">
+                            {RAP_FEATURES.map((item) => (
+                                <div class="group flex gap-3.5 bg-slate-50 border border-slate-200 rounded-xl p-3.5 hover:border-emerald-300 hover:bg-white transition-all">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                        <CheckCircle2 size={16} />
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-900 text-[13px]">{item.title}</h4>
+                                        <p class="text-slate-500 text-xs leading-relaxed">{item.text}</p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
+                        <div class="h-1 w-16 rounded-full bg-gradient-to-r from-cyan-400 to-[#0B1E40] mt-8"></div>
                     </div>
 
-                    <div class="bg-blue-50/50 border border-blue-100 p-6 rounded-2xl text-center">
-                        <p class="text-lg text-blue-900 leading-relaxed">
-                            Así, mientras avanzan en sus estudios, pueden obtener un reconocimiento formal de las competencias que ya han desarrollado y contar con una herramienta adicional para enfrentar el mundo laboral.
-                        </p>
+                    <div class="relative">
+                        <div class="hidden sm:block absolute left-[3.75rem] top-10 bottom-10 w-px bg-gradient-to-b from-cyan-400 via-blue-600 to-[#0B1E40]"></div>
+                        <div class="space-y-5">
+                            {RAP_PASOS.map((step, index) => (
+                                <div class="group relative flex gap-5 items-start bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-18px_rgba(11,30,64,0.25)] hover:shadow-[0_20px_40px_-18px_rgba(11,30,64,0.25)] hover:-translate-y-0.5 transition-all p-6 pl-7 overflow-hidden">
+                                    <div class={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${step.accent}`}></div>
+                                    <span class="absolute right-4 bottom-1 text-6xl font-black text-slate-50 group-hover:text-blue-50 transition-colors select-none leading-none">
+                                        {index + 1}
+                                    </span>
+                                    <div class={`relative z-10 w-14 h-14 rounded-2xl bg-gradient-to-br ${step.accent} text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-900/20`}>
+                                        <step.icon size={22} />
+                                    </div>
+                                    <div class="relative z-10 pt-1.5">
+                                        <h3 class="font-bold text-slate-900 mb-1.5">{step.title}</h3>
+                                        <p class="text-slate-600 text-[15px] leading-relaxed">{step.text}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        {/* BENEFICIOS */}
-        <section id="beneficios" class="bg-white py-24 relative">
+        {/* ¿QUÉ PODEMOS HACER CON SU INSTITUCIÓN? */}
+        <section id="proceso" class="bg-white py-24 border-t border-slate-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col lg:flex-row gap-16 items-center">
-                    <div class="w-full lg:w-1/2">
-                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-bold tracking-widest uppercase mb-6">
-                            <Award size={16} /> Valor Diferencial
-                        </div>
-                        <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-8 leading-tight">
-                            Trayectorias formativas <span class="text-blue-600">más flexibles.</span>
-                        </h2>
-                        <div class="space-y-6">
-                            <div class="flex gap-5">
-                                <div class="bg-blue-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-blue-600">
-                                    <BookOpen size={24} />
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-xl text-slate-900 mb-2">RAP: Reconocimiento de Aprendizajes Previos</h4>
-                                    <p class="text-slate-600 leading-relaxed">En instituciones y carreras con mecanismos de articulación, una certificación ChileValora puede ser reconocida como aprendizaje previo y contribuir al reconocimiento o convalidación de determinadas asignaturas o módulos.</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-5">
-                                <div class="bg-cyan-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-cyan-600">
-                                    <ShieldCheck size={24} />
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-xl text-slate-900 mb-3">¿Qué podemos hacer con su institución?</h4>
-                                    <ul class="space-y-2">
-                                        {QUE_PODEMOS_HACER.map((item) => (
-                                            <li class="flex items-start gap-2.5 text-slate-600 leading-relaxed">
-                                                <CheckCircle2 size={16} className="text-blue-500 mt-1 shrink-0" />
-                                                {item}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-100 text-cyan-700 text-sm font-bold tracking-widest uppercase mb-6">
+                        <ClipboardList size={16} /> ¿Qué podemos hacer con su institución?
                     </div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight">
+                        Trabajemos la certificación como parte de la trayectoria formativa
+                    </h2>
+                    <p class="text-base md:text-lg text-slate-600">
+                        WYLAR puede trabajar junto a su institución para identificar oportunidades y coordinar los procesos de evaluación y certificación.
+                    </p>
+                </div>
 
-                    <div class="w-full lg:w-1/2 relative">
-                        <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-cyan-400 rounded-3xl transform rotate-3 scale-105 opacity-20 blur-lg"></div>
-                        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop" alt="Estudiantes de carrera técnico-profesional" class="relative rounded-3xl shadow-2xl object-cover h-[500px] w-full" />
-                        <div class="absolute -bottom-8 -left-8 bg-white p-6 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-4">
-                            <div class="bg-green-100 text-green-600 p-3 rounded-full"><CheckCircle2 size={24} /></div>
-                            <div>
-                                <div class="font-black text-xl text-slate-900">Convenio</div>
-                                <div class="text-sm font-medium text-slate-500">Sin Costo de Instalación</div>
+                <div class="bg-white border border-slate-200 rounded-[2rem] shadow-[0_10px_40px_-18px_rgba(11,30,64,0.15)] overflow-hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 divide-y divide-slate-100 sm:divide-y-0 sm:divide-x">
+                        {PROCESO.map((item, index) => (
+                            <div class="group relative p-7 min-h-[210px] flex flex-col hover:bg-gradient-to-b hover:from-blue-50/60 hover:to-transparent transition-colors">
+                                <span class="absolute top-6 right-7 text-xs font-black text-slate-200 group-hover:text-blue-300 transition-colors">{String(index + 1).padStart(2, '0')}</span>
+                                <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 group-hover:bg-[#0B1E40] group-hover:text-cyan-300 transition-colors">
+                                    <item.icon size={20} />
+                                </div>
+                                <strong class="text-lg font-extrabold text-slate-900 leading-snug mb-2">{item.title}</strong>
+                                <span class="text-sm text-slate-500">{item.text}</span>
                             </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </div>
         </section>
 
         {/* CATÁLOGO DE PERFILES */}
-        <div id="perfiles">
-            <CatalogoPerfiles client:load perfiles={perfiles} title="Perfiles para sus Estudiantes" subtitle="Estos son los perfiles ChileValora que puede incorporar en la trayectoria formativa de sus carreras." />
+        <div id="perfiles" class="bg-slate-50">
+            <CatalogoPerfiles client:load perfiles={perfiles} title="Perfiles para sus estudiantes" subtitle="Estos son los perfiles ChileValora que puede incorporar en la trayectoria formativa de sus carreras." />
         </div>
+
+        {/* CONSTRUYAMOS UNA ALIANZA */}
+        <section class="relative bg-[#050B14] py-24 overflow-hidden">
+            <div class="absolute inset-0">
+                <img src={HERO_IMG} alt="" class="w-full h-full object-cover opacity-25" />
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-b from-[#050B14] via-[#0B1E40]/90 to-[#050B14]"></div>
+            <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/15 rounded-full blur-[110px] pointer-events-none"></div>
+            <div class="absolute bottom-0 right-0 w-[28rem] h-[28rem] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+                <div class="max-w-2xl mb-14">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-cyan-300 text-sm font-bold tracking-widest uppercase mb-6 border border-white/10">
+                        <GraduationCap size={16} /> Construyamos una alianza
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-5 tracking-tight">
+                        Conectamos la formación con las competencias que el mundo laboral reconoce
+                    </h2>
+                    <p class="text-blue-100/85 text-base md:text-lg leading-relaxed">
+                        WYLAR está disponible para establecer convenios de colaboración con instituciones de educación interesadas en desarrollar iniciativas de certificación de competencias laborales.
+                    </p>
+                </div>
+
+                <div class="grid sm:grid-cols-3 gap-5">
+                    {ALIANZA.map((item, index) => (
+                        <div class="group relative bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm hover:bg-white/[0.08] hover:border-cyan-400/30 hover:-translate-y-1 transition-all overflow-hidden">
+                            <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-400 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></div>
+                            <span class="absolute right-3 bottom-1 text-5xl font-black text-white/[0.05] group-hover:text-white/[0.08] transition-colors select-none leading-none">
+                                {index + 1}
+                            </span>
+                            <div class="relative w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 flex items-center justify-center mb-4 group-hover:bg-cyan-400/25 transition-colors">
+                                <item.icon size={18} />
+                            </div>
+                            <h4 class="relative font-bold text-white text-[15px] mb-1.5">{item.title}</h4>
+                            <p class="relative text-blue-100/70 text-sm leading-relaxed">{item.text}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
 
         {/* FORMULARIO */}
         <ContactForm
             client:idle
-            title="Construyamos una Alianza"
-            subtitle="Cuéntenos qué carreras imparte su institución y exploremos juntos las oportunidades de certificación. Conectamos la formación con las competencias que el mundo laboral reconoce."
+            title="¿Qué carreras imparte su institución?"
+            subtitle="Cuéntenos qué carreras imparte su institución y exploremos juntos las oportunidades de certificación para sus estudiantes."
             preselectedContext="instituciones"
         />
     </div>
