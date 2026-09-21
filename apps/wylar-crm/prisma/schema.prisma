@@ -115,12 +115,19 @@ model Profile {
   // Identificador en la URL de wylar.cl, ej. "electricista" → /perfil/electricista.
   slug String @unique
 
-  // CHILEVALORA | SOLDADURA | OPERADORES — determina qué secciones aplican
-  // y qué plantilla de ficha usa wylar.cl (ver PROFILE_SECTION_SPECS).
+  // CHILEVALORA | SOLDADURA | OPERADORES | ESTANDAR — determina qué
+  // secciones aplican y qué plantilla de ficha usa wylar.cl (ver
+  // PROFILE_SECTION_SPECS). ESTANDAR es la plantilla simple de 6 bloques
+  // de texto enriquecido — la única disponible al crear un perfil nuevo
+  // desde /catalogo/nuevo (ver ProfileWizard.tsx); las otras 3 siguen
+  // existiendo para los perfiles ya cargados con esa forma.
   templateType String
 
   title       String
   description String @db.Text
+  // Descripción larga (HTML del editor de texto enriquecido) — solo la
+  // usa la plantilla ESTANDAR, como cuerpo principal de la ficha.
+  descriptionLong String? @db.Text
   image       String
 
   category  String

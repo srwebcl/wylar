@@ -1,0 +1,101 @@
+---
+import { ArrowRight, ShieldCheck, Wrench, Users, Construction } from 'lucide-react';
+
+const { perfiles, currentId } = Astro.props;
+
+// Filtrar el perfil actual y quedarse con 4 al azar o los primeros 4
+const otrosPerfiles = perfiles
+    .filter(p => p.id !== currentId)
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 4);
+
+const getCategoryIcon = (category) => {
+    switch(category) {
+        case 'Construcción': return Construction;
+        case 'Industrial': return Wrench;
+        case 'Salud': return Users;
+        default: return ShieldCheck;
+    }
+};
+---
+
+{otrosPerfiles.length > 0 && (
+    <section class="py-20 bg-slate-100 border-t border-slate-200 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-end justify-between mb-10">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-[#0B1E40] mb-2">Otras certificaciones</h2>
+                    <p class="text-slate-600 text-lg">Sigue explorando nuestro catálogo oficial</p>
+                </div>
+                <a href="/catalogo" class="hidden sm:flex items-center gap-2 text-blue-600 font-bold hover:text-blue-800 transition-colors">
+                    Ver todo el catálogo <ArrowRight size={18} />
+                </a>
+            </div>
+
+            <div class="flex overflow-x-auto gap-6 pb-8 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {otrosPerfiles.map((perfil) => {
+                    const Icon = getCategoryIcon(perfil.category);
+                    return (
+                        <a 
+                            href={perfil.link} 
+                            class={`group flex flex-col w-[85vw] sm:w-[350px] shrink-0 snap-center sm:snap-align-none bg-white rounded-2xl overflow-hidden transition-all duration-300 relative ${
+                                perfil.isChileValora 
+                                    ? 'border-2 border-cyan-400 hover:shadow-[0_0_30px_rgba(34,211,238,0.25)] hover:-translate-y-1' 
+                                    : 'border-2 border-transparent hover:border-blue-300 shadow-sm hover:shadow-2xl hover:-translate-y-1'
+                            }`}
+                        >
+                            {/* Imagen */}
+                            <div class="w-full h-48 bg-slate-900 relative overflow-hidden shrink-0">
+                                <img 
+                                    src={perfil.image} 
+                                    alt={perfil.title} 
+                                    class={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ${!perfil.isChileValora ? 'opacity-90 grayscale group-hover:grayscale-0' : 'opacity-100'}`} 
+                                />
+                                {/* Tag over image */}
+                                <div class="absolute top-4 right-4 z-20">
+                                    {perfil.isChileValora ? (
+                                        <span class="bg-cyan-500/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm border border-white/20">
+                                            Certificada
+                                        </span>
+                                    ) : (
+                                        <span class="bg-[#0B1E40]/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm border border-white/10">
+                                            Privada
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {/* Contenido */}
+                            <div class="p-6 flex-1 flex flex-col justify-start">
+                                <div class="flex items-start justify-between mb-4 gap-2">
+                                    <div class={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${perfil.isChileValora ? 'text-cyan-600' : 'text-blue-600'}`}>
+                                        <Icon size={14} /> {perfil.category}
+                                    </div>
+                                    {perfil.isChileValora && (
+                                        <img src="/images/logo-chilevalora.png" alt="ChileValora" class="h-5 object-contain shrink-0" />
+                                    )}
+                                </div>
+                                
+                                <h3 class="text-lg font-extrabold text-[#0B1E40] mb-3 leading-tight group-hover:text-blue-700 transition-colors">{perfil.title}</h3>
+                                <p class="text-sm text-slate-600 mb-8 line-clamp-3 leading-relaxed">{perfil.description}</p>
+                                
+                                <div class="mt-auto">
+                                    <span class="w-full justify-center relative overflow-hidden group-hover:shadow-blue-900/40 bg-slate-50 group-hover:bg-gradient-to-r group-hover:from-[#0B1E40] group-hover:to-blue-900 text-[#0B1E40] group-hover:text-white px-6 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-sm font-bold text-sm border border-slate-200 group-hover:border-transparent">
+                                        <span class="relative z-10">Ver Perfil</span>
+                                        <ArrowRight size={16} class="relative z-10" />
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    );
+                })}
+            </div>
+
+            <div class="mt-6 sm:hidden text-center">
+                <a href="/catalogo" class="inline-flex items-center justify-center gap-2 text-[#0B1E40] bg-white border border-slate-200 shadow-sm font-bold px-6 py-3 rounded-full w-full">
+                    Ver todo el catálogo <ArrowRight size={18} />
+                </a>
+            </div>
+        </div>
+    </section>
+)}

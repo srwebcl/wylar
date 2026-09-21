@@ -38,7 +38,6 @@ export function CatalogTable({ profiles }: { profiles: Row[] }) {
                 <thead>
                     <tr className="border-b border-slate-100 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
                         <th className="px-5 py-3">Perfil</th>
-                        <th className="px-5 py-3">Plantilla</th>
                         <th className="px-5 py-3">Categoría</th>
                         <th className="px-5 py-3">Estado</th>
                         <th className="px-5 py-3 text-right">Acciones</th>
@@ -49,9 +48,7 @@ export function CatalogTable({ profiles }: { profiles: Row[] }) {
                         <tr key={p.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
                             <td className="px-5 py-3.5">
                                 <p className="font-bold text-slate-900">{p.title}</p>
-                                <p className="text-xs text-slate-400">/perfil/{p.slug}</p>
                             </td>
-                            <td className="px-5 py-3.5 text-slate-600">{p.templateLabel}</td>
                             <td className="px-5 py-3.5 text-slate-600">{p.category}</td>
                             <td className="px-5 py-3.5">
                                 <div className="flex gap-1.5 flex-wrap">

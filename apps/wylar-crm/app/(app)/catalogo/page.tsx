@@ -3,7 +3,6 @@ import { Plus } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import { profileTemplateLabel } from '@/lib/catalogSpec';
 import { CatalogTable } from '@/components/CatalogTable';
-import { PublishSiteButton } from '@/components/PublishSiteButton';
 
 export default async function CatalogoPage() {
     const profiles = await prisma.profile.findMany({ orderBy: [{ isFeatured: 'desc' }, { title: 'asc' }] });
@@ -16,7 +15,6 @@ export default async function CatalogoPage() {
                     <p className="text-slate-500 text-sm mt-1">Perfiles/certificaciones que se exhiben en wylar.cl (GET /api/public/catalog).</p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                    <PublishSiteButton />
                     <Link
                         href="/catalogo/nuevo"
                         className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-colors"

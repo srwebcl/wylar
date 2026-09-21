@@ -5,388 +5,302 @@ import CatalogoPerfiles from "../components/CatalogoPerfiles.jsx";
 import { getCatalogList } from "../lib/catalog.js";
 import {
   Handshake,
+  Shuffle,
+  Users2,
   MapPin,
-  FileCheck,
-  Award,
+  ClipboardList,
+  CalendarClock,
+  Presentation as PresentationIcon,
+  Info,
+  CheckCircle2,
   ArrowDown,
   ArrowRight,
-  Presentation,
-  CheckCircle2,
-  Layers,
+  HelpCircle,
+  Lightbulb,
+  MessageCircleQuestion,
+  BookOpenCheck,
 } from "lucide-react";
 
-const PROGRAMAS = [
-  "Becas Laborales",
-  "Reinvéntate",
-  "Capacitación en Oficios / Fórmate para el Trabajo",
-  "Proyecto +R (Reinserción)",
+const PROPUESTA = [
+  { icon: CheckCircle2, title: "Proceso claro", text: "Coordinamos cada etapa de manera ordenada, facilitando la gestión operativa para el OTEC." },
+  { icon: Shuffle, title: "Adaptación", text: "Nos adaptamos a sus fechas, programas y a las particularidades de cada proceso de capacitación." },
+  { icon: Handshake, title: "Trabajo conjunto", text: "Trabajamos directamente con el OTEC para que la certificación se integre adecuadamente a su planificación." },
 ];
+
+const PROCESO = [
+  { title: "Coordinación previa con el OTEC", text: "Revisamos las características del curso, participantes, fechas y requerimientos del proceso." },
+  { title: "Planificación de las evaluaciones", text: "Coordinamos fechas, horarios y condiciones necesarias para desarrollar las evaluaciones." },
+  { title: "Evaluación en terreno", text: "Nos trasladamos al lugar donde se desarrolla la capacitación para ejecutar las evaluaciones correspondientes." },
+  { title: "Orientación a los participantes", text: "Entregamos información clara sobre el proceso, sus etapas y los aspectos que deben considerar." },
+  { title: "Seguimiento", text: "Mantenemos la coordinación con el OTEC para facilitar el desarrollo ordenado de cada etapa." },
+];
+
+const TERRITORIO = [
+  { title: "En terreno", text: "Evaluaciones en el lugar donde se desarrolla la capacitación." },
+  { title: "A nivel territorial", text: "Nos adaptamos a cursos desarrollados en distintas comunas y regiones." },
+  { title: "Según su planificación", text: "Coordinamos fechas y condiciones de acuerdo con los requerimientos del OTEC." },
+];
+
+const PROGRAMAS = [
+  { title: "Becas Laborales", text: "Procesos de capacitación y certificación asociados al programa." },
+  { title: "Reinvéntate", text: "Apoyo a procesos de certificación vinculados a programas de capacitación." },
+  { title: "Capacitación en Oficios / Fórmate para el Trabajo", text: "Coordinación de procesos de evaluación y certificación." },
+  { title: "Proyecto +R — Reinserción", text: "Procesos de certificación asociados a iniciativas de capacitación y reinserción." },
+];
+
+const ORIENTACION = [
+  { title: "Conocer el proceso", text: "Explicamos de manera clara las etapas de la certificación." },
+  { title: "Comprender la evaluación", text: "Entregamos información sobre los aspectos que deben considerar." },
+  { title: "Resolver dudas", text: "Los participantes pueden plantear sus consultas antes de la evaluación." },
+  { title: "Recibir información clara", text: "Facilitamos una preparación adecuada para la instancia de certificación." },
+];
+
+const HERO_IMG = "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop";
 
 const perfiles = await getCatalogList();
 ---
 
-<Layout title="Alianzas para OTEC | Wylar">
-  <div class="animate-in fade-in duration-700 bg-slate-50 overflow-hidden">
-    {/* HERO */}
-    <section
-      id="inicio"
-      class="relative min-h-[75vh] md:min-h-[85vh] lg:min-h-[90vh] flex items-center bg-[#050B14] overflow-hidden border-b border-white/10"
-    >
-      <div class="absolute inset-0 overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop"
-          alt="Charla de capacitación técnica"
-          class="w-full h-full object-cover animate-[kenBurns_30s_ease-in-out_infinite_alternate]"
-        />
-      </div>
-      <div class="absolute inset-0 bg-[#0B1E40]/80"></div>
-      <div
-        class="absolute inset-0 bg-gradient-to-t from-[#050B14] via-transparent to-[#050B14]/50"
-      >
-      </div>
+<Layout title="Certificación para OTEC | Wylar">
+    <div class="animate-in fade-in duration-700 bg-slate-50 overflow-hidden">
 
-      <div
-        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 md:py-24"
-      >
-        <div class="flex flex-col items-center text-center max-w-4xl mx-auto">
-          <div
-            class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#0B1E40] to-[#122b59] text-white shadow-xl mb-8 border border-white/10"
-          >
-            <Handshake size={16} className="text-cyan-400" />
-            <span class="text-xs font-bold uppercase tracking-widest"
-              >Portal OTEC</span
-            >
-          </div>
-
-          <h1
-            class="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] mb-4 sm:mb-6 text-white"
-          >
-            Un aliado estratégico para sus certificaciones
-          </h1>
-
-          <p
-            class="text-base md:text-lg text-white/80 mb-6 sm:mb-8 md:mb-12 leading-relaxed max-w-xl mx-auto"
-          >
-            En WYLAR nos aliamos con su OTEC para llevar a cabo las certificaciones de sus estudiantes.
-          </p>
-
-          <div class="flex flex-col sm:flex-row items-center gap-4">
-            <a
-              href="#seccion-2"
-              class="bg-white hover:bg-slate-50 text-[#0B1E40] font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 group"
-            >
-              DESCUBRE CÓMO FUNCIONA <ArrowDown size={18} class="group-hover:translate-y-1 transition-transform" />
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    {/* SECCIÓN 2: INTRO Y FEATURES */}
-    <section id="seccion-2" class="bg-white py-24 md:py-32 relative overflow-hidden border-b border-slate-100">
-      {/* Elementos decorativos sutiles */}
-      <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-blue-50/50 to-transparent rounded-full blur-3xl -z-10 translate-x-1/3 -translate-y-1/3"></div>
-      <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-cyan-50/50 to-transparent rounded-full blur-3xl -z-10 -translate-x-1/3 translate-y-1/3"></div>
-
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Fila 1: Textos */}
-        <div class="max-w-4xl mx-auto text-center mb-20 scroll-fade-up opacity-0 translate-y-8 transition-all duration-1000 ease-out">
-          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-bold text-sm tracking-widest uppercase mb-8">
-            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-            Nuestra Experiencia
-          </div>
-          
-          <h2 class="text-4xl md:text-5xl font-extrabold text-[#0B1E40] leading-[1.15] mb-8">
-            La certificación de los participantes es <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">fundamental</span>
-          </h2>
-          
-          <p class="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto mb-16">
-            En WYLAR entendemos la importancia de este proceso para una OTEC. Por eso, ponemos nuestra experiencia a disposición para coordinar y ejecutar procesos de certificación de manera clara, ordenada y oportuna, adaptándonos a las necesidades de cada curso, programa y territorio.
-          </p>
-          
-          <div class="relative inline-block text-left">
-            <span class="absolute -top-6 -left-8 text-8xl text-blue-100 font-serif leading-none select-none -z-10">"</span>
-            <p class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] leading-snug">
-              Usted ejecuta la <span class="text-blue-600">capacitación</span>.<br />
-              Nosotros nos hacemos cargo de coordinar la <span class="text-cyan-500">certificación</span>.
-            </p>
-          </div>
-        </div>
-
-        {/* Fila 2: Features Uniformes */}
-        <div class="grid md:grid-cols-3 gap-8 relative z-10">
-          {/* Card 1 */}
-          <div class="scroll-fade-up opacity-0 translate-y-8 transition-all duration-1000 ease-out delay-[200ms]">
-            <div class="bg-[#0B1E40] p-10 rounded-[2rem] h-full flex flex-col items-start border border-[#163065] shadow-2xl shadow-blue-900/20 hover:-translate-y-2 transition-transform duration-300 group">
-              <div class="w-16 h-16 bg-[#163065] text-cyan-400 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-cyan-400 group-hover:text-[#0B1E40] transition-all duration-300">
-                <Layers size={32} />
-              </div>
-              <h4 class="font-bold text-2xl text-white mb-4">Procesos Claros</h4>
-              <p class="text-blue-100/80 leading-relaxed text-lg">Ejecución ordenada y oportuna, simplificando la gestión operativa para su OTEC.</p>
+        {/* HERO */}
+        <section id="inicio" class="relative min-h-[60vh] md:min-h-[65vh] flex items-center bg-[#050B14] overflow-hidden border-b border-white/10">
+            <div class="absolute inset-0">
+                <img src={HERO_IMG} alt="Charla de capacitación técnica" class="w-full h-full object-cover" />
             </div>
-          </div>
+            <div class="absolute inset-0 bg-[#0B1E40]/80"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#050B14] via-transparent to-[#050B14]/50"></div>
 
-          {/* Card 2 */}
-          <div class="scroll-fade-up opacity-0 translate-y-8 transition-all duration-1000 ease-out delay-[400ms]">
-            <div class="bg-[#0B1E40] p-10 rounded-[2rem] h-full flex flex-col items-start border border-[#163065] shadow-2xl shadow-blue-900/20 hover:-translate-y-2 transition-transform duration-300 group">
-              <div class="w-16 h-16 bg-[#163065] text-cyan-400 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-cyan-400 group-hover:text-[#0B1E40] transition-all duration-300">
-                <MapPin size={32} />
-              </div>
-              <h4 class="font-bold text-2xl text-white mb-4">Adaptabilidad</h4>
-              <p class="text-blue-100/80 leading-relaxed text-lg">Nos adaptamos a cada curso, programa y a las particularidades de cada territorio.</p>
-            </div>
-          </div>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 md:py-24">
+                <div class="flex flex-col items-center text-center max-w-4xl mx-auto">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#0B1E40] to-[#122b59] text-white shadow-xl mb-8 border border-white/10">
+                        <Handshake size={16} className="text-cyan-400" />
+                        <span class="text-xs font-bold uppercase tracking-widest">Servicios de certificación para OTEC</span>
+                    </div>
 
-          {/* Card 3 */}
-          <div class="scroll-fade-up opacity-0 translate-y-8 transition-all duration-1000 ease-out delay-[600ms]">
-            <div class="bg-[#0B1E40] p-10 rounded-[2rem] h-full flex flex-col items-start border border-[#163065] shadow-2xl shadow-blue-900/20 hover:-translate-y-2 transition-transform duration-300 group">
-              <div class="w-16 h-16 bg-[#163065] text-cyan-400 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-cyan-400 group-hover:text-[#0B1E40] transition-all duration-300">
-                <Handshake size={32} />
-              </div>
-              <h4 class="font-bold text-2xl text-white mb-4">Trabajo Conjunto</h4>
-              <p class="text-blue-100/80 leading-relaxed text-lg">Nos hacemos cargo de la certificación para que usted concentre su energía en capacitar.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-6 text-white">
+                        Un aliado <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-cyan-300">estratégico</span> para sus procesos de certificación
+                    </h1>
 
-      <script>
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.remove('opacity-0', 'translate-y-8');
-                    entry.target.classList.add('opacity-100', 'translate-y-0');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        });
-        
-        document.querySelectorAll('.scroll-fade-up').forEach(el => observer.observe(el));
-      </script>
+                    <p class="text-lg md:text-xl text-white/80 leading-relaxed font-medium max-w-3xl mb-8">
+                        Coordinamos y ejecutamos procesos de evaluación y certificación para participantes de programas de capacitación, adaptándonos a las necesidades, fechas y características de cada OTEC.
+                    </p>
 
-      <style>
-        @keyframes marqueeUp {
-          0% { transform: translateY(0%); }
-          100% { transform: translateY(-50%); }
-        }
-        @keyframes kenBurns {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.12); }
-        }
-      </style>
-    </section>
+                    <div class="w-full max-w-2xl border-l-4 border-cyan-400 bg-white/5 backdrop-blur-sm rounded-r-2xl px-6 py-5 mb-10 text-left">
+                        <p class="text-lg md:text-xl font-bold text-white leading-snug">
+                            Usted ejecuta la capacitación.<br />
+                            Nosotros nos hacemos cargo de coordinar el proceso de certificación.
+                        </p>
+                    </div>
 
-    {/* CÓMO FUNCIONA */}
-    <div id="proceso" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-      <div class="text-center mb-16 relative">
-        <div
-          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-100 rounded-full blur-[80px] -z-10"
-        >
-        </div>
-        <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6">
-          Un proceso coordinado de principio a fin
-        </h2>
-        <p class="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          Coordinamos cada proceso de acuerdo con las fechas y requerimientos
-          definidos, buscando que la certificación se integre de manera fluida a
-          su proceso de capacitación.
-        </p>
-      </div>
-
-      <div
-        class="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-[2rem] border border-slate-100 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)]"
-      >
-        <h3 class="text-2xl font-bold text-[#0B1E40] mb-8 text-center">
-          Nuestro trabajo considera:
-        </h3>
-
-        <div class="space-y-6">
-          <div class="flex gap-4">
-            <div
-              class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 mt-1"
-            >
-              <Layers size={20} />
-            </div>
-            <div>
-              <h4 class="font-bold text-lg text-slate-900">
-                Coordinación previa con el OTEC
-              </h4>
-            </div>
-          </div>
-          <div class="flex gap-4">
-            <div
-              class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 mt-1"
-            >
-              <CheckCircle2 size={20} />
-            </div>
-            <div>
-              <h4 class="font-bold text-lg text-slate-900">
-                Planificación de las fechas de evaluación
-              </h4>
-            </div>
-          </div>
-          <div class="flex gap-4">
-            <div
-              class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 mt-1"
-            >
-              <MapPin size={20} />
-            </div>
-            <div>
-              <h4 class="font-bold text-lg text-slate-900">
-                Ejecución de las evaluaciones en el lugar donde se desarrolla la
-                capacitación
-              </h4>
-            </div>
-          </div>
-          <div class="flex gap-4">
-            <div
-              class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 mt-1"
-            >
-              <FileCheck size={20} />
-            </div>
-            <div>
-              <h4 class="font-bold text-lg text-slate-900">
-                Entrega de información clara a los participantes candidatos a
-                certificación
-              </h4>
-            </div>
-          </div>
-          <div class="flex gap-4">
-            <div
-              class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 mt-1"
-            >
-              <Presentation size={20} />
-            </div>
-            <div>
-              <h4 class="font-bold text-lg text-slate-900">
-                Charlas informativas
-              </h4>
-              <p class="text-slate-600 mt-1 leading-relaxed">
-                Para que los participantes conozcan el proceso, comprendan sus
-                etapas y puedan resolver sus dudas antes de la evaluación.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {/* BENEFICIOS */}
-    <section id="beneficios" class="bg-white py-24 relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col lg:flex-row gap-16 items-center">
-          <div class="w-full lg:w-1/2">
-            <div
-              class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-bold tracking-widest uppercase mb-6"
-            >
-              <Handshake size={16} /> Aliado Estratégico
-            </div>
-            <h2
-              class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-8 leading-tight"
-            >
-              Entendemos sus <span class="text-blue-600"
-                >programas y territorios.</span
-              >
-            </h2>
-            <div class="space-y-6">
-              <div class="flex gap-5">
-                <div
-                  class="bg-blue-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-blue-600"
-                >
-                  <FileCheck size={24} />
+                    <div class="flex flex-col sm:flex-row items-center gap-4">
+                        <a href="#contacto" class="bg-gradient-to-r from-[#0B1E40] to-blue-900 hover:from-blue-900 hover:to-blue-700 text-white font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                            Solicitar cotización <ArrowRight size={18} />
+                        </a>
+                        <a href="#proceso" class="bg-white hover:bg-slate-50 text-[#0B1E40] font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+                            Conocer nuestro proceso <ArrowDown size={18} />
+                        </a>
+                    </div>
                 </div>
-                <div>
-                  <h4 class="font-bold text-xl text-slate-900 mb-3">
-                    Nos adaptamos a sus programas
-                  </h4>
-                  <p class="text-slate-600 leading-relaxed mb-3">
-                    Conocemos y comprendemos los procesos asociados a distintos
-                    programas de capacitación, entre ellos:
-                  </p>
-                  <ul class="grid sm:grid-cols-2 gap-2">
-                    {
-                      PROGRAMAS.map((p) => (
-                        <li class="flex items-start gap-2 text-sm text-slate-600">
-                          <CheckCircle2
-                            size={14}
-                            className="text-blue-500 mt-1 shrink-0"
-                          />{" "}
-                          {p}
-                        </li>
-                      ))
-                    }
-                  </ul>
-                </div>
-              </div>
-              <div class="flex gap-5">
-                <div
-                  class="bg-cyan-50 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-cyan-600"
-                >
-                  <Award size={24} />
-                </div>
-                <div>
-                  <h4 class="font-bold text-xl text-slate-900 mb-2">
-                    ¿Necesita certificar un perfil específico?
-                  </h4>
-                  <p class="text-slate-600 leading-relaxed">
-                    Si necesita certificar un perfil que no se encuentra dentro
-                    de nuestra oferta habitual, consúltenos. Analizaremos su
-                    requerimiento y las alternativas disponibles para gestionar
-                    el proceso que necesita.
-                  </p>
-                </div>
-              </div>
             </div>
-          </div>
+        </section>
 
-          <div class="w-full lg:w-1/2 relative">
-            <div
-              class="absolute inset-0 bg-gradient-to-br from-blue-600 to-cyan-400 rounded-3xl transform rotate-3 scale-105 opacity-20 blur-lg"
-            >
+        {/* NUESTRA PROPUESTA */}
+        <section id="servicio" class="bg-white py-24 border-b border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-bold tracking-widest uppercase mb-6">
+                        <Info size={16} /> Nuestra propuesta
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight">
+                        La certificación de sus participantes, <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#0B1E40] to-blue-800">coordinada de principio a fin</span>
+                    </h2>
+                    <p class="text-base md:text-lg text-slate-600">
+                        En WYLAR entendemos que la certificación es una etapa fundamental del proceso de capacitación de un OTEC. Por eso, ponemos nuestra experiencia a disposición para coordinar y ejecutar cada proceso de manera clara, ordenada y oportuna.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    {PROPUESTA.map((item) => (
+                        <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)] hover:-translate-y-1 hover:shadow-lg transition-all">
+                            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-5">
+                                <item.icon size={22} />
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
+                            <p class="text-slate-600 leading-relaxed text-[15px]">{item.text}</p>
+                        </div>
+                    ))}
+                </div>
             </div>
-            <img
-              src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop"
-              alt="Charla de capacitación técnica"
-              class="relative rounded-3xl shadow-2xl object-cover h-[500px] w-full"
+        </section>
+
+        {/* CÓMO TRABAJAMOS */}
+        <section id="proceso" class="bg-slate-50 py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-16 items-start">
+                    <div class="lg:sticky lg:top-28">
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-bold tracking-widest uppercase mb-6">
+                            <ClipboardList size={16} /> Cómo trabajamos
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight leading-tight">
+                            Nos hacemos cargo del proceso de certificación
+                        </h2>
+                        <p class="text-slate-600 leading-relaxed text-base md:text-lg">
+                            Coordinamos cada etapa de acuerdo con las fechas y requerimientos definidos por el OTEC, buscando que la certificación se integre de manera fluida al proceso de capacitación.
+                        </p>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] border border-slate-200 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)] p-3">
+                        {PROCESO.map((step, index) => (
+                            <div class={`flex gap-5 p-6 ${index < PROCESO.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                                <div class="w-11 h-11 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black text-sm shrink-0">
+                                    {String(index + 1).padStart(2, '0')}
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 mb-1.5">{step.title}</h3>
+                                    <p class="text-slate-600 text-[15px] leading-relaxed">{step.text}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* COBERTURA Y FLEXIBILIDAD */}
+        <section class="bg-white py-24 border-t border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col lg:flex-row gap-16 items-center">
+                    <div class="w-full lg:w-1/2">
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-100 text-cyan-700 text-sm font-bold tracking-widest uppercase mb-6">
+                            <MapPin size={16} /> Cobertura y flexibilidad
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 leading-tight">
+                            Su capacitación se realiza en distintas comunas. <span class="text-blue-600">Nosotros llegamos hasta donde se necesita.</span>
+                        </h2>
+                        <p class="text-slate-700 leading-relaxed text-base mb-8">
+                            Los OTEC desarrollan sus cursos en distintas comunas y regiones del país. Por eso, WYLAR se traslada al lugar donde se desarrolla la capacitación, facilitando la evaluación y certificación de los participantes.
+                        </p>
+                        <div class="space-y-5">
+                            {TERRITORIO.map((item) => (
+                                <div class="flex gap-4">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                        <CheckCircle2 size={16} />
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-900 text-[15px]">{item.title}</h4>
+                                        <p class="text-slate-500 text-sm">{item.text}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div class="w-full lg:w-1/2 relative">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-cyan-400 rounded-3xl transform rotate-3 scale-105 opacity-20 blur-lg"></div>
+                        <img src={HERO_IMG} alt="Certificación en terreno" class="relative rounded-3xl shadow-2xl object-cover h-[420px] w-full" />
+                        <div class="absolute -bottom-8 -left-8 bg-white p-6 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-4 max-w-xs">
+                            <div class="bg-blue-100 text-blue-600 p-3 rounded-full shrink-0"><CalendarClock size={22} /></div>
+                            <div>
+                                <div class="font-black text-base text-slate-900">Certificación en terreno</div>
+                                <div class="text-sm font-medium text-slate-500">Donde se desarrolla su capacitación</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {/* PROGRAMAS */}
+        <section id="programas" class="bg-slate-50 py-24 border-t border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-2xl mb-14">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-bold tracking-widest uppercase mb-6">
+                        <Lightbulb size={16} /> Experiencia
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight">
+                        Conocemos los procesos asociados a distintos programas de capacitación
+                    </h2>
+                    <p class="text-base md:text-lg text-slate-600">
+                        En WYLAR conocemos y comprendemos los procesos asociados a distintos programas de capacitación, entre ellos:
+                    </p>
+                </div>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    {PROGRAMAS.map((p) => (
+                        <div class="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col justify-between min-h-[170px] hover:border-blue-300 hover:shadow-md transition-all">
+                            <span class="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-3">Programa</span>
+                            <strong class="text-lg font-extrabold text-slate-900 leading-snug mb-2">{p.title}</strong>
+                            <span class="text-sm text-slate-500">{p.text}</span>
+                        </div>
+                    ))}
+                </div>
+
+                <p class="text-slate-500 text-[15px] mt-8 max-w-2xl">
+                    Cada programa tiene sus propias características. Por eso, revisamos cada requerimiento y coordinamos el proceso de acuerdo con sus necesidades.
+                </p>
+            </div>
+        </section>
+
+        {/* CATÁLOGO DE PERFILES */}
+        <div id="perfiles">
+            <CatalogoPerfiles
+                client:load
+                perfiles={perfiles}
+                title="Perfiles que podemos certificar"
+                subtitle="Conozca algunos de los perfiles disponibles para los participantes de sus cursos y programas de capacitación."
             />
-            <div
-              class="absolute -bottom-8 -left-8 bg-white p-6 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-4"
-            >
-              <div class="bg-green-100 text-green-600 p-3 rounded-full">
-                <MapPin size={24} />
-              </div>
-              <div>
-                <div class="font-black text-xl text-slate-900">En Terreno</div>
-                <div class="text-sm font-medium text-slate-500">
-                  Donde se dicte su curso
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
-    </section>
+        <div class="bg-slate-50/50 border-t border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 -mt-8">
+                <div class="bg-white border border-slate-200 rounded-2xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+                    <div>
+                        <h3 class="text-xl font-extrabold text-slate-900 mb-1.5 flex items-center gap-2"><MessageCircleQuestion size={20} className="text-blue-600" /> ¿Necesita certificar otro perfil?</h3>
+                        <p class="text-slate-600 text-[15px]">Si el perfil que necesita no se encuentra dentro de nuestra oferta habitual, consúltenos.</p>
+                    </div>
+                    <a href="#contacto" data-open-form class="shrink-0 inline-flex items-center gap-2 bg-gradient-to-r from-[#0B1E40] to-blue-900 hover:from-blue-900 hover:to-blue-700 text-white font-bold text-sm px-6 py-3.5 rounded-xl transition-all shadow-lg">
+                        Consultar por un perfil <ArrowRight size={16} />
+                    </a>
+                </div>
+            </div>
+        </div>
 
-    {/* CATÁLOGO DE PERFILES */}
-    <div id="perfiles">
-      <CatalogoPerfiles
-        client:load
-        perfiles={perfiles}
-        title="Perfiles para sus Participantes"
-        subtitle="Estas son las certificaciones que puede coordinar para los participantes de sus cursos y programas."
-      />
+        {/* ORIENTACIÓN A PARTICIPANTES */}
+        <section class="bg-[#0B1E40] py-24 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-[100px]"></div>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+                <div class="max-w-2xl mb-14">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-cyan-300 text-sm font-bold tracking-widest uppercase mb-6 border border-white/10">
+                        <PresentationIcon size={16} /> Orientación a participantes
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-5 tracking-tight">
+                        Antes de evaluar, sus participantes conocen el proceso
+                    </h2>
+                    <p class="text-blue-100/85 text-base md:text-lg leading-relaxed">
+                        También realizamos charlas informativas para que los participantes conozcan el proceso de certificación, comprendan sus etapas y puedan resolver sus dudas antes de la evaluación.
+                    </p>
+                </div>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    {ORIENTACION.map((item) => (
+                        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 flex items-center justify-center mb-4">
+                                <HelpCircle size={18} />
+                            </div>
+                            <h4 class="font-bold text-white text-[15px] mb-1.5">{item.title}</h4>
+                            <p class="text-blue-100/70 text-sm leading-relaxed">{item.text}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        {/* FORMULARIO */}
+        <ContactForm
+            client:idle
+            title="Conversemos sobre su proceso de certificación"
+            subtitle="Cuéntenos sobre su curso, programa o perfil y revisemos juntos las alternativas disponibles. Estamos disponibles para analizar su requerimiento y preparar una propuesta de acuerdo con las necesidades de su OTEC."
+            preselectedContext="otec"
+        />
     </div>
-
-    {/* FORMULARIO */}
-    <ContactForm
-      client:idle
-      title="Queremos Apoyar su Proceso"
-      subtitle="Cuéntenos sus necesidades puntuales y busquemos juntos la mejor forma de llevar adelante su proceso de certificación. ¿Tiene un curso que necesita certificar? Solicite una cotización."
-      preselectedContext="otec"
-    />
-  </div>
 </Layout>

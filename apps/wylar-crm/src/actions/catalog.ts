@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/auth';
+import { triggerSitePublish } from './publish';
 import { profileSchema, type ProfileInput } from '@/lib/validation';
 
 export interface CatalogFormState {
@@ -93,6 +94,8 @@ export async function saveProfile(input: ProfileInput, profileId?: number | null
     });
 
     revalidatePath('/catalogo');
+    // Trigger site publish automatically upon saving
+    await triggerSitePublish().catch(console.error);
     return { success: profileId ? 'Perfil actualizado.' : 'Perfil creado.' };
 }
 
@@ -100,5 +103,7 @@ export async function deleteProfile(profileId: number): Promise<CatalogFormState
     await requireUser();
     await prisma.profile.delete({ where: { id: profileId } });
     revalidatePath('/catalogo');
+    // Trigger site publish automatically upon deleting
+    await triggerSitePublish().catch(console.error);
     return { success: 'Perfil eliminado.' };
 }

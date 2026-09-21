@@ -6,18 +6,14 @@
 // wylar.cl" en /catalogo del CRM, que dispara justamente ese redeploy).
 const CRM_ORIGIN = import.meta.env.PUBLIC_CRM_ORIGIN || 'https://wylar-crm.vercel.app';
 
-let cachedProfiles = null;
-
 async function fetchCatalog() {
-    if (cachedProfiles) return cachedProfiles;
-    const res = await fetch(`${CRM_ORIGIN}/api/public/catalog`);
+    const res = await fetch(`${CRM_ORIGIN}/api/public/catalog`, { next: { revalidate: 0 }, cache: 'no-store' });
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || 'No se pudo cargar el catálogo del CRM.');
-    cachedProfiles = data.profiles;
-    return cachedProfiles;
+    return data.profiles;
 }
 
-const TYPE_FROM_TEMPLATE = { CHILEVALORA: 'chilevalora', SOLDADURA: 'soldadura', OPERADORES: 'operadores' };
+const TYPE_FROM_TEMPLATE = { CHILEVALORA: 'chilevalora', SOLDADURA: 'soldadura', OPERADORES: 'operadores', ESTANDAR: 'estandar' };
 
 function commonFields(p) {
     return {
@@ -49,6 +45,22 @@ function detailFields(p) {
     const byKey = Object.fromEntries(p.sections.map((s) => [s.key, s]));
     const texts = (key) => (byKey[key]?.items ?? []).map((i) => i.text);
     const faq = p.faq;
+
+    if (p.templateType === 'ESTANDAR') {
+        // Cada bloque es un único texto en HTML (viene del editor de texto
+        // enriquecido del CRM) — FichaEstandar.astro lo renderiza tal cual
+        // con set:html, sin listas/tarjetas intermedias.
+        return {
+            descriptionLong: byKey.descriptionLong?.text ?? '',
+            requisitos: byKey.requisitos?.text ?? '',
+            queEs: byKey.queEs?.text ?? '',
+            quienesPueden: byKey.quienesPueden?.text ?? '',
+            queSeEvalua: byKey.queSeEvalua?.text ?? '',
+            proceso: byKey.proceso?.text ?? '',
+            porQueCertificar: byKey.porQueCertificar?.text ?? '',
+            faq,
+        };
+    }
 
     if (p.templateType === 'SOLDADURA') {
         return {

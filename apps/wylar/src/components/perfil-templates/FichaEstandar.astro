@@ -1,0 +1,165 @@
+---
+import { ShieldCheck, BookOpen, Star, Activity, Briefcase, Handshake } from 'lucide-react';
+import HeroFicha from './HeroFicha.astro';
+import Breadcrumb from './Breadcrumb.astro';
+import SidebarForm from './SidebarForm.astro';
+import FaqAccordion from './FaqAccordion.astro';
+import MobileCtaBar from './MobileCtaBar.astro';
+import ContactModal from './ContactModal.astro';
+
+const { perfil } = Astro.props;
+const HeroIcon = Star;
+const proseClasses = "prose prose-slate max-w-none prose-headings:font-extrabold prose-h3:text-2xl prose-h3:text-slate-900 prose-p:text-slate-700 prose-p:leading-relaxed prose-a:font-bold prose-a:text-blue-600 prose-li:text-slate-700 prose-ul:list-disc prose-ul:pl-5 prose-ol:list-decimal prose-ol:pl-5 prose-ul:my-3 prose-li:my-1.5 bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm";
+---
+
+<div class="bg-slate-50 min-h-screen pb-24 lg:pb-0">
+
+    <HeroFicha perfil={perfil} badgeLabel={perfil.isChileValora ? "Certificación ChileValora" : "Certificación Wylar"} ctaLabel={perfil.heroCta || 'Ver más'} ctaIcon={HeroIcon}>
+        <ShieldCheck slot="badge-icon" size={14} className="text-cyan-400" />
+    </HeroFicha>
+
+    <Breadcrumb title={perfil.title} />
+
+    <div id="contenido-perfil" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-24">
+        <div class="grid lg:grid-cols-3 gap-12">
+            <div class="lg:col-span-2 space-y-12 sm:space-y-16">
+
+                {/* Introducción / Descripción Larga */}
+                {perfil.descriptionLong && (
+                    <section class={proseClasses}>
+                        <div set:html={perfil.descriptionLong} />
+                    </section>
+                )}
+
+                {/* Requisitos */}
+                {perfil.requisitos && (
+                    <section class={proseClasses}>
+                        <h2 class="text-2xl font-extrabold text-slate-900 mb-4 not-prose flex items-center gap-2">
+                            <BookOpen size={24} className="text-blue-600" /> Requisitos
+                        </h2>
+                        <div set:html={perfil.requisitos} />
+                    </section>
+                )}
+
+                {/* Qué es */}
+                {perfil.queEs && (
+                    <section class={proseClasses}>
+                        <h2 class="text-2xl font-extrabold text-slate-900 mb-4 not-prose">¿Qué es esta certificación?</h2>
+                        <div set:html={perfil.queEs} />
+                    </section>
+                )}
+
+                {/* Quiénes Pueden */}
+                {perfil.quienesPueden && (
+                    <section class={proseClasses}>
+                        <h2 class="text-2xl font-extrabold text-slate-900 mb-4 not-prose">¿Quiénes pueden certificarse?</h2>
+                        <div set:html={perfil.quienesPueden} />
+                    </section>
+                )}
+
+                {/* Qué se evalúa */}
+                {perfil.queSeEvalua && (
+                    <section class={proseClasses}>
+                        <h2 class="text-2xl font-extrabold text-slate-900 mb-4 not-prose flex items-center gap-2">
+                            <Activity size={24} className="text-blue-600" /> ¿Qué se evalúa?
+                        </h2>
+                        <div set:html={perfil.queSeEvalua} />
+                    </section>
+                )}
+
+                {/* Proceso */}
+                {perfil.proceso && (
+                    <section class={`${proseClasses} proceso-styled`}>
+                        <h2 class="text-2xl font-extrabold text-slate-900 mb-6 not-prose">¿Cómo es el proceso?</h2>
+                        <div set:html={perfil.proceso} />
+                    </section>
+                )}
+
+                {/* Por qué certificar */}
+                {perfil.porQueCertificar && (
+                    <section class={proseClasses}>
+                        <h2 class="text-2xl font-extrabold text-slate-900 mb-4 not-prose flex items-center gap-2">
+                            <Briefcase size={24} className="text-blue-600" /> ¿Por qué certificar tus competencias?
+                        </h2>
+                        <div set:html={perfil.porQueCertificar} />
+                    </section>
+                )}
+
+                {/* FAQ */}
+                {perfil.faq && perfil.faq.length > 0 && (
+                    <section>
+                        <h2 class="text-2xl font-extrabold text-slate-900 mb-6">Preguntas frecuentes</h2>
+                        <FaqAccordion faq={perfil.faq} />
+                    </section>
+                )}
+
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="lg:sticky lg:top-28">
+                    <SidebarForm icon={Handshake} title="Solicitar Evaluación" ctaLabel="Cotizar este perfil" certificationInterest={perfil.title} />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <MobileCtaBar icon={Handshake} label={perfil.heroCta || 'Cotizar'} />
+    <ContactModal title="Solicitar Evaluación" ctaLabel="Enviar solicitud" certificationInterest={perfil.title} />
+
+</div>
+
+<style is:global>
+    /* Estilos Premium para la sección de Proceso (Timeline) */
+    .proceso-styled ol,
+    .proceso-styled ul {
+        list-style: none !important;
+        counter-reset: step-counter;
+        padding-left: 0 !important;
+        margin-left: 0.75rem !important;
+        border-left: 3px solid #e2e8f0;
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .proceso-styled li {
+        position: relative;
+        counter-increment: step-counter;
+        padding-left: 2.5rem !important;
+        margin-bottom: 2rem !important;
+        padding-top: 0.25rem;
+    }
+
+    .proceso-styled li:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    .proceso-styled li::before {
+        content: counter(step-counter);
+        position: absolute;
+        left: -1.1rem; /* Centrado exacto sobre el borde de 3px */
+        top: 0;
+        width: 2rem;
+        height: 2rem;
+        background: linear-gradient(135deg, #0ea5e9, #2563eb);
+        color: white;
+        font-weight: 800;
+        font-size: 0.9rem;
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid white;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        z-index: 10;
+    }
+
+    .proceso-styled p {
+        margin-top: 0.25rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .proceso-styled strong {
+        color: #0f172a;
+        font-size: 1.05rem;
+    }
+</style>

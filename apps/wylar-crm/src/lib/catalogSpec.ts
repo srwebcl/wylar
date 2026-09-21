@@ -9,6 +9,7 @@
 // distinto hardcodeado por cada uno de los ~20 bloques de contenido.
 
 export const PROFILE_TEMPLATE_TYPES = [
+    { value: 'ESTANDAR', label: 'Estándar (formulario paso a paso, recomendado)' },
     { value: 'CHILEVALORA', label: 'ChileValora (certificación de competencias)' },
     { value: 'SOLDADURA', label: 'Soldadura (calificación técnica)' },
     { value: 'OPERADORES', label: 'Operadores (certificación privada)' },
@@ -48,7 +49,22 @@ export interface ProfileSectionSpec {
     itemLabel?: string;
 }
 
+// Plantilla ESTANDAR: 6 bloques de texto enriquecido (HTML del editor),
+// sin ítems/tarjetas — es la que arma ProfileWizard.tsx paso a paso. El
+// FAQ sigue siendo la tabla ProfileFaq de siempre.
+export const ESTANDAR_SECTION_KEYS = ['requisitos', 'queEs', 'quienesPueden', 'queSeEvalua', 'proceso', 'porQueCertificar'] as const;
+
+export const ESTANDAR_SECTION_LABELS: Record<(typeof ESTANDAR_SECTION_KEYS)[number], { step: string; label: string; helper: string }> = {
+    requisitos: { step: 'Requisitos', label: 'Requisitos (Esto no es un curso)', helper: 'Deja claro que es un proceso de evaluación, no una capacitación, y qué experiencia sirve para acceder.' },
+    queEs: { step: '¿Qué es?', label: '¿Qué es esta certificación?', helper: 'Explica en qué consiste el proceso y qué reconoce oficialmente.' },
+    quienesPueden: { step: '¿Quiénes pueden?', label: '¿Quiénes pueden certificarse?', helper: 'Describe el perfil de personas a las que está dirigida esta certificación.' },
+    queSeEvalua: { step: '¿Qué se evalúa?', label: '¿Qué se evalúa?', helper: 'Detalla las competencias, conocimientos o habilidades que se evalúan durante el proceso.' },
+    proceso: { step: 'El proceso', label: '¿Cómo es el proceso?', helper: 'Describe, en el orden que prefieras, las etapas desde que alguien se contacta hasta que recibe su certificación.' },
+    porQueCertificar: { step: '¿Por qué?', label: '¿Por qué certificar tus competencias?', helper: 'Los beneficios de certificarse: empleabilidad, respaldo formal, nuevas oportunidades, etc.' },
+};
+
 export const PROFILE_SECTION_SPECS: Record<ProfileTemplateType, ProfileSectionSpec[]> = {
+    ESTANDAR: ESTANDAR_SECTION_KEYS.map((key) => ({ key, label: ESTANDAR_SECTION_LABELS[key].label, hasText: true, itemShape: 'none' as const })),
     CHILEVALORA: [
         { key: 'importante', label: 'Aviso "No es un curso"', hasText: true, hasIntro: true, hasClosing: true, itemShape: 'text', itemLabel: 'Forma en que se pudo aprender el oficio' },
         { key: 'quienesPueden', label: 'Quiénes pueden certificarse', hasIntro: true, hasClosing: true, itemShape: 'text', itemLabel: 'Viñeta' },

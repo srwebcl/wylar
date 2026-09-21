@@ -40,8 +40,8 @@ export default function Header({ currentPath = '/' }) {
                         <a href="mailto:contacto@wylar.cl" className="flex items-center gap-2 hover:text-cyan-400 transition-colors">
                             <Mail size={14} className="text-cyan-500" /> contacto@wylar.cl
                         </a>
-                        <a href="tel:+56912345678" className="flex items-center gap-2 hover:text-cyan-400 transition-colors">
-                            <Phone size={14} className="text-cyan-500" /> +56 9 1234 5678
+                        <a href="tel:+56929566326" className="flex items-center gap-2 hover:text-cyan-400 transition-colors">
+                            <Phone size={14} className="text-cyan-500" /> +56 9 2956 6326
                         </a>
                     </div>
                 </div>

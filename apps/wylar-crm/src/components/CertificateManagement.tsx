@@ -51,6 +51,7 @@ export function CertificateManagement({ profiles, closedLeads, certificates }: {
     const [certificationTitle, setCertificationTitle] = useState('');
     const [categoryLabel, setCategoryLabel] = useState('');
     const [issueDate, setIssueDate] = useState(todayIso());
+    const [expiryMode, setExpiryMode] = useState<string>('indefinida');
     const [expiryDate, setExpiryDate] = useState('');
     const [leadId, setLeadId] = useState<string>('');
 
@@ -78,6 +79,7 @@ export function CertificateManagement({ profiles, closedLeads, certificates }: {
         setCertificationTitle('');
         setCategoryLabel('');
         setIssueDate(todayIso());
+        setExpiryMode('indefinida');
         setExpiryDate('');
         setLeadId('');
     }
@@ -88,6 +90,20 @@ export function CertificateManagement({ profiles, closedLeads, certificates }: {
         setSuccess(null);
 
         startTransition(async () => {
+            let computedExpiryDate = null;
+            if (expiryMode === 'personalizada') {
+                computedExpiryDate = expiryDate ? new Date(expiryDate) : null;
+            } else if (expiryMode === '1') {
+                computedExpiryDate = new Date(issueDate);
+                computedExpiryDate.setFullYear(computedExpiryDate.getFullYear() + 1);
+            } else if (expiryMode === '2') {
+                computedExpiryDate = new Date(issueDate);
+                computedExpiryDate.setFullYear(computedExpiryDate.getFullYear() + 2);
+            } else if (expiryMode === '3') {
+                computedExpiryDate = new Date(issueDate);
+                computedExpiryDate.setFullYear(computedExpiryDate.getFullYear() + 3);
+            }
+            
             const result = await issueCertificate({
                 holderName,
                 holderRut,
@@ -95,7 +111,7 @@ export function CertificateManagement({ profiles, closedLeads, certificates }: {
                 certificationTitle,
                 categoryLabel,
                 issueDate: new Date(issueDate),
-                expiryDate: expiryDate ? new Date(expiryDate) : null,
+                expiryDate: computedExpiryDate,
                 leadId: leadId ? Number(leadId) : null,
             });
             if (result.error) {
@@ -158,8 +174,19 @@ export function CertificateManagement({ profiles, closedLeads, certificates }: {
                     <Field label="Fecha de emisión">
                         <input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className={inputClass} required />
                     </Field>
-                    <Field label="Fecha de vencimiento (opcional)">
-                        <input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} className={inputClass} />
+                    <Field label="Vigencia">
+                        <div className="flex flex-col gap-2">
+                            <select value={expiryMode} onChange={(e) => setExpiryMode(e.target.value)} className={inputClass}>
+                                <option value="indefinida">Indefinida (Sin vencimiento)</option>
+                                <option value="1">1 Año</option>
+                                <option value="2">2 Años</option>
+                                <option value="3">3 Años</option>
+                                <option value="personalizada">Personalizada...</option>
+                            </select>
+                            {expiryMode === 'personalizada' && (
+                                <input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} className={inputClass} required />
+                            )}
+                        </div>
                     </Field>
                 </div>
 
