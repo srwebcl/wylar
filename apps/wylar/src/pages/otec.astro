@@ -31,11 +31,11 @@ const PROPUESTA = [
 ];
 
 const PROCESO = [
-  { icon: ClipboardList, title: "Coordinación previa con el OTEC", text: "Revisamos las características del curso, participantes, fechas y requerimientos del proceso." },
-  { icon: CalendarClock, title: "Planificación de las evaluaciones", text: "Coordinamos fechas, horarios y condiciones necesarias para desarrollar las evaluaciones." },
-  { icon: MapPin, title: "Evaluación en terreno", text: "Nos trasladamos al lugar donde se desarrolla la capacitación para ejecutar las evaluaciones correspondientes." },
-  { icon: PresentationIcon, title: "Orientación a los participantes", text: "Entregamos información clara sobre el proceso, sus etapas y los aspectos que deben considerar." },
-  { icon: CheckCircle2, title: "Seguimiento", text: "Mantenemos la coordinación con el OTEC para facilitar el desarrollo ordenado de cada etapa." },
+  { icon: ClipboardList, title: "Coordinación previa con el OTEC", text: "Revisamos las características del curso, participantes, fechas y requerimientos del proceso.", accent: "from-[#0B1E40] to-blue-700" },
+  { icon: CalendarClock, title: "Planificación de las evaluaciones", text: "Coordinamos fechas, horarios y condiciones necesarias para desarrollar las evaluaciones.", accent: "from-blue-700 to-blue-600" },
+  { icon: MapPin, title: "Evaluación en terreno", text: "Nos trasladamos al lugar donde se desarrolla la capacitación para ejecutar las evaluaciones correspondientes.", accent: "from-blue-600 to-cyan-600" },
+  { icon: PresentationIcon, title: "Orientación a los participantes", text: "Entregamos información clara sobre el proceso, sus etapas y los aspectos que deben considerar.", accent: "from-cyan-600 to-cyan-500" },
+  { icon: CheckCircle2, title: "Seguimiento", text: "Mantenemos la coordinación con el OTEC para facilitar el desarrollo ordenado de cada etapa.", accent: "from-cyan-500 to-emerald-500" },
 ];
 
 const TERRITORIO = [
@@ -160,24 +160,25 @@ const perfiles = await getCatalogList();
                         </p>
                     </div>
 
-                    <div class="bg-white rounded-[2rem] border border-slate-200 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)] p-3">
-                        {PROCESO.map((step, index) => (
-                            <div class={`relative flex gap-5 p-6 ${index < PROCESO.length - 1 ? 'border-b border-slate-100' : ''}`}>
-                                {index < PROCESO.length - 1 && (
-                                    <div class="absolute left-[2.85rem] top-[4.25rem] bottom-0 w-px bg-gradient-to-b from-blue-200 to-transparent"></div>
-                                )}
-                                <div class="relative w-11 h-11 rounded-full bg-gradient-to-br from-[#0B1E40] to-blue-700 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-900/20">
-                                    <step.icon size={18} />
-                                    <span class="absolute -bottom-1.5 -right-1.5 w-5 h-5 rounded-full bg-amber-400 text-[#0B1E40] text-[10px] font-black flex items-center justify-center ring-2 ring-white">
+                    <div class="relative">
+                        <div class="hidden sm:block absolute left-[3.75rem] top-10 bottom-10 w-px bg-gradient-to-b from-blue-300 via-cyan-400 to-emerald-400"></div>
+                        <div class="space-y-5">
+                            {PROCESO.map((step, index) => (
+                                <div class="group relative flex gap-5 items-start bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-18px_rgba(11,30,64,0.25)] hover:shadow-[0_20px_40px_-18px_rgba(11,30,64,0.25)] hover:-translate-y-0.5 transition-all p-6 pl-7 overflow-hidden">
+                                    <div class={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${step.accent}`}></div>
+                                    <span class="absolute right-4 bottom-1 text-6xl font-black text-slate-50 group-hover:text-blue-50 transition-colors select-none leading-none">
                                         {index + 1}
                                     </span>
+                                    <div class={`relative z-10 w-14 h-14 rounded-2xl bg-gradient-to-br ${step.accent} text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-900/20`}>
+                                        <step.icon size={22} />
+                                    </div>
+                                    <div class="relative z-10 pt-1.5">
+                                        <h3 class="font-bold text-slate-900 mb-1.5">{step.title}</h3>
+                                        <p class="text-slate-600 text-[15px] leading-relaxed">{step.text}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 class="font-bold text-slate-900 mb-1.5">{step.title}</h3>
-                                    <p class="text-slate-600 text-[15px] leading-relaxed">{step.text}</p>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -197,11 +198,11 @@ const perfiles = await getCatalogList();
                         <p class="text-slate-700 leading-relaxed text-base mb-8">
                             Los OTEC desarrollan sus cursos en distintas comunas y regiones del país. Por eso, WYLAR se traslada al lugar donde se desarrolla la capacitación, facilitando la evaluación y certificación de los participantes.
                         </p>
-                        <div class="space-y-5">
+                        <div class="space-y-3.5">
                             {TERRITORIO.map((item) => (
-                                <div class="flex gap-4">
-                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                                        <CheckCircle2 size={16} />
+                                <div class="group flex gap-4 bg-white border border-slate-200 rounded-2xl p-4 hover:border-emerald-300 hover:shadow-[0_10px_30px_-18px_rgba(16,185,129,0.4)] transition-all">
+                                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                        <CheckCircle2 size={18} />
                                     </div>
                                     <div>
                                         <h4 class="font-bold text-slate-900 text-[15px]">{item.title}</h4>
@@ -213,8 +214,12 @@ const perfiles = await getCatalogList();
                     </div>
 
                     <div class="w-full lg:w-1/2 relative">
+                        <div class="absolute -inset-8 opacity-40 pointer-events-none" style="background-image: radial-gradient(circle, #93c5fd 1.5px, transparent 1.5px); background-size: 20px 20px;"></div>
                         <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-cyan-400 rounded-[2rem] transform rotate-3 scale-105 opacity-20 blur-lg"></div>
                         <img src={HERO_IMG} alt="Certificación en terreno" class="relative rounded-[2rem] shadow-2xl object-cover h-[420px] w-full ring-1 ring-black/5" />
+                        <div class="hidden md:block absolute -top-7 -right-7 w-28 h-28 rounded-2xl overflow-hidden shadow-xl ring-4 ring-white rotate-6">
+                            <img src={HERO_IMG} alt="" class="w-full h-full object-cover scale-150" />
+                        </div>
                         <div class="absolute -bottom-8 -left-8 bg-white p-6 rounded-2xl shadow-2xl shadow-blue-900/10 border border-slate-100 flex items-center gap-4 max-w-xs">
                             <div class="bg-gradient-to-br from-blue-600 to-[#0B1E40] text-white p-3 rounded-xl shrink-0 shadow-md shadow-blue-900/30"><CalendarClock size={22} /></div>
                             <div>
@@ -242,17 +247,20 @@ const perfiles = await getCatalogList();
                     </p>
                 </div>
 
-                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    {PROGRAMAS.map((p) => (
-                        <div class="group bg-white border border-slate-200 rounded-2xl p-6 flex flex-col justify-between min-h-[190px] hover:border-blue-300 hover:-translate-y-1 hover:shadow-lg transition-all">
-                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-[#0B1E40] group-hover:text-cyan-300 transition-colors">
-                                <p.icon size={18} />
+                <div class="bg-white border border-slate-200 rounded-[2rem] shadow-[0_10px_40px_-18px_rgba(11,30,64,0.15)] overflow-hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y divide-slate-100 sm:divide-y-0 sm:divide-x">
+                        {PROGRAMAS.map((p, index) => (
+                            <div class="group relative p-7 min-h-[210px] flex flex-col hover:bg-gradient-to-b hover:from-blue-50/60 hover:to-transparent transition-colors">
+                                <span class="absolute top-6 right-7 text-xs font-black text-slate-200 group-hover:text-blue-300 transition-colors">{String(index + 1).padStart(2, '0')}</span>
+                                <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 group-hover:bg-[#0B1E40] group-hover:text-cyan-300 transition-colors">
+                                    <p.icon size={20} />
+                                </div>
+                                <span class="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">Programa</span>
+                                <strong class="text-lg font-extrabold text-slate-900 leading-snug mb-2">{p.title}</strong>
+                                <span class="text-sm text-slate-500">{p.text}</span>
                             </div>
-                            <span class="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">Programa</span>
-                            <strong class="text-lg font-extrabold text-slate-900 leading-snug mb-2">{p.title}</strong>
-                            <span class="text-sm text-slate-500">{p.text}</span>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
 
                 <p class="text-slate-500 text-[15px] mt-8 max-w-2xl">
@@ -307,13 +315,17 @@ const perfiles = await getCatalogList();
                 </div>
 
                 <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    {ORIENTACION.map((item) => (
-                        <div class="group bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm hover:bg-white/[0.08] hover:border-cyan-400/30 transition-all">
-                            <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 flex items-center justify-center mb-4 group-hover:bg-cyan-400/25 transition-colors">
+                    {ORIENTACION.map((item, index) => (
+                        <div class="group relative bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm hover:bg-white/[0.08] hover:border-cyan-400/30 hover:-translate-y-1 transition-all overflow-hidden">
+                            <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-400 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></div>
+                            <span class="absolute right-3 bottom-1 text-5xl font-black text-white/[0.05] group-hover:text-white/[0.08] transition-colors select-none leading-none">
+                                {index + 1}
+                            </span>
+                            <div class="relative w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 flex items-center justify-center mb-4 group-hover:bg-cyan-400/25 transition-colors">
                                 <item.icon size={18} />
                             </div>
-                            <h4 class="font-bold text-white text-[15px] mb-1.5">{item.title}</h4>
-                            <p class="text-blue-100/70 text-sm leading-relaxed">{item.text}</p>
+                            <h4 class="relative font-bold text-white text-[15px] mb-1.5">{item.title}</h4>
+                            <p class="relative text-blue-100/70 text-sm leading-relaxed">{item.text}</p>
                         </div>
                     ))}
                 </div>
