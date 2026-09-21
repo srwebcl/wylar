@@ -46,10 +46,10 @@ const FRANQUICIA_REQUISITOS = [
 ];
 
 const FRANQUICIA_ALTERNATIVAS = [
-  { icon: Landmark, title: 'Franquicia Tributaria', text: 'Puede financiar procesos de evaluación y certificación si cumple los requisitos establecidos.', accent: 'from-cyan-400 to-blue-500' },
-  { icon: FileSignature, title: 'Precontrato', text: 'Contempla alternativas para personas que no son actualmente trabajadoras, bajo las condiciones establecidas por SENCE.', accent: 'from-blue-500 to-blue-700' },
-  { icon: FileCheck, title: 'Postcontrato', text: 'También contempla esta alternativa bajo las condiciones establecidas por SENCE.', accent: 'from-blue-700 to-blue-900' },
-  { icon: Wallet, title: 'Recursos propios', text: 'También puede realizar el proceso directamente, sin utilizar la Franquicia Tributaria.', accent: 'from-blue-900 to-[#0B1E40]' },
+  { icon: Landmark, title: 'Franquicia Tributaria', text: 'Puede financiar procesos de evaluación y certificación si cumple los requisitos establecidos.' },
+  { icon: FileSignature, title: 'Precontrato', text: 'Contempla alternativas para personas que no son actualmente trabajadoras, bajo las condiciones establecidas por SENCE.' },
+  { icon: FileCheck, title: 'Postcontrato', text: 'También contempla esta alternativa bajo las condiciones establecidas por SENCE.' },
+  { icon: Wallet, title: 'Recursos propios', text: 'También puede realizar el proceso directamente, sin utilizar la Franquicia Tributaria.' },
 ];
 
 const COBERTURA_FEATURES = [
@@ -167,53 +167,45 @@ const perfiles = await getCatalogList();
         {/* FRANQUICIA TRIBUTARIA SENCE */}
         <section id="franquicia" class="bg-slate-50 py-24">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-16 items-start">
-                    <div class="lg:sticky lg:top-32 bg-white rounded-[2rem] border border-slate-200 shadow-[0_20px_50px_-25px_rgba(11,30,64,0.3)] p-8 md:p-10 overflow-hidden relative">
-                        <div class="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-cyan-400/10 to-blue-600/10 rounded-full blur-2xl"></div>
-                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-bold tracking-widest uppercase mb-6">
-                            <Landmark size={16} /> Franquicia Tributaria SENCE
-                        </div>
-                        <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight leading-tight">
-                            ¿Puede utilizar la Franquicia Tributaria para certificar?
-                        </h2>
-                        <p class="text-slate-600 leading-relaxed text-base md:text-lg mb-8">
-                            Si su empresa cumple con los requisitos establecidos por SENCE, puede utilizar la Franquicia Tributaria para financiar procesos de Evaluación y Certificación de Competencias Laborales.
-                        </p>
-                        <div class="space-y-3">
-                            {FRANQUICIA_REQUISITOS.map((item) => (
-                                <div class="group flex gap-3.5 bg-slate-50 border border-slate-200 rounded-xl p-3.5 hover:border-emerald-300 hover:bg-white transition-all">
-                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                                        <CheckCircle2 size={16} />
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-slate-900 text-[13px]">{item.title}</h4>
-                                        <p class="text-slate-500 text-xs leading-relaxed">{item.text}</p>
-                                    </div>
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-bold tracking-widest uppercase mb-6">
+                        <Landmark size={16} /> Franquicia Tributaria SENCE
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight">
+                        ¿Puede utilizar la <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#0B1E40] to-blue-800">Franquicia Tributaria para certificar?</span>
+                    </h2>
+                    <p class="text-base md:text-lg text-slate-600">
+                        Si su empresa cumple con los requisitos establecidos por SENCE, puede utilizar la Franquicia Tributaria para financiar procesos de Evaluación y Certificación de Competencias Laborales.
+                    </p>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-8 items-stretch">
+                    <div class="bg-white rounded-[2rem] border border-slate-200 shadow-[0_20px_50px_-25px_rgba(11,30,64,0.25)] p-8 md:p-10 divide-y divide-slate-100">
+                        {FRANQUICIA_REQUISITOS.map((item) => (
+                            <div class="group flex gap-5 items-start py-5 first:pt-0 last:pb-0">
+                                <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                    <CheckCircle2 size={20} />
                                 </div>
-                            ))}
-                        </div>
-                        <div class="h-1 w-16 rounded-full bg-gradient-to-r from-cyan-400 to-[#0B1E40] mt-8"></div>
+                                <div class="pt-1">
+                                    <h4 class="font-bold text-slate-900 text-base mb-1">{item.title}</h4>
+                                    <p class="text-slate-500 text-sm leading-relaxed">{item.text}</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
 
-                    <div class="relative">
-                        <div class="hidden sm:block absolute left-[3.75rem] top-10 bottom-10 w-px bg-gradient-to-b from-cyan-400 via-blue-600 to-[#0B1E40]"></div>
-                        <div class="space-y-5">
-                            {FRANQUICIA_ALTERNATIVAS.map((step, index) => (
-                                <div class="group relative flex gap-5 items-start bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-18px_rgba(11,30,64,0.25)] hover:shadow-[0_20px_40px_-18px_rgba(11,30,64,0.25)] hover:-translate-y-0.5 transition-all p-6 pl-7 overflow-hidden">
-                                    <div class={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${step.accent}`}></div>
-                                    <span class="absolute right-4 bottom-1 text-6xl font-black text-slate-50 group-hover:text-blue-50 transition-colors select-none leading-none">
-                                        {index + 1}
-                                    </span>
-                                    <div class={`relative z-10 w-14 h-14 rounded-2xl bg-gradient-to-br ${step.accent} text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-900/20`}>
-                                        <step.icon size={22} />
-                                    </div>
-                                    <div class="relative z-10 pt-1.5">
-                                        <h3 class="font-bold text-slate-900 mb-1.5">{step.title}</h3>
-                                        <p class="text-slate-600 text-[15px] leading-relaxed">{step.text}</p>
-                                    </div>
+                    <div class="bg-white rounded-[2rem] border border-slate-200 shadow-[0_20px_50px_-25px_rgba(11,30,64,0.25)] p-8 md:p-10 divide-y divide-slate-100">
+                        {FRANQUICIA_ALTERNATIVAS.map((item) => (
+                            <div class="group flex gap-5 items-start py-4 first:pt-0 last:pb-0">
+                                <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-[#0B1E40] group-hover:text-cyan-300 transition-colors">
+                                    <item.icon size={20} />
                                 </div>
-                            ))}
-                        </div>
+                                <div class="pt-1">
+                                    <h4 class="font-bold text-slate-900 text-base mb-1">{item.title}</h4>
+                                    <p class="text-slate-500 text-sm leading-relaxed">{item.text}</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
