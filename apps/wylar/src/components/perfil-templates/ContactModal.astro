@@ -51,6 +51,11 @@ const { title = 'Solicitar información', ctaLabel = 'Enviar solicitud', certifi
                     </select>
                 </div>
 
+                <label class="flex items-start gap-2.5 text-xs text-slate-600 cursor-pointer">
+                    <input type="checkbox" name="consent" required class="mt-0.5 w-4 h-4 shrink-0 rounded border-slate-300 accent-[#0B1E40]" />
+                    <span>He leído y acepto la <a href="/politicas-privacidad" target="_blank" rel="noreferrer" class="font-bold text-blue-700 hover:underline">Política de Privacidad</a> y autorizo el uso de mis datos para responder esta solicitud.</span>
+                </label>
+
                 <p id="ficha-modal-feedback" class="hidden text-sm font-medium rounded-lg p-3"></p>
 
                 <button type="submit" id="ficha-modal-submit" class="w-full bg-[#0B1E40] hover:bg-blue-900 disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold text-sm py-3 rounded-xl transition-colors flex items-center justify-center gap-2 mt-2 shadow-lg">

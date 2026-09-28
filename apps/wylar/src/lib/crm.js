@@ -6,9 +6,13 @@
 //
 // PUBLIC_CRM_API_URL debe apuntar al endpoint público desplegado del
 // proyecto wylar-crm (ver wylar-crm/README.md, sección "Conectar wylar.cl").
-// Configúrala en un archivo .env de este proyecto:
+// Opcional: define en un archivo .env de este proyecto (ver .env.example):
 //   PUBLIC_CRM_API_URL="https://<tu-deploy-de-wylar-crm>.vercel.app/api/public/leads"
-export const CRM_API_URL = import.meta.env.PUBLIC_CRM_API_URL || 'https://crm.wylar.cl/api/public/leads';
+// Si no se define PUBLIC_CRM_API_URL se usa el mismo origen del CRM que el catálogo y el
+// validador (PUBLIC_CRM_ORIGIN, y si tampoco existe, el CRM de producción). Así los formularios
+// funcionan también en desarrollo local sin configurar nada.
+const CRM_ORIGIN = import.meta.env.PUBLIC_CRM_ORIGIN || 'https://wylar-crm.vercel.app';
+export const CRM_API_URL = import.meta.env.PUBLIC_CRM_API_URL || `${CRM_ORIGIN}/api/public/leads`;
 
 /**
  * Rastreo de Origen: detecta desde dónde llegó el visitante (Facebook,
