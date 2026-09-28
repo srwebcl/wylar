@@ -30,8 +30,6 @@ export const STATUSES = [
 
 export type LeadStatus = (typeof STATUSES)[number]['value'];
 
-export const CLOSED_STATUSES: LeadStatus[] = ['CERRADO'];
-
 export const ACTIVITY_TYPES = [
     { value: 'NOTA', label: 'Nota' },
     { value: 'LLAMADA', label: 'Llamada' },
