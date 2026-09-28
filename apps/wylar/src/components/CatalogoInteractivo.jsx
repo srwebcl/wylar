@@ -159,7 +159,7 @@ export default function CatalogoInteractivo({ perfiles = [] }) {
                                             <img 
                                                 src={perfil.image} 
                                                 alt={perfil.title} 
-                                                className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ${!perfil.isChileValora ? 'opacity-90 grayscale group-hover:grayscale-0' : 'opacity-100'}`} 
+                                                className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ${!perfil.isChileValora ? 'opacity-90' : 'opacity-100'}`} 
                                             />
                                             {/* Tag over image */}
                                             <div className="absolute top-4 right-4 z-20">
@@ -168,7 +168,7 @@ export default function CatalogoInteractivo({ perfiles = [] }) {
                                                         Certificada
                                                     </span>
                                                 ) : (
-                                                    <span className="bg-[#0B1E40]/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm border border-white/10">
+                                                    <span className="bg-gradient-to-r from-blue-600 to-cyan-500 shadow-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
                                                         Privada
                                                     </span>
                                                 )}

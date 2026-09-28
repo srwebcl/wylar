@@ -53,7 +53,7 @@ export default function CatalogoPerfiles({ perfiles = [], featuredOnly = false, 
                                 <img 
                                     src={perfil.image} 
                                     alt={perfil.title} 
-                                    className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ${!perfil.isChileValora ? 'opacity-80 grayscale group-hover:grayscale-0' : 'opacity-95'}`} 
+                                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-95"
                                 />
                             </div>
                             
@@ -69,9 +69,9 @@ export default function CatalogoPerfiles({ perfiles = [], featuredOnly = false, 
                                             <img src="/images/logo-chilevalora.png" alt="ChileValora" className="h-8 md:h-10 object-contain shrink-0" />
                                         </div>
                                     ) : (
-                                        <div className="bg-white rounded-lg px-2.5 py-1.5 shadow-sm border border-slate-100 flex items-center gap-1.5">
-                                            <ShieldCheck size={14} className="text-slate-400" />
-                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Privada</span>
+                                        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg px-2.5 py-1.5 shadow-md flex items-center gap-1.5">
+                                            <ShieldCheck size={14} className="text-white" />
+                                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Privada</span>
                                         </div>
                                     )}
                                 </div>

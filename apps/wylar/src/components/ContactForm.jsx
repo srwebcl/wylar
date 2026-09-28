@@ -4,17 +4,17 @@ import { submitLead } from '../lib/crm.js';
 
 // Motivo de contacto -> tipo de lead + certificación de interés para el CRM.
 const MOTIVO_META = {
+    personas: { type: 'PERSONA', certificationInterest: 'Evaluación para personas' },
     empresas: { type: 'EMPRESA', certificationInterest: 'Cotización para empresas' },
     otec: { type: 'INSTITUCION', certificationInterest: 'Alianza con OTEC / Organismo de Capacitación' },
     instituciones: { type: 'INSTITUCION', certificationInterest: 'Alianza para instituciones de educación' },
-    electricista: { type: 'PERSONA', certificationInterest: 'Instalador Eléctrico Clase D' },
-    cuidador: { type: 'PERSONA', certificationInterest: 'Cuidador(a) de Personas Mayores' },
     otro: { type: 'PERSONA', certificationInterest: null },
 };
 
 export default function ContactForm({ title = '', subtitle = '', preselectedContext = '', hideHeader = false }) {
     const [status, setStatus] = useState('idle'); // idle | sending | success | error
     const [errorMessage, setErrorMessage] = useState('');
+    const [selectedMotivo, setSelectedMotivo] = useState(preselectedContext);
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -34,6 +34,7 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
                 name: data.get('name'),
                 email: data.get('email'),
                 phone: data.get('phone'),
+                company: data.get('company') || null,
                 certificationInterest: meta.certificationInterest,
                 message: data.get('message') || null,
             });
@@ -87,38 +88,9 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
                     </div>
                 )}
 
-                <div className="flex flex-col lg:flex-row gap-16 items-start">
-
-                    {/* Left Side: Value Proposition Features */}
-                    <div className="w-full lg:w-1/2">
-
-                        <div className="space-y-6">
-                            <div className="flex gap-4">
-                                <CheckCircle2 className="text-blue-600 flex-shrink-0 mt-1" size={24} />
-                                <div>
-                                    <h4 className="font-bold text-slate-900 text-lg mb-1">Respaldo Oficial</h4>
-                                    <p className="text-slate-600 leading-relaxed">Procesos de evaluación y certificación alineados con los estándares de ChileValora.</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-4">
-                                <CheckCircle2 className="text-blue-600 flex-shrink-0 mt-1" size={24} />
-                                <div>
-                                    <h4 className="font-bold text-slate-900 text-lg mb-1">Financiamiento SENCE</h4>
-                                    <p className="text-slate-600 leading-relaxed">Posibilidad de utilizar Franquicia Tributaria para procesos de evaluación de empresas.</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-4">
-                                <CheckCircle2 className="text-blue-600 flex-shrink-0 mt-1" size={24} />
-                                <div>
-                                    <h4 className="font-bold text-slate-900 text-lg mb-1">Cobertura en todo Chile</h4>
-                                    <p className="text-slate-600 leading-relaxed">Capacidad operativa para ejecutar evaluaciones teóricas y prácticas en sus instalaciones.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right Side: Form */}
-                    <div className="w-full lg:w-1/2">
+                <div className="flex justify-center items-start">
+                    {/* Centered Form */}
+                    <div className="w-full max-w-2xl">
                         <div className="bg-white p-8 md:p-10 rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100">
                             <h3 className="text-2xl font-bold text-slate-900 mb-8">Solicitud de Contacto</h3>
                             <form className="space-y-5" onSubmit={handleSubmit}>
@@ -143,19 +115,24 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
 
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">Motivo de contacto</label>
-                                    <select name="motivo" defaultValue={preselectedContext} className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all cursor-pointer" required>
+                                    <select name="motivo" value={selectedMotivo} onChange={(e) => setSelectedMotivo(e.target.value)} className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all cursor-pointer" required>
                                         <option value="" disabled>Seleccione el servicio...</option>
-                                        <option value="empresas">Cotización para Empresas (Múltiples trabajadores)</option>
-                                        <option value="otec">Alianza para OTEC / Organismos de Capacitación</option>
-                                        <option value="instituciones">Alianza para Instituciones de Educación</option>
-                                        <option value="electricista">Evaluación Individual: Instalador Eléctrico Clase D</option>
-                                        <option value="cuidador">Evaluación Individual: Cuidador/a de Personas</option>
-                                        <option value="otro">Otras consultas</option>
+                                        <option value="personas">Personas</option>
+                                        <option value="empresas">Empresas</option>
+                                        <option value="otec">OTEC</option>
+                                        <option value="instituciones">Instituciones de Educación</option>
                                     </select>
                                 </div>
 
+                                {['empresas', 'otec', 'instituciones'].includes(selectedMotivo) && (
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Nombre de la Empresa / Institución</label>
+                                        <input name="company" type="text" className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all" placeholder="Nombre de su organización" required />
+                                    </div>
+                                )}
+
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Mensaje (Opcional)</label>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Mensaje</label>
                                     <textarea name="message" rows="3" className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all resize-none" placeholder="Indique cantidad de trabajadores, ubicación, etc."></textarea>
                                 </div>
 

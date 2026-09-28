@@ -18,19 +18,19 @@ const AUDIENCIAS = [
         ctaLabel: 'Portal Personas',
     },
     {
-        key: 'institucion',
-        pillLabel: 'Somos institución educativa',
-        icon: ShieldCheck,
-        href: '/instituciones',
-        gradient: 'bg-gradient-to-br from-[#0B1E40] via-[#0B1E40] to-[#6b4610]',
-        glow: 'shadow-[0_30px_70px_-20px_rgba(245,158,11,0.45)]',
-        headline: 'Certifica a tus egresados',
+        key: 'empresa',
+        pillLabel: 'Somos empresa',
+        icon: Building2,
+        href: '/empresas',
+        gradient: 'bg-gradient-to-br from-[#0B1E40] via-[#0B1E40] to-[#1e3a8a]',
+        glow: 'shadow-[0_30px_70px_-20px_rgba(59,130,246,0.45)]',
+        headline: 'Certifica a tu equipo en terreno',
         bullets: [
-            'Evaluación al cierre de la malla formativa',
-            'Alianza directa con OTEC, CFT y universidades',
-            'Doble valor: aprendizaje + certificación oficial',
+            'Evaluamos en tus faenas y turnos',
+            'Financiable con Franquicia Tributaria SENCE',
+            'Cumple normativa y reduce riesgo operativo',
         ],
-        ctaLabel: 'Portal Instituciones',
+        ctaLabel: 'Portal Empresas',
     },
     {
         key: 'otec',
@@ -48,19 +48,19 @@ const AUDIENCIAS = [
         ctaLabel: 'Portal OTEC',
     },
     {
-        key: 'empresa',
-        pillLabel: 'Somos empresa',
-        icon: Building2,
-        href: '/empresas',
-        gradient: 'bg-gradient-to-br from-[#0B1E40] via-[#0B1E40] to-[#1e3a8a]',
-        glow: 'shadow-[0_30px_70px_-20px_rgba(59,130,246,0.45)]',
-        headline: 'Certifica a tu equipo en terreno',
+        key: 'institucion',
+        pillLabel: 'Somos institución educativa',
+        icon: ShieldCheck,
+        href: '/instituciones',
+        gradient: 'bg-gradient-to-br from-[#0B1E40] via-[#0B1E40] to-[#6b4610]',
+        glow: 'shadow-[0_30px_70px_-20px_rgba(245,158,11,0.45)]',
+        headline: 'Certifica a tus egresados',
         bullets: [
-            'Evaluamos en tus faenas y turnos',
-            'Financiable con Franquicia Tributaria SENCE',
-            'Cumple normativa y reduce riesgo operativo',
+            'Evaluación al cierre de la malla formativa',
+            'Alianza directa con OTEC, CFT y universidades',
+            'Doble valor: aprendizaje + certificación oficial',
         ],
-        ctaLabel: 'Portal Empresas',
+        ctaLabel: 'Portal Instituciones',
     },
 ];
 
@@ -89,9 +89,9 @@ export default function Portales() {
                     <p className="text-base md:text-lg text-slate-600">En Wylar contamos con soluciones especializadas para Personas, Instituciones de Educación, OTEC o Empresas. Selecciona el perfil que más se adecúa a tu búsqueda y descubre el proceso.</p>
                 </div>
 
-                <div className="max-w-3xl mx-auto">
+                <div className="max-w-4xl mx-auto">
                     {/* Selector: una pregunta, no tres cajas */}
-                    <div className="flex flex-wrap justify-center gap-3 mb-8" role="tablist" aria-label="Selecciona tu perfil">
+                    <div className="flex flex-wrap lg:flex-nowrap justify-center gap-3 mb-8" role="tablist" aria-label="Selecciona tu perfil">
                         {AUDIENCIAS.map((a) => {
                             const Icon = a.icon;
                             const isActive = a.key === activeKey;

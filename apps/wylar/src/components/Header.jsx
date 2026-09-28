@@ -22,18 +22,17 @@ export default function Header({ currentPath = '/' }) {
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center relative z-10">
                     <div className="flex items-center gap-4 lg:gap-5">
-                        <span className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Portal:</span>
                         <a href="/personas" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/personas') ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
                             <Users size={14} /> Personas
                         </a>
-                        <a href="/instituciones" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/instituciones') ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
-                            <ShieldCheck size={14} /> Instituciones de Educación
+                        <a href="/empresas" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/empresas') ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
+                            <Building2 size={14} /> Empresas
                         </a>
                         <a href="/otec" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/otec') ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
                             <Handshake size={14} /> OTEC
                         </a>
-                        <a href="/empresas" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/empresas') ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
-                            <Building2 size={14} /> Empresas
+                        <a href="/instituciones" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/instituciones') ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
+                            <ShieldCheck size={14} /> Instituciones de Educación
                         </a>
                     </div>
                     <div className="flex items-center gap-6 font-semibold">
@@ -65,7 +64,7 @@ export default function Header({ currentPath = '/' }) {
                         </a>
 
                         <a href="/catalogo" className={`px-4 py-2 rounded-full transition-all duration-300 ${isActive('/catalogo') ? 'bg-blue-50 text-blue-700' : 'hover:bg-slate-50 hover:text-blue-600'}`}>
-                            Certificaciones
+                            Catálogo
                         </a>
 
                         <a href="/chilevalora" className={`px-4 py-2 rounded-full transition-all duration-300 ${isActive('/chilevalora') ? 'bg-blue-50 text-blue-700' : 'hover:bg-slate-50 hover:text-blue-600'}`}>
@@ -94,16 +93,16 @@ export default function Header({ currentPath = '/' }) {
                     <div className="md:hidden bg-white/95 backdrop-blur-3xl px-6 py-8 flex flex-col gap-5 shadow-2xl absolute w-full h-[calc(100vh-80px)] overflow-y-auto left-0 animate-in fade-in slide-in-from-top-4 duration-300 z-50 border-t border-slate-100">
                         <div className="text-xs font-black text-blue-500 uppercase tracking-widest px-3 mb-2">Menú Principal</div>
                         <a href="/" className="font-black text-slate-800 text-2xl px-4 py-3 hover:bg-blue-50 hover:text-blue-700 rounded-2xl transition-colors">Inicio</a>
-                        <a href="/catalogo" className="font-black text-slate-800 text-2xl px-4 py-3 hover:bg-blue-50 hover:text-blue-700 rounded-2xl transition-colors">Certificaciones</a>
+                        <a href="/catalogo" className="font-black text-slate-800 text-2xl px-4 py-3 hover:bg-blue-50 hover:text-blue-700 rounded-2xl transition-colors">Catálogo</a>
                         <a href="/chilevalora" className="font-black text-slate-800 text-2xl px-4 py-3 hover:bg-blue-50 hover:text-blue-700 rounded-2xl transition-colors">Sobre Chile Valora</a>
                         <a href="/contacto" className="font-black text-slate-800 text-2xl px-4 py-3 hover:bg-blue-50 hover:text-blue-700 rounded-2xl transition-colors">Contacto</a>
                         
                         <div className="h-px bg-slate-200 w-full my-4"></div>
                         <div className="text-xs font-black text-blue-500 uppercase tracking-widest px-3 mb-2">Portales de Atención</div>
                         <a href="/personas" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><Users size={24} className="text-blue-600" /> Personas</a>
-                        <a href="/instituciones" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><ShieldCheck size={24} className="text-amber-500" /> Instituciones de Educación</a>
-                        <a href="/otec" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><Handshake size={24} className="text-violet-500" /> OTEC</a>
                         <a href="/empresas" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><Building2 size={24} className="text-blue-600" /> Empresas</a>
+                        <a href="/otec" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><Handshake size={24} className="text-violet-500" /> OTEC</a>
+                        <a href="/instituciones" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><ShieldCheck size={24} className="text-amber-500" /> Instituciones de Educación</a>
                         
                         <div className="mt-8 pb-12">
                             <a href="/validador" className="bg-gradient-to-r from-[#0B1E40] to-blue-900 text-white font-black text-lg p-5 rounded-full flex items-center justify-center gap-3 shadow-[0_8px_30px_rgba(11,30,64,0.3)] w-full relative overflow-hidden group">

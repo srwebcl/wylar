@@ -17,9 +17,6 @@ import {
   FileCheck,
   Wallet,
   MapPin,
-  Activity,
-  SearchCheck,
-  Award,
   Compass,
   ClipboardList,
   HeartHandshake,
@@ -53,15 +50,9 @@ const FRANQUICIA_ALTERNATIVAS = [
 ];
 
 const COBERTURA_FEATURES = [
-  { title: 'En sus instalaciones', text: 'Las evaluaciones pueden realizarse en las instalaciones de la empresa.' },
-  { title: 'En el lugar de trabajo', text: 'También pueden desarrollarse en el lugar donde se desempeñan los trabajadores.' },
+  { title: 'En sus instalaciones', text: 'Las evaluaciones pueden realizarse en las instalaciones de la empresa o en el lugar de trabajo.' },
+  { title: 'En un centro WYLAR', text: 'Realiza la evaluación en una de nuestras instalaciones habilitadas.' },
   { title: 'En otras comunas o regiones', text: 'Si necesita certificar trabajadores en otra comuna o región, coordinamos el proceso donde se encuentre su equipo.' },
-];
-
-const ETAPAS = [
-  { icon: Activity, title: 'Evaluación', text: 'Se desarrollan las instancias de evaluación correspondientes al perfil y las condiciones del proceso.' },
-  { icon: SearchCheck, title: 'Revisión y validación', text: 'Una vez realizada la evaluación, comienza la etapa de revisión y validación de los resultados.' },
-  { icon: Award, title: 'Certificación', text: 'Posteriormente se completa la etapa de certificación. WYLAR informa y coordina con la empresa los tiempos correspondientes.' },
 ];
 
 const ALIADO = [
@@ -140,14 +131,6 @@ const perfiles = await getCatalogList();
                     </p>
                 </div>
 
-                <div class="relative max-w-3xl mx-auto bg-gradient-to-br from-[#0B1E40] to-[#122b59] rounded-2xl px-8 py-7 mb-16 text-center shadow-xl shadow-blue-900/20">
-                    <Quote size={32} className="absolute -top-3 left-1/2 -translate-x-1/2 text-cyan-400 bg-[#0B1E40] rounded-full p-1.5" />
-                    <p class="text-lg md:text-xl font-bold text-white leading-snug">
-                        Su equipo también es parte de su propuesta de valor.
-                        <span class="text-cyan-300"> Demuestre sus competencias.</span>
-                    </p>
-                </div>
-
                 <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {QUE_GANA.map((item, index) => (
                         <div class="group relative bg-white p-8 rounded-2xl border border-slate-200 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)] hover:-translate-y-1 hover:shadow-xl hover:border-blue-200 transition-all overflow-hidden">
@@ -160,6 +143,14 @@ const perfiles = await getCatalogList();
                             <p class="relative text-slate-600 leading-relaxed text-[15px]">{item.text}</p>
                         </div>
                     ))}
+                </div>
+
+                <div class="relative max-w-3xl mx-auto bg-gradient-to-br from-[#0B1E40] to-[#122b59] rounded-2xl px-8 py-7 mt-16 text-center shadow-xl shadow-blue-900/20">
+                    <Quote size={32} className="absolute -top-3 left-1/2 -translate-x-1/2 text-cyan-400 bg-[#0B1E40] rounded-full p-1.5" />
+                    <p class="text-lg md:text-xl font-bold text-white leading-snug">
+                        Su equipo también es parte de su propuesta de valor.
+                        <span class="text-cyan-300"> Demuestre sus competencias.</span>
+                    </p>
                 </div>
             </div>
         </section>
@@ -261,41 +252,9 @@ const perfiles = await getCatalogList();
             </div>
         </section>
 
-        {/* EVALUACIÓN Y CERTIFICACIÓN: SON ETAPAS DIFERENTES */}
-        <section class="bg-slate-50 py-24 border-t border-slate-100">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-3xl mx-auto mb-16">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-bold tracking-widest uppercase mb-6">
-                        <Activity size={16} /> Evaluación y certificación
-                    </div>
-                    <h2 class="text-3xl md:text-4xl font-extrabold text-[#0B1E40] mb-5 tracking-tight">
-                        Son etapas diferentes
-                    </h2>
-                    <p class="text-base md:text-lg text-slate-600">
-                        Evaluarse puede tomar una jornada. Recibir la certificación es parte de un proceso posterior.
-                    </p>
-                </div>
-
-                <div class="bg-white border border-slate-200 rounded-[2rem] shadow-[0_10px_40px_-18px_rgba(11,30,64,0.15)] overflow-hidden">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 divide-y divide-slate-100 sm:divide-y-0 sm:divide-x">
-                        {ETAPAS.map((item, index) => (
-                            <div class="group relative p-7 min-h-[210px] flex flex-col hover:bg-gradient-to-b hover:from-blue-50/60 hover:to-transparent transition-colors">
-                                <span class="absolute top-6 right-7 text-xs font-black text-slate-200 group-hover:text-blue-300 transition-colors">{String(index + 1).padStart(2, '0')}</span>
-                                <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 group-hover:bg-[#0B1E40] group-hover:text-cyan-300 transition-colors">
-                                    <item.icon size={20} />
-                                </div>
-                                <strong class="text-lg font-extrabold text-slate-900 leading-snug mb-2">{item.title}</strong>
-                                <span class="text-sm text-slate-500">{item.text}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </section>
-
         {/* CATÁLOGO DE PERFILES */}
         <div id="perfiles" class="bg-white">
-            <CatalogoPerfiles client:load perfiles={perfiles} title="Perfiles disponibles para su empresa" subtitle="Revise el catálogo de especialidades técnicas habilitadas para evaluación." />
+            <CatalogoPerfiles client:load perfiles={perfiles.filter(p => p.isChileValora)} title="Perfiles disponibles para su empresa" subtitle="Revise el catálogo de especialidades técnicas habilitadas para evaluación." />
         </div>
 
         {/* UN ALIADO PARA SU EMPRESA */}
@@ -322,16 +281,17 @@ const perfiles = await getCatalogList();
 
                 <div class="grid sm:grid-cols-3 gap-5">
                     {ALIADO.map((item, index) => (
-                        <div class="group relative bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm hover:bg-white/[0.08] hover:border-cyan-400/30 hover:-translate-y-1 transition-all overflow-hidden">
-                            <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-400 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></div>
-                            <span class="absolute right-3 bottom-1 text-5xl font-black text-white/[0.05] group-hover:text-white/[0.08] transition-colors select-none leading-none">
+                        <div class="group relative bg-white/10 border border-cyan-400/50 rounded-2xl p-6 shadow-[0_0_40px_rgba(34,211,238,0.15)] hover:bg-cyan-400/10 hover:shadow-[inset_0_0_30px_rgba(34,211,238,0.15),0_0_40px_rgba(34,211,238,0.3)] hover:-translate-y-1 transition-all overflow-hidden backdrop-blur-md">
+                            <div class="absolute inset-0 bg-cyan-400/5 pointer-events-none"></div>
+                            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></div>
+                            <span class="absolute right-3 bottom-1 text-5xl font-black text-cyan-200/20 group-hover:text-cyan-300/60 transition-colors select-none leading-none z-10">
                                 {index + 1}
                             </span>
-                            <div class="relative w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 flex items-center justify-center mb-4 group-hover:bg-cyan-400/25 transition-colors">
+                            <div class="relative z-10 w-10 h-10 rounded-xl bg-cyan-400/20 border border-cyan-400/50 text-cyan-300 flex items-center justify-center mb-4 group-hover:bg-cyan-400/40 group-hover:shadow-[0_0_15px_rgba(34,211,238,0.5)] transition-all">
                                 <item.icon size={18} />
                             </div>
-                            <h4 class="relative font-bold text-white text-[15px] mb-1.5">{item.title}</h4>
-                            <p class="relative text-blue-100/70 text-sm leading-relaxed">{item.text}</p>
+                            <h4 class="relative z-10 font-bold text-white text-[15px] mb-1.5">{item.title}</h4>
+                            <p class="relative z-10 text-blue-100/80 text-sm leading-relaxed">{item.text}</p>
                         </div>
                     ))}
                 </div>
