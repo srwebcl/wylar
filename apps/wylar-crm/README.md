@@ -4,7 +4,7 @@ Plataforma interna para administrar los leads (prospectos) de Wylar y automatiza
 
 Stack: **Next.js 16** (App Router) + **TypeScript** + **Prisma** (PostgreSQL/Neon) + **Tailwind CSS 4**. Pensado para desplegarse en **Vercel**.
 
-Es un proyecto separado del sitio [wylar](../wylar) (Astro, 100% estático) — se comunican por HTTP: el sitio público envía leads a la API pública de este proyecto (ver [Conectar wylar.cl](#conectar-wylarcl)).
+Es un proyecto separado del sitio [wylar](../wylar) (Astro 7, renderizado en servidor con caché de CDN) — se comunican por HTTP: el sitio público envía leads a la API pública de este proyecto (ver [Conectar wylar.cl](#conectar-wylarcl)).
 
 ## Qué incluye (y qué no, todavía)
 
@@ -22,7 +22,7 @@ El módulo de WhatsApp quedó pendiente a propósito: requiere una cuenta de **W
 
 ## Requisitos
 
-- Node.js `^20.19 || ^22.12 || >=24.0`
+- Node.js 22 (`nvm use` lee el `.nvmrc`; también funciona con `^20.19 || >=22.12`)
 - Una base de datos PostgreSQL accesible (Neon — ver despliegue en Vercel más abajo)
 
 ## Desarrollo local
@@ -37,7 +37,7 @@ El módulo de WhatsApp quedó pendiente a propósito: requiere una cuenta de **W
    npm run db:migrate   # crea las tablas
    npm run db:seed      # crea usuarios y 4 leads de ejemplo
    ```
-   El seed imprime la contraseña de los usuarios de ejemplo (por defecto `1234`). Usuario admin: `admin@wylar.cl`.
+   El seed crea usuarios de ejemplo con la contraseña de `SEED_PASSWORD` (por defecto `1234`, **solo para desarrollo**; las nuevas contraseñas exigen 12 caracteres). Usuario admin: `admin@wylar.cl`. En producción cambia la contraseña desde **Mi cuenta** (`/cuenta`).
 4. Levantar el servidor de desarrollo:
    ```bash
    npm run dev
@@ -58,6 +58,8 @@ El módulo de WhatsApp quedó pendiente a propósito: requiere una cuenta de **W
 | `npm run db:seed` | Carga usuarios y leads de ejemplo |
 | `npm run db:studio` | Abre Prisma Studio para inspeccionar la base de datos |
 | `npm run lint` | Lint con oxlint |
+| `npm test` | Pruebas unitarias (Vitest) de las reglas puras: slug, RUT, estados de certificado, sanitizado de HTML, validaciones… |
+| `npm run db:backup` | Respaldo de leads, usuarios, perfiles, certificados y banners a JSON en `backups/` (ignorado por git; contiene datos personales) |
 
 ## Despliegue en Vercel
 
@@ -66,9 +68,10 @@ El módulo de WhatsApp quedó pendiente a propósito: requiere una cuenta de **W
    - `SESSION_SECRET` — secreto para firmar la cookie de sesión (`openssl rand -base64 32`).
    - `PUBLIC_FORM_ORIGINS` — dominios permitidos para que wylar.cl pueda llamar a la API pública, ej. `https://wylar.cl,https://www.wylar.cl`.
    - `SEED_PASSWORD` — opcional, solo la usa `npm run db:seed`.
+   - Ver `.env.example` para la lista completa.
 3. Migrar y sembrar contra la BD de Vercel: `vercel env pull` (trae las variables reales a `.env.local`) y luego `npm run db:migrate:deploy` + `npm run db:seed` (o crear el primer admin manualmente, ver abajo).
 4. Deploy: `vercel --prod`, o hacer push a `main` una vez conectado el repo de GitHub al proyecto (`vercel git connect`).
-5. **Cambia la contraseña del usuario admin de ejemplo** apenas tengas acceso (no hay pantalla de "cambiar contraseña" todavía — usa `npm run db:studio` contra la base de producción, o pide que se agregue esa pantalla).
+5. **Cambia la contraseña del usuario admin de ejemplo** apenas tengas acceso, desde **Mi cuenta** (`/cuenta`, ícono de llave en la barra lateral).
 
 ## Conectar wylar.cl
 
@@ -113,10 +116,14 @@ Cuando exista la cuenta de WhatsApp Business API, el punto de integración natur
 
 ## Notas de seguridad
 
-- Contraseñas guardadas hasheadas (bcrypt), nunca en texto plano.
-- Sesión vía cookie `httpOnly` firmada (JWT), sin dependencias externas de autenticación.
-- La API pública de captura de leads valida origen (CORS restringido a `PUBLIC_FORM_ORIGINS`), incluye un campo honeypot anti-spam, y solo puede **crear** leads — no leer ni modificar nada.
+- Contraseñas guardadas hasheadas (bcrypt), mínimo 12 caracteres, con pantalla **Mi cuenta** para cambiarlas. El login compara el hash aunque el correo no exista (misma demora) y se bloquea tras 8 intentos fallidos por IP+correo cada 15 minutos.
+- Sesión vía cookie `httpOnly` firmada (JWT). Ningún componente cliente recibe `passwordHash` (`SafeUser`, `omit`).
+- **Límite de peticiones** (`src/lib/rateLimit.ts`, tabla `rate_limits`): login, leads (6 cada 10 min por IP), validador (30/min), PDF (20/min) y cambio de contraseña.
+- La API pública valida origen (CORS restringido a `PUBLIC_FORM_ORIGINS`; recuerda que CORS no frena a bots — para eso está el límite), incluye honeypot anti-spam y solo puede **crear** leads.
+- El HTML del catálogo (plantilla ESTANDAR) se **sanea en el servidor** (`sanitize-html`, lista blanca) antes de guardarse; `ctaHref` e imágenes del banner solo aceptan rutas internas o `https://`.
+- Acciones destructivas solo para ADMIN: eliminar perfiles y banners, revocar certificados. Los certificados **no se borran**: se revocan (el validador los muestra como "Revocado" y el PDF deja de estar disponible). Todo queda en **Auditoría** (`/auditoria`, solo ADMIN).
+- La subida de imágenes verifica la firma real del archivo (no solo el tipo que declara el navegador).
+- Cabeceras de seguridad (`next.config.ts`): `frame-ancestors 'none'`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`. `robots.txt` y `noindex` para que el panel no aparezca en buscadores.
 - Un usuario desactivado (`/equipo`) pierde el acceso de inmediato, sin esperar a que expire su sesión.
-- El validador de certificados (`/api/public/certificates/validate`) expone el RUT completo del titular — es una decisión de producto, no un descuido: el propio flujo del validador en wylar.cl busca por RUT o código, así que ocultarlo rompería la función. No expone ningún otro dato personal (email, teléfono) ni permite listar certificados sin conocer uno de los dos identificadores.
-
-<!-- prueba de auto-deploy: 2026-09-17 10:12 -->
+- El validador de certificados (`/api/public/certificates/validate`) expone el RUT completo del titular — decisión de producto (el validador busca por RUT o código). Se mitiga con búsqueda indexada, límite de consultas y respuesta acotada a 20 resultados. Evalúa con asesoría legal si conviene enmascararlo.
+- El sitio consulta catálogo y banners con caché de CDN (30 s) y las páginas del sitio se cachean 60 s: los cambios hechos aquí se ven en 1–3 minutos, sin desplegar.

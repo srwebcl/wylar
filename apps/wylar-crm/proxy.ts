@@ -12,7 +12,7 @@ import { jwtVerify } from 'jose';
 // dejaría inalcanzables.
 const PUBLIC_PREFIXES = ['/login', '/api/health', '/api/public'];
 
-const PUBLIC_STATIC_FILES = ['/favicon.svg', '/logo-wylar.webp'];
+const PUBLIC_STATIC_FILES = ['/favicon.svg', '/logo-wylar.webp', '/robots.txt'];
 
 function isPublicPath(pathname: string) {
     if (pathname.startsWith('/_next/')) return true;
@@ -57,9 +57,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
 }
 
-export const proxyConfig = {
+export const config = {
     matcher: [
         // Todas las rutas salvo assets internos de Next.
-        '/((?!_next/static|_next/image|favicon.svg).*)',
+        '/((?!_next/static|_next/image|favicon.svg|robots.txt).*)',
     ],
 };

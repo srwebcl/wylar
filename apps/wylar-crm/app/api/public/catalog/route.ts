@@ -11,6 +11,10 @@ import { corsHeaders } from '@/lib/publicApi';
 // FichaSoldadura, FichaOperadores) alimentadas por esta API en vez del
 // archivo local.
 
+// Caché de CDN: la base se consulta como máximo cada ~30 s por región, aunque el
+// sitio reciba mucho tráfico; los cambios del CRM se ven en menos de 2.5 minutos.
+const CDN_CACHE = 'public, s-maxage=30, stale-while-revalidate=120';
+
 export async function OPTIONS(request: Request) {
     return new Response(null, { status: 204, headers: corsHeaders(request.headers.get('origin')) });
 }
@@ -63,5 +67,5 @@ export async function GET(request: Request) {
         faq: profile.faqs.map((faq) => ({ q: faq.question, a: faq.answer })),
     }));
 
-    return Response.json({ ok: true, profiles: slug ? data[0] ? [data[0]] : [] : data }, { status: 200, headers });
+    return Response.json({ ok: true, profiles: slug ? data[0] ? [data[0]] : [] : data }, { status: 200, headers: { ...headers, 'Cache-Control': CDN_CACHE } });
 }

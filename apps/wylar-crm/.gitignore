@@ -29,3 +29,9 @@ next-env.d.ts
 
 .vercel
 *.tsbuildinfo
+
+# Respaldos locales (datos personales)
+backups/
+
+# Plantilla de variables (sin valores)
+!.env.example

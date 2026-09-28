@@ -13,6 +13,8 @@ export const metadata: Metadata = {
     title: 'Wylar CRM',
     description: 'Plataforma de gestión de leads y oportunidades de Wylar',
     icons: { icon: '/favicon.svg' },
+    // Panel interno: no debe aparecer en buscadores.
+    robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

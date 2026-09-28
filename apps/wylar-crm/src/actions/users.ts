@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth';
 import { hashPassword } from '@/lib/auth';
 import { userSchema } from '@/lib/validation';
+import { audit } from '@/lib/audit';
 
 export interface UserFormState {
     error?: string;
@@ -13,7 +14,7 @@ export interface UserFormState {
 
 /** Alta de un nuevo miembro del equipo comercial. Solo administradores. */
 export async function createUser(_prevState: UserFormState, formData: FormData): Promise<UserFormState> {
-    await requireAdmin();
+    const admin = await requireAdmin();
 
     const parsed = userSchema.safeParse(Object.fromEntries(formData));
     if (!parsed.success) {
@@ -28,6 +29,7 @@ export async function createUser(_prevState: UserFormState, formData: FormData):
         data: { name: parsed.data.name, email: parsed.data.email, role: parsed.data.role, passwordHash },
     });
 
+    await audit(admin, 'USUARIO_CREADO', 'usuario', parsed.data.email, `rol ${parsed.data.role}`);
     revalidatePath('/equipo');
     return { success: 'Usuario creado.' };
 }
@@ -39,5 +41,6 @@ export async function toggleUserActive(userId: number) {
 
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     await prisma.user.update({ where: { id: userId }, data: { active: !user.active } });
+    await audit(currentUser, user.active ? 'USUARIO_DESACTIVADO' : 'USUARIO_ACTIVADO', 'usuario', user.email);
     revalidatePath('/equipo');
 }

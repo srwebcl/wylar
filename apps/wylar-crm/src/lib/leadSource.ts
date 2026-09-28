@@ -25,7 +25,7 @@ export function detectSourceFromReferer(referer: string | null): string {
     if (host.includes('facebook.com') || host.includes('fb.com')) return 'FACEBOOK';
     if (host.includes('instagram.com') || host.includes('l.instagram.com')) return 'INSTAGRAM';
     if (host.includes('whatsapp.com') || host.includes('wa.me')) return 'WHATSAPP';
-    if (host.includes('wylar.cl') || host.includes('localhost')) return 'WEB';
+    if (host === 'wylar.cl' || host.endsWith('.wylar.cl') || host === 'wylar.vercel.app' || host === 'localhost') return 'WEB';
     return 'OTRO';
 }
 

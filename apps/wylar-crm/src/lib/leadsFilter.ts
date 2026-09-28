@@ -13,7 +13,7 @@ export function buildLeadsWhere({ q, status, source, assignedToId }: LeadsFilter
     return {
         ...(status ? { status } : {}),
         ...(source ? { source } : {}),
-        ...(assignedToId === 'sin-asignar' ? { assignedToId: null } : assignedToId ? { assignedToId: Number(assignedToId) } : {}),
+        ...(assignedToId === 'sin-asignar' ? { assignedToId: null } : assignedToId ? { assignedToId: Number.isInteger(Number(assignedToId)) ? Number(assignedToId) : -1 } : {}),
         ...(q
             ? {
                   OR: [

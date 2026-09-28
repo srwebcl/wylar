@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Download, ShieldCheck, Trash2 } from 'lucide-react';
+import { Ban, Download, ShieldCheck } from 'lucide-react';
 import { issueCertificate, revokeCertificate } from '@/actions/certificates';
 import { suggestedCategoryLabel } from '@/lib/catalogSpec';
 
@@ -27,7 +27,7 @@ interface CertificateRow {
     categoryLabel: string;
     issueDate: string;
     expiryDate: string | null;
-    status: 'VIGENTE' | 'VENCIDO' | 'SIN_VENCIMIENTO';
+    status: 'VIGENTE' | 'VENCIDO' | 'SIN_VENCIMIENTO' | 'REVOCADO';
     statusLabel: string;
     issuedByName: string | null;
 }
@@ -36,11 +36,12 @@ const STATUS_TONE: Record<CertificateRow['status'], string> = {
     VIGENTE: 'bg-emerald-50 text-emerald-700',
     VENCIDO: 'bg-red-50 text-red-700',
     SIN_VENCIMIENTO: 'bg-slate-100 text-slate-600',
+    REVOCADO: 'bg-red-100 text-red-800',
 };
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
 
-export function CertificateManagement({ profiles, closedLeads, certificates }: { profiles: Profile[]; closedLeads: ClosedLead[]; certificates: CertificateRow[] }) {
+export function CertificateManagement({ profiles, closedLeads, certificates, isAdmin }: { profiles: Profile[]; closedLeads: ClosedLead[]; certificates: CertificateRow[]; isAdmin: boolean }) {
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -124,9 +125,13 @@ export function CertificateManagement({ profiles, closedLeads, certificates }: {
     }
 
     function handleRevoke(id: number, code: string) {
-        if (!confirm(`¿Eliminar el certificado ${code}? Dejará de ser válido en el validador.`)) return;
+        if (!confirm(`¿Revocar el certificado ${code}? Dejará de ser válido en el validador y su PDF no podrá descargarse. Queda registrado quién lo revocó.`)) return;
+        setError(null);
+        setSuccess(null);
         startTransition(async () => {
-            await revokeCertificate(id);
+            const result = await revokeCertificate(id);
+            if (result.error) setError(result.error);
+            else setSuccess(result.success ?? 'Certificado revocado.');
         });
     }
 
@@ -231,23 +236,27 @@ export function CertificateManagement({ profiles, closedLeads, certificates }: {
                                 <td className="px-5 py-3.5 text-slate-500">{c.issuedByName ?? '—'}</td>
                                 <td className="px-5 py-3.5">
                                     <div className="flex items-center justify-end gap-1">
-                                        <a
-                                            href={`/api/public/certificates/${c.code}/pdf`}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="p-2 text-slate-400 hover:text-cyan-700 transition-colors"
-                                            title="Descargar PDF"
-                                        >
-                                            <Download size={16} />
-                                        </a>
-                                        <button
-                                            onClick={() => handleRevoke(c.id, c.code)}
-                                            disabled={isPending}
-                                            className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50"
-                                            title="Eliminar"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        {c.status !== 'REVOCADO' && (
+                                            <a
+                                                href={`/api/public/certificates/${c.code}/pdf`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="p-2 text-slate-400 hover:text-cyan-700 transition-colors"
+                                                title="Descargar PDF"
+                                            >
+                                                <Download size={16} />
+                                            </a>
+                                        )}
+                                        {isAdmin && c.status !== 'REVOCADO' && (
+                                            <button
+                                                onClick={() => handleRevoke(c.id, c.code)}
+                                                disabled={isPending}
+                                                className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                                                title="Revocar certificado"
+                                            >
+                                                <Ban size={16} />
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>

@@ -233,6 +233,9 @@ model Certificate {
 
   holderName String
   holderRut  String
+  // RUT sin puntos, guion ni espacios y en minúscula: es lo que se busca en el
+  // validador público (columna indexada, así la consulta no recorre la tabla).
+  holderRutNorm String @default("")
 
   profile            Profile? @relation(fields: [profileId], references: [id])
   profileId          Int?
@@ -256,9 +259,15 @@ model Certificate {
   issuedBy   User? @relation(fields: [issuedById], references: [id])
   issuedById Int?
 
+  // Un certificado revocado no se borra: deja de ser válido pero conserva su
+  // historial (quién y cuándo). El validador lo muestra como "Revocado".
+  revokedAt     DateTime?
+  revokedByName String?
+
   createdAt DateTime @default(now())
 
   @@index([holderRut])
+  @@index([holderRutNorm])
   @@map("certificates")
 }
 
@@ -287,4 +296,33 @@ model HeroSlide {
   updatedAt DateTime @updatedAt
 
   @@map("hero_slides")
+}
+
+// --- Infraestructura ---
+
+// Contadores para limitar peticiones (login, formularios públicos, validador,
+// PDF) sin depender de un servicio externo. Ver src/lib/rateLimit.ts.
+model RateLimit {
+  key       String   @id
+  count     Int      @default(0)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+  @@map("rate_limits")
+}
+
+// Registro de acciones sensibles (quién hizo qué). Ver src/lib/audit.ts.
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  userName   String
+  // Ej. CERTIFICADO_EMITIDO, CERTIFICADO_REVOCADO, PERFIL_ELIMINADO, USUARIO_CREADO…
+  action     String
+  entity     String
+  entityId   String?
+  detail     String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("audit_logs")
 }

@@ -1,14 +1,10 @@
 import { z } from 'zod';
+import { isSafeUrl } from './safeUrl';
 import { ACTIVITY_TYPE_VALUES, LEAD_TYPE_VALUES, ROLES, STATUS_VALUES } from './constants';
 import { PROFILE_TEMPLATE_TYPE_VALUES, TARGET_AUDIENCE_VALUES } from './catalogSpec';
 
 const ROLE_VALUES = ROLES.map((r) => r.value) as [string, ...string[]];
 
-// Solo rutas internas ("/x", no "//host") o https: bloquea javascript:, data:, etc.
-function isSafeUrl(value: string): boolean {
-    if (value.startsWith('/')) return !value.startsWith('//') && !value.startsWith('/\\');
-    return /^https:\/\//i.test(value);
-}
 
 /**
  * Datos que envía el formulario web público de wylar.cl (Módulo de Captura
@@ -28,7 +24,7 @@ export const publicLeadSchema = z.object({
     sourceDetail: z.string().trim().max(2000).optional().nullable(),
     // Honeypot anti-spam: campo invisible para personas, si viene con
     // contenido es casi seguro un bot. Ver app/api/public/leads/route.ts.
-    website: z.string().max(0).optional().or(z.literal('')),
+    website: z.string().max(200).optional(),
 });
 
 export const activityEntrySchema = z.object({
@@ -50,6 +46,15 @@ export const userSchema = z.object({
     role: z.enum(ROLE_VALUES),
     password: z.string().min(12, 'La contraseña debe tener al menos 12 caracteres.').max(200),
 });
+
+export const changePasswordSchema = z
+    .object({
+        currentPassword: z.string().min(1, 'Ingresa tu contraseña actual.'),
+        newPassword: z.string().min(12, 'La nueva contraseña debe tener al menos 12 caracteres.').max(200),
+        confirmPassword: z.string(),
+    })
+    .refine((d) => d.newPassword === d.confirmPassword, { message: 'La confirmación no coincide con la nueva contraseña.', path: ['confirmPassword'] })
+    .refine((d) => d.newPassword !== d.currentPassword, { message: 'La nueva contraseña debe ser distinta de la actual.', path: ['newPassword'] });
 
 export const loginSchema = z.object({
     email: z.string().trim().email('Correo inválido.'),

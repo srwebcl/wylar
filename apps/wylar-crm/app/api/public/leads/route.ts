@@ -1,5 +1,6 @@
-import { createLeadFromPublicForm } from '@/actions/leads';
+import { createLeadFromPublicForm } from '@/lib/leads';
 import { corsHeaders } from '@/lib/publicApi';
+import { clientIp, rateLimit, tooManyRequests } from '@/lib/rateLimit';
 
 // Módulo de Captura de Oportunidades: endpoint público (sin sesión) que
 // consumen los formularios de wylar.cl (ContactForm, y los formularios de
@@ -14,6 +15,10 @@ export async function OPTIONS(request: Request) {
 export async function POST(request: Request) {
     const origin = request.headers.get('origin');
     const headers = corsHeaders(origin);
+
+    // Anti-spam: 6 envíos cada 10 minutos por IP (un usuario real envía 1 o 2).
+    const limit = await rateLimit('leads', clientIp(request.headers), 6, 600);
+    if (!limit.ok) return tooManyRequests(limit.retryAfter, headers);
 
     let body: unknown;
     try {

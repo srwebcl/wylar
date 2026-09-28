@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  crm:
+    name: CRM (lint, pruebas y build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/wylar-crm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/wylar-crm/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  sitio:
+    name: Sitio (build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/wylar
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/wylar/package-lock.json
+      - run: npm ci
+      # El build prerenderiza pocas páginas y consulta el CRM público: si el CRM está caído, falla a propósito.
+      - run: npm run build

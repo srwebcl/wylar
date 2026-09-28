@@ -1,8 +1,10 @@
 import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/auth';
 import { certificateStatus, certificateStatusLabel } from '@/lib/constants';
 import { CertificateManagement } from '@/components/CertificateManagement';
 
 export default async function CertificadosPage() {
+    const currentUser = await requireUser();
     const [certificates, profiles, closedLeads] = await Promise.all([
         prisma.certificate.findMany({ orderBy: { createdAt: 'desc' }, include: { issuedBy: { select: { name: true } } } }),
         prisma.profile.findMany({ where: { active: true }, orderBy: { title: 'asc' }, select: { id: true, title: true, templateType: true } }),
@@ -17,10 +19,11 @@ export default async function CertificadosPage() {
             </div>
 
             <CertificateManagement
+                isAdmin={currentUser.role === 'ADMIN'}
                 profiles={profiles}
                 closedLeads={closedLeads}
                 certificates={certificates.map((c) => {
-                    const status = certificateStatus(c.expiryDate);
+                    const status = certificateStatus(c.expiryDate, c.revokedAt);
                     return {
                         id: c.id,
                         code: c.code,

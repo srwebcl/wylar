@@ -20,7 +20,7 @@ function previewSrc(image: string): string {
     return image.startsWith('/') ? `${SITE_ORIGIN}${image}` : image;
 }
 
-export function HeroSlideTable({ slides }: { slides: Row[] }) {
+export function HeroSlideTable({ slides, isAdmin }: { slides: Row[]; isAdmin: boolean }) {
     const [, startTransition] = useTransition();
 
     function handleDelete(id: number, title: string) {
@@ -99,9 +99,11 @@ export function HeroSlideTable({ slides }: { slides: Row[] }) {
                                     <Link href={`/hero/${s.id}`} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Editar">
                                         <Pencil size={16} />
                                     </Link>
-                                    <button onClick={() => handleDelete(s.id, s.title)} className="p-2 text-slate-400 hover:text-red-600 transition-colors" title="Eliminar">
-                                        <Trash2 size={16} />
-                                    </button>
+                                    {isAdmin && (
+                                        <button onClick={() => handleDelete(s.id, s.title)} className="p-2 text-slate-400 hover:text-red-600 transition-colors" title="Eliminar (solo administradores)">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    )}
                                 </div>
                             </td>
                         </tr>

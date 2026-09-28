@@ -6,6 +6,7 @@ export const LEAD_TYPES = [
     { value: 'PERSONA', label: 'Persona' },
     { value: 'EMPRESA', label: 'Empresa' },
     { value: 'INSTITUCION', label: 'Institución de Educación' },
+    { value: 'OTEC', label: 'OTEC' },
 ] as const;
 
 export type LeadType = (typeof LEAD_TYPES)[number]['value'];
@@ -79,9 +80,11 @@ export function roleLabel(value: string): string {
 // Módulo de Certificados: el estado (Vigente/Vencido) nunca se guarda en la
 // BD — se deriva de expiryDate en el momento de la consulta, tanto en el
 // CRM como en el validador público, para que nunca quede desactualizado.
-export type CertificateStatus = 'VIGENTE' | 'VENCIDO' | 'SIN_VENCIMIENTO';
+export type CertificateStatus = 'VIGENTE' | 'VENCIDO' | 'SIN_VENCIMIENTO' | 'REVOCADO';
 
-export function certificateStatus(expiryDate: Date | null): CertificateStatus {
+/** Un certificado revocado (revokedAt) deja de ser válido aunque su fecha de vigencia no haya vencido. */
+export function certificateStatus(expiryDate: Date | null, revokedAt?: Date | null): CertificateStatus {
+    if (revokedAt) return 'REVOCADO';
     if (!expiryDate) return 'SIN_VENCIMIENTO';
     return expiryDate.getTime() >= Date.now() ? 'VIGENTE' : 'VENCIDO';
 }
@@ -92,6 +95,8 @@ export function certificateStatusLabel(status: CertificateStatus): string {
             return 'Vigente';
         case 'VENCIDO':
             return 'Vencido';
+        case 'REVOCADO':
+            return 'Revocado';
         default:
             return 'Sin vencimiento';
     }

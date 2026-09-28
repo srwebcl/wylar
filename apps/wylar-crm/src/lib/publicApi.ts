@@ -12,7 +12,7 @@ function allowedOrigins(): string[] {
         .filter(Boolean);
 }
 
-export function corsHeaders(origin: string | null): HeadersInit {
+export function corsHeaders(origin: string | null): Record<string, string> {
     const allowed = allowedOrigins();
     const allowOrigin = origin && allowed.includes(origin) ? origin : allowed[0] || '';
     return {

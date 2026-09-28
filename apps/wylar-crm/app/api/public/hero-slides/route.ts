@@ -6,6 +6,10 @@ import { corsHeaders } from '@/lib/publicApi';
 // apps/wylar/src/lib/hero.js). Los slides "de perfil destacado" no viven
 // acá — el sitio los agrega aparte a partir de GET /api/public/catalog.
 
+// Caché de CDN: la base se consulta como máximo cada ~30 s por región, aunque el
+// sitio reciba mucho tráfico; los cambios del CRM se ven en menos de 2.5 minutos.
+const CDN_CACHE = 'public, s-maxage=30, stale-while-revalidate=120';
+
 export async function OPTIONS(request: Request) {
     return new Response(null, { status: 204, headers: corsHeaders(request.headers.get('origin')) });
 }
@@ -27,5 +31,5 @@ export async function GET(request: Request) {
         ctaHref: s.ctaHref,
     }));
 
-    return Response.json({ ok: true, slides: data }, { status: 200, headers });
+    return Response.json({ ok: true, slides: data }, { status: 200, headers: { ...headers, 'Cache-Control': CDN_CACHE } });
 }

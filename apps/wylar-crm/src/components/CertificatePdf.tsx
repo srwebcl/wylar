@@ -27,7 +27,6 @@ const styles = StyleSheet.create({
 
     footer: { position: 'absolute', bottom: 40, left: 40, right: 40, borderTop: '1 solid #000', paddingTop: 10 },
     footerText: { fontSize: 9, textAlign: 'center' },
-    tcpdfText: { fontSize: 8, textAlign: 'right', marginTop: 4 },
 });
 
 function formatDate(date: Date | null): string {
@@ -44,14 +43,13 @@ export interface CertificatePdfProps {
     issueDate: Date;
     expiryDate: Date | null;
     statusLabel: string;
+    /** QR ya generado (data URL): el PDF no depende de ningún servicio externo. */
+    qrDataUrl: string;
 }
 
-export function CertificatePdf({ code, holderName, holderRut, certificationTitle, categoryLabel: _categoryLabel, issueDate, expiryDate, statusLabel: _statusLabel }: CertificatePdfProps) {
+export function CertificatePdf({ code, holderName, holderRut, certificationTitle, categoryLabel: _categoryLabel, issueDate, expiryDate, statusLabel: _statusLabel, qrDataUrl }: CertificatePdfProps) {
     // Resolve local path for the logo to avoid network issues during SSR
     const logoPath = path.join(process.cwd(), 'public', 'images', 'logo.png');
-    // Generate QR using a reliable public API
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wylar.cl/validador?code=${code}`;
-    
     const today = new Date().toLocaleDateString('es-CL');
 
     return (
@@ -93,14 +91,13 @@ export function CertificatePdf({ code, holderName, holderRut, certificationTitle
                 </View>
 
                 <View style={styles.qrContainer}>
-                    <Image src={qrUrl} style={styles.qrCode} />
+                    <Image src={qrDataUrl} style={styles.qrCode} />
                 </View>
 
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>
                         contacto@wylar.cl ~ www.wylar.cl ~ Fecha de descarga del certificado: {today}
                     </Text>
-                    <Text style={styles.tcpdfText}>Powered by TCPDF (www.tcpdf.org)</Text>
                 </View>
             </Page>
         </Document>

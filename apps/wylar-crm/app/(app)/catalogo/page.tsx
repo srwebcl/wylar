@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/auth';
 import { profileTemplateLabel } from '@/lib/catalogSpec';
 import { CatalogTable } from '@/components/CatalogTable';
 
 export default async function CatalogoPage() {
+    const currentUser = await requireUser();
     const profiles = await prisma.profile.findMany({ orderBy: [{ isFeatured: 'desc' }, { title: 'asc' }] });
 
     return (
@@ -12,7 +14,7 @@ export default async function CatalogoPage() {
             <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
                 <div>
                     <h1 className="text-2xl font-extrabold text-slate-900">Catálogo</h1>
-                    <p className="text-slate-500 text-sm mt-1">Perfiles/certificaciones que se exhiben en wylar.cl (GET /api/public/catalog).</p>
+                    <p className="text-slate-500 text-sm mt-1">Perfiles/certificaciones que se exhiben en el sitio. Los cambios se ven en 1 a 3 minutos.</p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                     <Link
@@ -25,6 +27,7 @@ export default async function CatalogoPage() {
             </div>
 
             <CatalogTable
+                isAdmin={currentUser.role === 'ADMIN'}
                 profiles={profiles.map((p) => ({
                     id: p.id,
                     slug: p.slug,

@@ -15,7 +15,7 @@ interface Row {
     active: boolean;
 }
 
-export function CatalogTable({ profiles }: { profiles: Row[] }) {
+export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: boolean }) {
     const [isPending, startTransition] = useTransition();
     const [pendingId, setPendingId] = useState<number | null>(null);
 
@@ -72,14 +72,16 @@ export function CatalogTable({ profiles }: { profiles: Row[] }) {
                                     <Link href={`/catalogo/${p.id}`} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Editar">
                                         <Pencil size={16} />
                                     </Link>
-                                    <button
-                                        onClick={() => handleDelete(p.id, p.title)}
-                                        disabled={isPending && pendingId === p.id}
-                                        className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50"
-                                        title="Eliminar"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => handleDelete(p.id, p.title)}
+                                            disabled={isPending && pendingId === p.id}
+                                            className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                                            title="Eliminar (solo administradores)"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    )}
                                 </div>
                             </td>
                         </tr>

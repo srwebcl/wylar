@@ -2,7 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
-import { requireUser } from '@/lib/auth';
+import { requireAdmin, requireUser } from '@/lib/auth';
+import { audit } from '@/lib/audit';
 import { heroSlideSchema, type HeroSlideInput } from '@/lib/validation';
 
 export interface HeroFormState {
@@ -30,9 +31,13 @@ export async function saveHeroSlide(input: HeroSlideInput, slideId?: number | nu
     return { success: slideId ? 'Slide actualizado.' : 'Slide creado.' };
 }
 
+/** Eliminar un slide es irreversible: solo ADMIN. */
 export async function deleteHeroSlide(slideId: number): Promise<HeroFormState> {
-    await requireUser();
+    const admin = await requireAdmin();
+    const slide = await prisma.heroSlide.findUnique({ where: { id: slideId } });
+    if (!slide) return { error: 'El slide no existe.' };
     await prisma.heroSlide.delete({ where: { id: slideId } });
+    await audit(admin, 'BANNER_ELIMINADO', 'banner', slideId, slide.title);
     revalidatePath('/hero');
     return { success: 'Slide eliminado.' };
 }

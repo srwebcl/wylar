@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
-import { requireUser } from '@/lib/auth';
-import { triggerSitePublish } from './publish';
+import { requireAdmin, requireUser } from '@/lib/auth';
+import { audit } from '@/lib/audit';
 import { sanitizeRichText } from '@/lib/sanitizeHtml';
 import { profileSchema, type ProfileInput } from '@/lib/validation';
 
@@ -22,7 +22,7 @@ export interface CatalogFormState {
  * insignificante.
  */
 export async function saveProfile(input: ProfileInput, profileId?: number | null): Promise<CatalogFormState> {
-    await requireUser();
+    const currentUser = await requireUser();
 
     const parsed = profileSchema.safeParse(input);
     if (!parsed.success) {
@@ -97,17 +97,18 @@ export async function saveProfile(input: ProfileInput, profileId?: number | null
         }
     });
 
+    await audit(currentUser, profileId ? 'PERFIL_ACTUALIZADO' : 'PERFIL_CREADO', 'perfil', data.slug, data.title);
     revalidatePath('/catalogo');
-    // Trigger site publish automatically upon saving
-    await triggerSitePublish().catch(console.error);
     return { success: profileId ? 'Perfil actualizado.' : 'Perfil creado.' };
 }
 
+/** Eliminar un perfil es irreversible: solo ADMIN. */
 export async function deleteProfile(profileId: number): Promise<CatalogFormState> {
-    await requireUser();
+    const admin = await requireAdmin();
+    const profile = await prisma.profile.findUnique({ where: { id: profileId } });
+    if (!profile) return { error: 'El perfil no existe.' };
     await prisma.profile.delete({ where: { id: profileId } });
+    await audit(admin, 'PERFIL_ELIMINADO', 'perfil', profile.slug, profile.title);
     revalidatePath('/catalogo');
-    // Trigger site publish automatically upon deleting
-    await triggerSitePublish().catch(console.error);
     return { success: 'Perfil eliminado.' };
 }

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { KanbanSquare, ListChecks, Users, LogOut, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal } from 'lucide-react';
+import { KanbanSquare, ListChecks, Users, LogOut, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal, KeyRound, ScrollText } from 'lucide-react';
 import clsx from 'clsx';
 import { logoutAction } from '@/actions/auth';
 import { Logo } from '@/components/Logo';
@@ -20,6 +20,7 @@ const WEB_NAV_ITEMS = [
     { href: '/catalogo', label: 'Catálogo', icon: BookOpen, match: (p: string) => p.startsWith('/catalogo'), adminOnly: false },
     { href: '/certificados', label: 'Certificados', icon: ShieldCheck, match: (p: string) => p.startsWith('/certificados'), adminOnly: false },
     { href: '/equipo', label: 'Equipo', icon: Users, match: (p: string) => p === '/equipo', adminOnly: true },
+    { href: '/auditoria', label: 'Auditoría', icon: ScrollText, match: (p: string) => p === '/auditoria', adminOnly: true },
 ];
 
 export function Sidebar({ currentUser }: { currentUser: User }) {
@@ -74,6 +75,9 @@ export function Sidebar({ currentUser }: { currentUser: User }) {
                         <p className="text-sm font-bold text-white truncate">{currentUser.name}</p>
                         <p className="text-xs text-slate-400 truncate">{roleLabel(currentUser.role)}</p>
                     </div>
+                    <Link href="/cuenta" title="Mi cuenta / cambiar contraseña" className="p-2 text-slate-400 hover:text-cyan-400 transition-colors shrink-0">
+                        <KeyRound size={18} />
+                    </Link>
                     <form action={logoutAction}>
                         <button type="submit" title="Cerrar sesión" className="p-2 text-slate-400 hover:text-red-400 transition-colors shrink-0">
                             <LogOut size={18} />

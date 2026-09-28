@@ -3,7 +3,9 @@
 import { revalidatePath } from 'next/cache';
 import { randomInt } from 'node:crypto';
 import { prisma } from '@/lib/prisma';
-import { requireUser } from '@/lib/auth';
+import { requireAdmin, requireUser } from '@/lib/auth';
+import { audit } from '@/lib/audit';
+import { normalizeRut } from '@/lib/rut';
 import { certificateSchema, type CertificateInput } from '@/lib/validation';
 
 export interface CertificateFormState {
@@ -49,6 +51,7 @@ export async function issueCertificate(input: CertificateInput): Promise<Certifi
             code,
             holderName: data.holderName,
             holderRut: data.holderRut,
+            holderRutNorm: normalizeRut(data.holderRut),
             profileId: data.profileId || null,
             certificationTitle: data.certificationTitle,
             categoryLabel: data.categoryLabel,
@@ -59,13 +62,24 @@ export async function issueCertificate(input: CertificateInput): Promise<Certifi
         },
     });
 
+    await audit(currentUser, 'CERTIFICADO_EMITIDO', 'certificado', code, `${data.holderName} · ${data.certificationTitle}`);
     revalidatePath('/certificados');
     return { success: `Certificado emitido con código ${code}.` };
 }
 
+/**
+ * Revoca un certificado (solo ADMIN). No se borra: queda marcado como revocado,
+ * el validador público lo muestra como "Revocado" y su PDF deja de estar disponible.
+ */
 export async function revokeCertificate(certificateId: number): Promise<CertificateFormState> {
-    await requireUser();
-    await prisma.certificate.delete({ where: { id: certificateId } });
+    const admin = await requireAdmin();
+
+    const certificate = await prisma.certificate.findUnique({ where: { id: certificateId } });
+    if (!certificate) return { error: 'El certificado no existe.' };
+    if (certificate.revokedAt) return { error: 'El certificado ya estaba revocado.' };
+
+    await prisma.certificate.update({ where: { id: certificateId }, data: { revokedAt: new Date(), revokedByName: admin.name } });
+    await audit(admin, 'CERTIFICADO_REVOCADO', 'certificado', certificate.code, `${certificate.holderName} · ${certificate.certificationTitle}`);
     revalidatePath('/certificados');
-    return { success: 'Certificado eliminado.' };
+    return { success: 'Certificado revocado.' };
 }
