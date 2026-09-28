@@ -10,9 +10,9 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     const [lead, users] = await Promise.all([
         prisma.lead.findUnique({
             where: { id: leadId },
-            include: { assignedTo: true, activities: { orderBy: { createdAt: 'asc' } } },
+            include: { assignedTo: { omit: { passwordHash: true } }, activities: { orderBy: { createdAt: 'asc' } } },
         }),
-        prisma.user.findMany({ where: { active: true }, orderBy: { name: 'asc' } }),
+        prisma.user.findMany({ where: { active: true }, orderBy: { name: 'asc' }, omit: { passwordHash: true } }),
     ]);
 
     if (!lead) notFound();

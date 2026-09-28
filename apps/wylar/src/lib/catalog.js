@@ -6,11 +6,24 @@
 // wylar.cl" en /catalogo del CRM, que dispara justamente ese redeploy).
 const CRM_ORIGIN = import.meta.env.PUBLIC_CRM_ORIGIN || 'https://wylar-crm.vercel.app';
 
+// Último catálogo bueno en memoria: si el CRM tarda o falla, el sitio sigue
+// mostrando lo último que se pudo leer (o vacío) en vez de caer con error 500.
+let lastGoodProfiles = [];
+
 async function fetchCatalog() {
-    const res = await fetch(`${CRM_ORIGIN}/api/public/catalog`, { next: { revalidate: 0 }, cache: 'no-store' });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || 'No se pudo cargar el catálogo del CRM.');
-    return data.profiles;
+    try {
+        const res = await fetch(`${CRM_ORIGIN}/api/public/catalog`, { cache: 'no-store', signal: AbortSignal.timeout(4000) });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || 'No se pudo cargar el catálogo del CRM.');
+        lastGoodProfiles = data.profiles;
+        return data.profiles;
+    } catch (error) {
+        // En el build (sin AWS_LAMBDA_FUNCTION_NAME) se sigue fallando: es mejor
+        // no desplegar que publicar páginas estáticas con el catálogo vacío.
+        if (lastGoodProfiles.length === 0 && !process.env.AWS_LAMBDA_FUNCTION_NAME) throw error;
+        console.error('[catalog] CRM no disponible, se usa el último catálogo conocido:', error?.message ?? error);
+        return lastGoodProfiles;
+    }
 }
 
 const TYPE_FROM_TEMPLATE = { CHILEVALORA: 'chilevalora', SOLDADURA: 'soldadura', OPERADORES: 'operadores', ESTANDAR: 'estandar' };

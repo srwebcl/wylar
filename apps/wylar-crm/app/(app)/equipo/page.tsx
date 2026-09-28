@@ -4,7 +4,7 @@ import { TeamManagement } from '@/components/TeamManagement';
 
 export default async function EquipoPage() {
     const currentUser = await requireAdmin();
-    const users = await prisma.user.findMany({ orderBy: { createdAt: 'asc' } });
+    const users = await prisma.user.findMany({ orderBy: { createdAt: 'asc' }, omit: { passwordHash: true } });
 
     return <TeamManagement users={users} currentUserId={currentUser.id} />;
 }

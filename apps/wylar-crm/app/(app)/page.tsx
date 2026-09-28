@@ -4,7 +4,7 @@ import { StatsStrip, type BoardStats } from '@/components/StatsStrip';
 
 export default async function BoardPage() {
     const leads = await prisma.lead.findMany({
-        include: { assignedTo: true },
+        include: { assignedTo: { omit: { passwordHash: true } } },
         orderBy: { createdAt: 'desc' },
     });
 

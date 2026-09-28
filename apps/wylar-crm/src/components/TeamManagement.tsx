@@ -2,7 +2,7 @@
 
 import { useActionState, useState, useTransition } from 'react';
 import { Shield, Plus, X, Power } from 'lucide-react';
-import type { User } from '@prisma/client';
+import type { SafeUser as User } from '@/lib/safeUser';
 import { createUser, toggleUserActive, type UserFormState } from '@/actions/users';
 import { ROLES, roleLabel } from '@/lib/constants';
 

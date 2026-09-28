@@ -27,7 +27,8 @@ export async function loginAction(_prevState: LoginState, formData: FormData): P
     await createSession(user.id);
 
     const next = formData.get('next');
-    const destination = typeof next === 'string' && next.startsWith('/') ? next : '/';
+    // Solo rutas internas: "//host" y "/\host" serían interpretadas como otro sitio.
+    const destination = typeof next === 'string' && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\') ? next : '/';
     redirect(destination);
 }
 

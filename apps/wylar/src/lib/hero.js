@@ -5,7 +5,7 @@ const CRM_ORIGIN = import.meta.env.PUBLIC_CRM_ORIGIN || 'https://wylar-crm.verce
 
 export async function getHeroSlides() {
     try {
-        const res = await fetch(`${CRM_ORIGIN}/api/public/hero-slides`, { next: { revalidate: 0 }, cache: 'no-store' });
+        const res = await fetch(`${CRM_ORIGIN}/api/public/hero-slides`, { cache: 'no-store', signal: AbortSignal.timeout(4000) });
         const data = await res.json();
         return data.ok ? data.slides : [];
     } catch {

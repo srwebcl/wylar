@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, CheckCircle, AlertTriangle, Users, Shield, Download } from 'lucide-react';
 
 const CRM_ORIGIN = import.meta.env.PUBLIC_CRM_ORIGIN || 'https://wylar-crm.vercel.app';
@@ -10,16 +10,29 @@ export default function Validador() {
     const [isSearching, setIsSearching] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    async function handleValidate(e) {
+    // El QR del PDF abre /validador?code=WYL-… : se busca automáticamente.
+    useEffect(() => {
+        const code = new URLSearchParams(window.location.search).get('code');
+        if (code && code.trim()) {
+            setQuery(code.trim());
+            runSearch(code.trim());
+        }
+    }, []);
+
+    function handleValidate(e) {
         e.preventDefault();
-        if (!query.trim()) return;
+        runSearch(query);
+    }
+
+    async function runSearch(rawQuery) {
+        if (!rawQuery.trim()) return;
 
         setIsSearching(true);
         setHasSearched(false);
         setErrorMessage('');
 
         try {
-            const res = await fetch(`${CRM_ORIGIN}/api/public/certificates/validate?q=${encodeURIComponent(query.trim())}`);
+            const res = await fetch(`${CRM_ORIGIN}/api/public/certificates/validate?q=${encodeURIComponent(rawQuery.trim())}`);
             const data = await res.json();
             if (!data.ok) throw new Error(data.error || 'No pudimos validar el certificado.');
             setResults(data.results);
@@ -116,7 +129,7 @@ export default function Validador() {
                                     <div className="space-y-8">
                                         {results.map((cert) => (
                                             <div key={cert.code} className="bg-white rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden flex flex-col md:flex-row transform hover:-translate-y-1 transition-transform duration-300">
-                                                <div className={`w-full md:w-6 flex md:flex-col items-center justify-center p-2 md:p-0 ${cert.status === 'VIGENTE' ? 'bg-green-500' : 'bg-red-500'}`}>
+                                                <div className={`w-full md:w-6 flex md:flex-col items-center justify-center p-2 md:p-0 ${cert.status !== 'VENCIDO' ? 'bg-green-500' : 'bg-red-500'}`}>
                                                     <span className="md:-rotate-90 text-white font-black tracking-widest text-xs uppercase opacity-90 whitespace-nowrap">{cert.statusLabel}</span>
                                                 </div>
 
@@ -128,8 +141,8 @@ export default function Validador() {
                                                             </div>
                                                             <h4 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight">{cert.certificationTitle}</h4>
                                                         </div>
-                                                        <div className={`px-5 py-2 rounded-xl font-black text-sm inline-flex items-center gap-2 self-start shadow-sm border ${cert.status === 'VIGENTE' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
-                                                            {cert.status === 'VIGENTE' ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
+                                                        <div className={`px-5 py-2 rounded-xl font-black text-sm inline-flex items-center gap-2 self-start shadow-sm border ${cert.status !== 'VENCIDO' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                                                            {cert.status !== 'VENCIDO' ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
                                                             {cert.statusLabel.toUpperCase()}
                                                         </div>
                                                     </div>

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { randomUUID } from 'node:crypto';
 import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/auth';
-import { activityEntrySchema, publicLeadSchema } from '@/lib/validation';
+import { activityEntrySchema, assignSchema, publicLeadSchema, statusChangeSchema } from '@/lib/validation';
 import { SYSTEM_ACTIVITY_TYPES, statusLabel } from '@/lib/constants';
 import { resolveSource } from '@/lib/leadSource';
 
@@ -97,6 +97,8 @@ export async function addLeadActivity(leadId: number, _prevState: LeadFormState,
 export async function changeLeadStatus(leadId: number, status: string) {
     const currentUser = await requireUser();
 
+    if (!statusChangeSchema.safeParse({ status }).success) return { ok: false as const };
+
     const lead = await prisma.lead.findUniqueOrThrow({ where: { id: leadId } });
     if (lead.status === status) return { ok: true as const };
 
@@ -129,7 +131,7 @@ export async function changeLeadStatus(leadId: number, status: string) {
 /** Variante para <form action> con useActionState (usada en la ficha del lead). */
 export async function changeLeadStatusForm(leadId: number, _prevState: LeadFormState, formData: FormData): Promise<LeadFormState> {
     const status = formData.get('status');
-    if (typeof status !== 'string' || !status) return { error: 'Estado inválido.' };
+    if (typeof status !== 'string' || !statusChangeSchema.safeParse({ status }).success) return { error: 'Estado inválido.' };
     await changeLeadStatus(leadId, status);
     return { success: 'Estado actualizado.' };
 }
@@ -137,8 +139,9 @@ export async function changeLeadStatusForm(leadId: number, _prevState: LeadFormS
 /** Asignación de responsables: delega el lead a un miembro del equipo (o lo deja sin asignar). */
 export async function assignLead(leadId: number, formData: FormData) {
     const currentUser = await requireUser();
-    const raw = formData.get('assignedToId');
-    const newAssigneeId = raw ? Number(raw) : null;
+    const parsedAssign = assignSchema.safeParse({ assignedToId: formData.get('assignedToId') || null });
+    if (!parsedAssign.success) return;
+    const newAssigneeId = parsedAssign.data.assignedToId ?? null;
 
     const lead = await prisma.lead.findUniqueOrThrow({ where: { id: leadId } });
     if (lead.assignedToId === newAssigneeId) return;

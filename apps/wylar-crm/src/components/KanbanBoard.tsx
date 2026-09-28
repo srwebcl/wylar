@@ -6,7 +6,8 @@ import { Building2, Clock, GraduationCap, User as UserIcon } from 'lucide-react'
 import clsx from 'clsx';
 import { changeLeadStatus } from '@/actions/leads';
 import { STATUSES, formatDuration, leadTypeLabel, sourceLabel } from '@/lib/constants';
-import type { Lead, User } from '@prisma/client';
+import type { Lead } from '@prisma/client';
+import type { SafeUser as User } from '@/lib/safeUser';
 
 type LeadWithAssignee = Lead & { assignedTo: User | null };
 

@@ -1,4 +1,5 @@
 import { requireUser } from '@/lib/auth';
+import { toSafeUser } from '@/lib/safeUser';
 import { Sidebar } from '@/components/Sidebar';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -11,7 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 <div className="absolute bottom-[-10%] right-[-5%] w-[30%] h-[40%] rounded-full bg-amber-100/40 blur-[100px]"></div>
             </div>
 
-            <Sidebar currentUser={currentUser} />
+            <Sidebar currentUser={toSafeUser(currentUser)} />
 
             <div className="flex-1 relative z-10 min-w-0">
                 <main className="p-6 md:p-8">

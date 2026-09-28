@@ -4,7 +4,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { SOURCES, STATUSES } from '@/lib/constants';
-import type { User } from '@prisma/client';
+import type { SafeUser as User } from '@/lib/safeUser';
 
 export function LeadsSearchBar({ users }: { users: User[] }) {
     const router = useRouter();

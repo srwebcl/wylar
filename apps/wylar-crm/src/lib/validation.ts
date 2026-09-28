@@ -4,6 +4,12 @@ import { PROFILE_TEMPLATE_TYPE_VALUES, TARGET_AUDIENCE_VALUES } from './catalogS
 
 const ROLE_VALUES = ROLES.map((r) => r.value) as [string, ...string[]];
 
+// Solo rutas internas ("/x", no "//host") o https: bloquea javascript:, data:, etc.
+function isSafeUrl(value: string): boolean {
+    if (value.startsWith('/')) return !value.startsWith('//') && !value.startsWith('/\\');
+    return /^https:\/\//i.test(value);
+}
+
 /**
  * Datos que envía el formulario web público de wylar.cl (Módulo de Captura
  * de Oportunidades). `source`/`sourceDetail` ya vienen calculados por el
@@ -12,9 +18,9 @@ const ROLE_VALUES = ROLES.map((r) => r.value) as [string, ...string[]];
  */
 export const publicLeadSchema = z.object({
     type: z.enum(LEAD_TYPE_VALUES),
-    name: z.string().trim().min(2, 'Ingresa el nombre completo.'),
-    email: z.string().trim().email('Correo inválido.'),
-    phone: z.string().trim().min(6, 'Ingresa un teléfono de contacto.'),
+    name: z.string().trim().min(2, 'Ingresa el nombre completo.').max(120),
+    email: z.string().trim().email('Correo inválido.').max(254),
+    phone: z.string().trim().min(6, 'Ingresa un teléfono de contacto.').max(30),
     company: z.string().trim().max(200).optional().nullable(),
     certificationInterest: z.string().trim().max(200).optional().nullable(),
     message: z.string().trim().max(2000).optional().nullable(),
@@ -42,7 +48,7 @@ export const userSchema = z.object({
     name: z.string().trim().min(2, 'Ingresa el nombre completo.'),
     email: z.string().trim().email('Correo corporativo inválido.'),
     role: z.enum(ROLE_VALUES),
-    password: z.string().min(4, 'La contraseña debe tener al menos 4 caracteres.'),
+    password: z.string().min(12, 'La contraseña debe tener al menos 12 caracteres.').max(200),
 });
 
 export const loginSchema = z.object({
@@ -129,14 +135,14 @@ export type CertificateInput = z.infer<typeof certificateSchema>;
 export const heroSlideSchema = z.object({
     order: z.coerce.number().int().default(0),
     active: z.boolean().default(true),
-    image: z.string().trim().min(1, 'Falta la imagen (URL o ruta).').max(500),
+    image: z.string().trim().min(1, 'Falta la imagen (URL o ruta).').max(500).refine(isSafeUrl, 'La imagen debe ser una ruta que empiece con "/" o una URL https://.'),
     eyebrowLead: z.string().trim().min(1, 'Falta el texto de la etiqueta (ej. "Centro Acreditado").').max(80),
     eyebrowAccent: z.string().trim().min(1, 'Falta el texto destacado de la etiqueta (ej. "ChileValora").').max(80),
     title: z.string().trim().min(1, 'Falta el título.').max(120),
     titleHighlight: z.string().trim().min(1, 'Falta la parte destacada del título.').max(120),
     description: z.string().trim().min(1, 'Falta la descripción.').max(500),
     ctaLabel: z.string().trim().min(1, 'Falta el texto del botón.').max(60),
-    ctaHref: z.string().trim().min(1, 'Falta el destino del botón (ej. /catalogo).').max(300),
+    ctaHref: z.string().trim().min(1, 'Falta el destino del botón (ej. /catalogo).').max(300).refine(isSafeUrl, 'El destino debe ser una ruta que empiece con "/" (ej. /catalogo) o una URL https://.'),
 });
 
 export type HeroSlideInput = z.infer<typeof heroSlideSchema>;

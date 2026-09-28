@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { leadTypeLabel, sourceLabel, statusLabel } from '@/lib/constants';
-import type { Lead, User } from '@prisma/client';
+import type { Lead } from '@prisma/client';
+import type { SafeUser as User } from '@/lib/safeUser';
 
 type LeadWithAssignee = Lead & { assignedTo: User | null };
 

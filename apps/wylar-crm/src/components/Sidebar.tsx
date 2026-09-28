@@ -2,19 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { KanbanSquare, ListChecks, Users, LogOut, MessageCircle, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal } from 'lucide-react';
+import { KanbanSquare, ListChecks, Users, LogOut, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal } from 'lucide-react';
 import clsx from 'clsx';
 import { logoutAction } from '@/actions/auth';
 import { Logo } from '@/components/Logo';
 import { roleLabel } from '@/lib/constants';
-import type { User } from '@prisma/client';
+import type { SafeUser as User } from '@/lib/safeUser';
 
-const NAV_ITEMS = [
-    { href: '/', label: 'Tablero (Embudo)', icon: KanbanSquare, match: (p: string) => p === '/', adminOnly: false },
-    { href: '/leads', label: 'Prospectos', icon: ListChecks, match: (p: string) => p.startsWith('/leads'), adminOnly: false },
+const CRM_NAV_ITEMS = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: (p: string) => p === '/dashboard', adminOnly: false },
+    { href: '/', label: 'Tablero Leads', icon: KanbanSquare, match: (p: string) => p === '/', adminOnly: false },
+    { href: '/leads', label: 'Prospectos', icon: ListChecks, match: (p: string) => p.startsWith('/leads'), adminOnly: false },
+];
+
+const WEB_NAV_ITEMS = [
+    { href: '/hero', label: 'Banners', icon: GalleryHorizontal, match: (p: string) => p.startsWith('/hero'), adminOnly: false },
     { href: '/catalogo', label: 'Catálogo', icon: BookOpen, match: (p: string) => p.startsWith('/catalogo'), adminOnly: false },
-    { href: '/hero', label: 'Hero del Home', icon: GalleryHorizontal, match: (p: string) => p.startsWith('/hero'), adminOnly: false },
     { href: '/certificados', label: 'Certificados', icon: ShieldCheck, match: (p: string) => p.startsWith('/certificados'), adminOnly: false },
     { href: '/equipo', label: 'Equipo', icon: Users, match: (p: string) => p === '/equipo', adminOnly: true },
 ];
@@ -22,38 +25,42 @@ const NAV_ITEMS = [
 export function Sidebar({ currentUser }: { currentUser: User }) {
     const pathname = usePathname();
 
+    const renderNavItem = ({ href, label, icon: Icon, match }: any) => {
+        const active = match(pathname);
+        return (
+            <Link
+                key={href}
+                href={href}
+                className={clsx(
+                    'w-full flex items-center px-4 py-3.5 rounded-xl transition-all duration-200 font-medium group',
+                    active ? 'bg-amber-500 text-[#0B1E40] shadow-lg shadow-amber-500/20' : 'text-slate-300 hover:bg-white/10 hover:text-white',
+                )}
+            >
+                <Icon size={20} className={clsx('mr-3 transition-colors', active ? 'text-[#0B1E40]' : 'text-slate-400 group-hover:text-cyan-400')} />
+                {label}
+            </Link>
+        );
+    };
+
     return (
-        <div className="w-72 bg-[#0B1E40] text-white flex flex-col shadow-2xl z-20 shrink-0">
-            <div className="p-6 flex items-center justify-center border-b border-white/10">
+        <div className="w-72 bg-[#0B1E40] text-white flex flex-col shadow-2xl z-20 shrink-0 overflow-y-auto">
+            <div className="p-6 flex items-center justify-center border-b border-white/10 shrink-0">
                 <Logo width={150} />
             </div>
 
-            <nav className="flex-1 px-4 py-6 space-y-2">
-                {NAV_ITEMS.filter((item) => !item.adminOnly || currentUser.role === 'ADMIN').map(({ href, label, icon: Icon, match }) => {
-                    const active = match(pathname);
-                    return (
-                        <Link
-                            key={href}
-                            href={href}
-                            className={clsx(
-                                'w-full flex items-center px-4 py-3.5 rounded-xl transition-all duration-200 font-medium group',
-                                active ? 'bg-amber-500 text-[#0B1E40] shadow-lg shadow-amber-500/20' : 'text-slate-300 hover:bg-white/10 hover:text-white',
-                            )}
-                        >
-                            <Icon size={20} className={clsx('mr-3 transition-colors', active ? 'text-[#0B1E40]' : 'text-slate-400 group-hover:text-cyan-400')} />
-                            {label}
-                        </Link>
-                    );
-                })}
-
-                <div className="pt-3 mt-3 border-t border-white/10">
-                    <div className="flex items-center gap-2 px-4 py-2 text-slate-500 text-xs uppercase tracking-widest font-semibold">
-                        <MessageCircle size={14} />
-                        WhatsApp
+            <nav className="flex-1 px-4 py-6 space-y-6">
+                <div>
+                    <p className="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">CRM</p>
+                    <div className="space-y-1">
+                        {CRM_NAV_ITEMS.filter((item) => !item.adminOnly || currentUser.role === 'ADMIN').map(renderNavItem)}
                     </div>
-                    <p className="px-4 text-xs text-slate-500 leading-relaxed">
-                        Autoconsulta y derivación automática — próximamente.
-                    </p>
+                </div>
+
+                <div>
+                    <p className="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">WEB</p>
+                    <div className="space-y-1">
+                        {WEB_NAV_ITEMS.filter((item) => !item.adminOnly || currentUser.role === 'ADMIN').map(renderNavItem)}
+                    </div>
                 </div>
             </nav>
 

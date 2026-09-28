@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/auth';
 import { triggerSitePublish } from './publish';
+import { sanitizeRichText } from '@/lib/sanitizeHtml';
 import { profileSchema, type ProfileInput } from '@/lib/validation';
 
 export interface CatalogFormState {
@@ -63,13 +64,16 @@ export async function saveProfile(input: ProfileInput, profileId?: number | null
         await tx.profileFaq.deleteMany({ where: { profileId: profile.id } });
 
         for (const section of data.sections) {
+            // La plantilla ESTANDAR guarda HTML del editor y el sitio lo muestra
+            // con set:html: se sanea aquí. Las demás plantillas guardan texto plano.
+            const text = data.templateType === 'ESTANDAR' && section.text ? sanitizeRichText(section.text) : section.text;
             await tx.profileSection.create({
                 data: {
                     profileId: profile.id,
                     key: section.key,
                     order: section.order,
                     title: section.title || null,
-                    text: section.text || null,
+                    text: text || null,
                     intro: section.intro || null,
                     closing: section.closing || null,
                     note: section.note || null,

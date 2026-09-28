@@ -9,10 +9,10 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
     const [leads, users] = await Promise.all([
         prisma.lead.findMany({
             where: buildLeadsWhere(params),
-            include: { assignedTo: true },
+            include: { assignedTo: { omit: { passwordHash: true } } },
             orderBy: { createdAt: 'desc' },
         }),
-        prisma.user.findMany({ where: { active: true }, orderBy: { name: 'asc' } }),
+        prisma.user.findMany({ where: { active: true }, orderBy: { name: 'asc' }, omit: { passwordHash: true } }),
     ]);
 
     return (

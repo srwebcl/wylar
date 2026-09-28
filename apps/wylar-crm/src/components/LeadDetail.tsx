@@ -3,7 +3,8 @@
 import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
 import { Send, User as UserIcon, Calendar, Phone, Mail, Building2, GraduationCap, Tag, Clock, TimerReset, AlarmClock } from 'lucide-react';
 import clsx from 'clsx';
-import type { Lead, LeadActivity, User } from '@prisma/client';
+import type { Lead, LeadActivity } from '@prisma/client';
+import type { SafeUser as User } from '@/lib/safeUser';
 import { addLeadActivity, assignLead, changeLeadStatusForm, type LeadFormState } from '@/actions/leads';
 import { ACTIVITY_TYPES, STATUSES, SOURCES, leadTypeLabel, sourceLabel, activityTypeLabel, formatDuration } from '@/lib/constants';
 
