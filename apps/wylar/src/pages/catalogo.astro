@@ -5,8 +5,10 @@ import Layout from '../layouts/Layout.astro';
 import CatalogoInteractivo from '../components/CatalogoInteractivo.jsx';
 import ContactForm from '../components/ContactForm.jsx';
 import { getCatalogList } from '../lib/catalog.js';
+import { setCdnCache } from '../lib/cache.js';
 
 const perfiles = await getCatalogList();
+setCdnCache(Astro, perfiles.length > 0);
 ---
 
 <Layout title="Certificaciones | Wylar">

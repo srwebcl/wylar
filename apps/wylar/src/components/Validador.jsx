@@ -3,6 +3,9 @@ import { Search, CheckCircle, AlertTriangle, Users, Shield, Download } from 'luc
 
 const CRM_ORIGIN = import.meta.env.PUBLIC_CRM_ORIGIN || 'https://wylar-crm.vercel.app';
 
+// Solo vigente o sin vencimiento es válido; vencido y revocado se muestran en rojo.
+const isValid = (cert) => cert.status === 'VIGENTE' || cert.status === 'SIN_VENCIMIENTO';
+
 export default function Validador() {
     const [query, setQuery] = useState('');
     const [hasSearched, setHasSearched] = useState(false);
@@ -129,7 +132,7 @@ export default function Validador() {
                                     <div className="space-y-8">
                                         {results.map((cert) => (
                                             <div key={cert.code} className="bg-white rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden flex flex-col md:flex-row transform hover:-translate-y-1 transition-transform duration-300">
-                                                <div className={`w-full md:w-6 flex md:flex-col items-center justify-center p-2 md:p-0 ${cert.status !== 'VENCIDO' ? 'bg-green-500' : 'bg-red-500'}`}>
+                                                <div className={`w-full md:w-6 flex md:flex-col items-center justify-center p-2 md:p-0 ${isValid(cert) ? 'bg-green-500' : 'bg-red-500'}`}>
                                                     <span className="md:-rotate-90 text-white font-black tracking-widest text-xs uppercase opacity-90 whitespace-nowrap">{cert.statusLabel}</span>
                                                 </div>
 
@@ -141,8 +144,8 @@ export default function Validador() {
                                                             </div>
                                                             <h4 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight">{cert.certificationTitle}</h4>
                                                         </div>
-                                                        <div className={`px-5 py-2 rounded-xl font-black text-sm inline-flex items-center gap-2 self-start shadow-sm border ${cert.status !== 'VENCIDO' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
-                                                            {cert.status !== 'VENCIDO' ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
+                                                        <div className={`px-5 py-2 rounded-xl font-black text-sm inline-flex items-center gap-2 self-start shadow-sm border ${isValid(cert) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                                                            {isValid(cert) ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
                                                             {cert.statusLabel.toUpperCase()}
                                                         </div>
                                                     </div>
@@ -167,14 +170,16 @@ export default function Validador() {
                                                         </div>
                                                     </div>
 
+                                                    {cert.pdfUrl && (
                                                     <a
-                                                        href={`${CRM_ORIGIN}${cert.pdfUrl}`}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="inline-flex items-center gap-2 bg-[#0B1E40] hover:bg-blue-900 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-md"
-                                                    >
-                                                        <Download size={18} /> Descargar Certificado (PDF)
-                                                    </a>
+                                                            href={`${CRM_ORIGIN}${cert.pdfUrl}`}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="inline-flex items-center gap-2 bg-[#0B1E40] hover:bg-blue-900 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-md"
+                                                        >
+                                                            <Download size={18} /> Descargar Certificado (PDF)
+                                                        </a>
+                                                    )}
                                                 </div>
                                             </div>
                                         ))}

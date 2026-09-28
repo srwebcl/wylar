@@ -1,9 +1,12 @@
 ---
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
 import ContactForm from '../components/ContactForm.jsx';
 import CatalogoPerfiles from '../components/CatalogoPerfiles.jsx';
 import FaqAccordion from '../components/perfil-templates/FaqAccordion.astro';
 import { getCatalogList } from '../lib/catalog.js';
+import { setCdnCache } from '../lib/cache.js';
 import {
   Building2,
   CheckCircle2,
@@ -72,6 +75,7 @@ const FAQ_EMPRESAS = [
 ];
 
 const perfiles = await getCatalogList();
+setCdnCache(Astro, perfiles.length > 0);
 ---
 
 <Layout title="Certificación para Empresas | Wylar">

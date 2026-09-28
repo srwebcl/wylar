@@ -9,10 +9,12 @@ import Portales from "../components/Portales.jsx";
 import LogoCarousel from "../components/LogoCarousel.astro";
 import { getCatalogList } from "../lib/catalog.js";
 import { getHeroSlides } from "../lib/hero.js";
+import { setCdnCache } from "../lib/cache.js";
 import { ShieldCheck, Target, MapPin, BadgeCheck } from "lucide-react";
 
 const perfiles = await getCatalogList();
 const heroSlides = await getHeroSlides();
+setCdnCache(Astro, perfiles.length > 0);
 ---
 
 <Layout title="Wylar - Certificadora de Competencias Laborales">

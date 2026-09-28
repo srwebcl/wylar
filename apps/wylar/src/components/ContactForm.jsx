@@ -6,7 +6,7 @@ import { submitLead } from '../lib/crm.js';
 const MOTIVO_META = {
     personas: { type: 'PERSONA', certificationInterest: 'Evaluación para personas' },
     empresas: { type: 'EMPRESA', certificationInterest: 'Cotización para empresas' },
-    otec: { type: 'INSTITUCION', certificationInterest: 'Alianza con OTEC / Organismo de Capacitación' },
+    otec: { type: 'OTEC', certificationInterest: 'Alianza con OTEC / Organismo de Capacitación' },
     instituciones: { type: 'INSTITUCION', certificationInterest: 'Alianza para instituciones de educación' },
     otro: { type: 'PERSONA', certificationInterest: null },
 };
@@ -141,6 +141,15 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
                                         <AlertCircle size={16} className="shrink-0 mt-0.5" /> {errorMessage}
                                     </div>
                                 )}
+
+                                <label className="flex items-start gap-3 text-sm text-slate-600 cursor-pointer">
+                                    <input type="checkbox" name="consent" required className="mt-1 w-4 h-4 shrink-0 rounded border-slate-300 accent-[#0B1E40]" />
+                                    <span>
+                                        He leído y acepto la{' '}
+                                        <a href="/politicas-privacidad" target="_blank" rel="noreferrer" className="font-bold text-blue-700 hover:underline">Política de Privacidad</a>{' '}
+                                        y autorizo el uso de mis datos para responder esta solicitud.
+                                    </span>
+                                </label>
 
                                 <button type="submit" disabled={status === 'sending'} className="w-full bg-[#0B1E40] hover:bg-blue-900 disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold text-lg py-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-2">
                                     {status === 'sending' ? (

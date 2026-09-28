@@ -1,8 +1,11 @@
 ---
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
 import ContactForm from '../components/ContactForm.jsx';
 import CatalogoPerfiles from '../components/CatalogoPerfiles.jsx';
 import { getCatalogList } from '../lib/catalog.js';
+import { setCdnCache } from '../lib/cache.js';
 import {
   GraduationCap,
   Layers,
@@ -52,6 +55,7 @@ const ALIANZA = [
 ];
 
 const perfiles = await getCatalogList();
+setCdnCache(Astro, perfiles.length > 0);
 ---
 
 <Layout title="Alianzas para Instituciones de Educación | Wylar">
