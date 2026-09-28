@@ -30,3 +30,6 @@ pnpm-debug.log*
 base/
 .vercel
 .env*
+
+# Plantilla de variables (sin valores)
+!.env.example
