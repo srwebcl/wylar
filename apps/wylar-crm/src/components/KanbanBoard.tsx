@@ -37,9 +37,12 @@ export function KanbanBoard({ leads }: { leads: LeadWithAssignee[] }) {
         const leadId = dragId;
         setDragId(null);
 
+        const before = items;
         setItems((prev) => prev.map((l) => (l.id === leadId ? { ...l, status } : l)));
         startTransition(async () => {
-            await changeLeadStatus(leadId, status);
+            // Si el servidor rechaza el cambio o falla, se vuelve a mostrar el estado real.
+            const saved = await changeLeadStatus(leadId, status).then((r) => r.ok).catch(() => false);
+            if (!saved) setItems(before);
         });
     }
 

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin, requireUser } from '@/lib/auth';
 import { audit } from '@/lib/audit';
+import { deleteBlobIfUnused } from '@/lib/blob';
 import { sanitizeRichText } from '@/lib/sanitizeHtml';
 import { profileSchema, type ProfileInput } from '@/lib/validation';
 
@@ -34,6 +35,8 @@ export async function saveProfile(input: ProfileInput, profileId?: number | null
     if (existingSlug && existingSlug.id !== profileId) {
         return { error: `El slug "${data.slug}" ya está en uso por otro perfil.` };
     }
+
+    const previousImage = profileId ? (await prisma.profile.findUnique({ where: { id: profileId }, select: { image: true } }))?.image : null;
 
     const profileData = {
         slug: data.slug,
@@ -97,6 +100,7 @@ export async function saveProfile(input: ProfileInput, profileId?: number | null
         }
     });
 
+    if (previousImage && previousImage !== data.image) await deleteBlobIfUnused(previousImage);
     await audit(currentUser, profileId ? 'PERFIL_ACTUALIZADO' : 'PERFIL_CREADO', 'perfil', data.slug, data.title);
     revalidatePath('/catalogo');
     return { success: profileId ? 'Perfil actualizado.' : 'Perfil creado.' };
@@ -108,6 +112,7 @@ export async function deleteProfile(profileId: number): Promise<CatalogFormState
     const profile = await prisma.profile.findUnique({ where: { id: profileId } });
     if (!profile) return { error: 'El perfil no existe.' };
     await prisma.profile.delete({ where: { id: profileId } });
+    await deleteBlobIfUnused(profile.image);
     await audit(admin, 'PERFIL_ELIMINADO', 'perfil', profile.slug, profile.title);
     revalidatePath('/catalogo');
     return { success: 'Perfil eliminado.' };

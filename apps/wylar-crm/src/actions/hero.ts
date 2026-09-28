@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin, requireUser } from '@/lib/auth';
 import { audit } from '@/lib/audit';
+import { deleteBlobIfUnused } from '@/lib/blob';
 import { heroSlideSchema, type HeroSlideInput } from '@/lib/validation';
 
 export interface HeroFormState {
@@ -37,6 +38,7 @@ export async function deleteHeroSlide(slideId: number): Promise<HeroFormState> {
     const slide = await prisma.heroSlide.findUnique({ where: { id: slideId } });
     if (!slide) return { error: 'El slide no existe.' };
     await prisma.heroSlide.delete({ where: { id: slideId } });
+    await deleteBlobIfUnused(slide.image);
     await audit(admin, 'BANNER_ELIMINADO', 'banner', slideId, slide.title);
     revalidatePath('/hero');
     return { success: 'Slide eliminado.' };
