@@ -6,6 +6,7 @@ import FichaChileValora from '../../components/perfil-templates/FichaChileValora
 import FichaSoldadura from '../../components/perfil-templates/FichaSoldadura.astro';
 import FichaOperadores from '../../components/perfil-templates/FichaOperadores.astro';
 import FichaEstandar from '../../components/perfil-templates/FichaEstandar.astro';
+import FichaOcupacionalDownload from '../../components/perfil-templates/FichaOcupacionalDownload.astro';
 import OtrasCertificaciones from '../../components/perfil-templates/OtrasCertificaciones.astro';
 
 export const prerender = false;
@@ -26,7 +27,9 @@ setCdnCache(Astro);
         {perfil.type === 'soldadura' && <FichaSoldadura perfil={perfil} />}
         {perfil.type === 'operadores' && <FichaOperadores perfil={perfil} />}
         {(!perfil.type || perfil.type === 'chilevalora') && <FichaChileValora perfil={perfil} />}
-        
+
+        <FichaOcupacionalDownload fichaUrl={perfil.fichaUrl} />
+
         <OtrasCertificaciones perfiles={perfiles} currentId={perfil.id} />
     </div>
 </Layout>

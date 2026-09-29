@@ -1,74 +1,39 @@
 ---
 // Cabecera de páginas internas (catálogo, ChileValora, contacto): franja
-// navy angosta con un anillo de sello de verificación (el objeto real que
-// define a Wylar — certificados con sello — no un gradiente abstracto) que
-// gira muy lento en la esquina, ver .hero-seal en global.css. El validador
+// navy extremadamente baja — no un banner alto — con un barrido de luz que
+// cruza el fondo en loop y una entrada escalonada del título/subtítulo al
+// cargar (ver .hero-sweep/.hero-in-* en global.css). Tipografía y colores
+// son los mismos del resto del sitio (Inter, navy/cian/ámbar). El validador
 // usa el mismo lenguaje visual pero no puede importar este componente (es
-// React, no Astro): ver Validador.jsx, que replica este mismo anillo.
+// React, no Astro): ver Validador.jsx.
 interface Props {
     title: string;
     subtitle?: string;
 }
 
 const { title, subtitle } = Astro.props;
-
-// Marcas radiales del sello: 28 ticks entre dos anillos concéntricos, con
-// uno solo acentuado en ámbar en las 12 — el único punto de color cálido,
-// como el timbre de un sello real. Coordenadas a 1 decimal (SVG liviano).
-const round = (n: number) => Math.round(n * 10) / 10;
-const SEAL_TICKS = Array.from({ length: 28 }, (_, i) => {
-    const angle = (i / 28) * 2 * Math.PI - Math.PI / 2;
-    const [r1, r2] = [86, 94];
-    return {
-        x1: round(100 + r1 * Math.cos(angle)),
-        y1: round(100 + r1 * Math.sin(angle)),
-        x2: round(100 + r2 * Math.cos(angle)),
-        y2: round(100 + r2 * Math.sin(angle)),
-        accent: i === 0,
-    };
-});
 ---
 
-<div
-    class="bg-[#050B14] pt-16 pb-12 md:pt-24 md:pb-16 relative overflow-hidden border-b border-white/10"
-    style="clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), 50% 100%, 0 calc(100% - 20px));"
->
-    {/* Foco de luz estático detrás del sello — no un blob que deambula */}
-    <div class="absolute inset-0 bg-[radial-gradient(60%_80%_at_82%_0%,rgba(34,211,238,0.12),transparent_65%)]"></div>
-
-    {/* Anillo del sello de verificación, sangrando por la esquina superior
-        derecha. El giro se anima en el <div> envolvente, no en el <svg>
-        (varios navegadores no aceleran por hardware transforms CSS sobre
-        el propio elemento SVG). */}
-    <div class="hero-seal absolute -top-14 -right-14 md:-top-16 md:-right-10 w-[240px] h-[240px] md:w-[320px] md:h-[320px] pointer-events-none">
-        <svg viewBox="0 0 200 200" class="w-full h-full" aria-hidden="true">
-            <circle cx="100" cy="100" r="94" fill="none" stroke="rgba(125,211,252,0.22)" stroke-width="1" />
-            <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(125,211,252,0.14)" stroke-width="1" />
-            {SEAL_TICKS.map((t) => (
-                <line
-                    x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-                    stroke={t.accent ? '#F59E0B' : 'rgba(226,240,255,0.3)'}
-                    stroke-width={t.accent ? 2 : 1}
-                    stroke-linecap="round"
-                />
-            ))}
-        </svg>
-    </div>
+<div class="bg-[#050B14] py-5 md:py-6 relative overflow-hidden border-b border-white/10">
+    {/* Barrido de luz en loop */}
+    <div class="absolute inset-0 hero-sweep"></div>
 
     <div class="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-        <div class="max-w-2xl">
-            <h1 class="font-serif font-semibold text-3xl sm:text-4xl md:text-5xl text-[#F5F8FC] tracking-tight leading-[1.05]">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-5">
+            <h1 class="hero-in-1 text-xl sm:text-2xl md:text-[28px] font-extrabold text-white tracking-tight leading-tight shrink-0">
                 {title}
             </h1>
-            <div class="flex items-center gap-2 my-4">
-                <span class="h-px w-12 md:w-16 bg-cyan-300/40"></span>
-                <span class="w-1.5 h-1.5 bg-amber-400"></span>
-            </div>
             {subtitle && (
-                <p class="text-sm md:text-base text-white/70 font-normal leading-relaxed max-w-lg">
-                    {subtitle}
-                </p>
+                <>
+                    <span class="hero-in-2 hidden sm:block w-px h-8 bg-white/15 shrink-0"></span>
+                    <p class="hero-in-3 hidden sm:block text-sm text-white/65 leading-snug max-w-lg">
+                        {subtitle}
+                    </p>
+                </>
             )}
         </div>
     </div>
+
+    {/* Barra de acento — el mismo degradé de la franja superior del Header */}
+    <div class="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-600 via-cyan-400 to-amber-500"></div>
 </div>

@@ -3,22 +3,6 @@ import { Search, CheckCircle, AlertTriangle, Users, Shield, Download } from 'luc
 
 const CRM_ORIGIN = import.meta.env.PUBLIC_CRM_ORIGIN || 'https://wylar-crm.vercel.app';
 
-// Marcas radiales del sello del hero — idénticas a PageHero.astro (ver ese
-// archivo para la explicación del diseño). Módulo, no useMemo: son estáticas.
-// Coordenadas a 1 decimal (SVG liviano).
-const round = (n) => Math.round(n * 10) / 10;
-const SEAL_TICKS = Array.from({ length: 28 }, (_, i) => {
-    const angle = (i / 28) * 2 * Math.PI - Math.PI / 2;
-    const [r1, r2] = [86, 94];
-    return {
-        x1: round(100 + r1 * Math.cos(angle)),
-        y1: round(100 + r1 * Math.sin(angle)),
-        x2: round(100 + r2 * Math.cos(angle)),
-        y2: round(100 + r2 * Math.sin(angle)),
-        accent: i === 0,
-    };
-});
-
 // Solo vigente o sin vencimiento es válido; vencido y revocado se muestran en rojo.
 const isValid = (cert) => cert.status === 'VIGENTE' || cert.status === 'SIN_VENCIMIENTO';
 
@@ -67,49 +51,26 @@ export default function Validador() {
     return (
         <div className="animate-in fade-in duration-500 bg-slate-50 min-h-screen pb-20">
             {/* Cabecera interna — mismo lenguaje visual que PageHero.astro (catálogo,
-                ChileValora, contacto): anillo de sello de verificación en vez de un
-                gradiente abstracto, girando lento (.hero-seal en global.css). Este
+                ChileValora, contacto): franja baja con barrido de luz en loop y
+                entrada escalonada (.hero-sweep/.hero-in-* en global.css). Este
                 componente es React, no puede importar un componente .astro, así
-                que replica el mismo anillo (ver SEAL_TICKS arriba). */}
-            <div
-                className="bg-[#050B14] pt-16 pb-12 md:pt-24 md:pb-16 relative overflow-hidden border-b border-white/10"
-                style={{ clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 20px), 50% 100%, 0 calc(100% - 20px))' }}
-            >
-                <div className="absolute inset-0 bg-[radial-gradient(60%_80%_at_82%_0%,rgba(34,211,238,0.12),transparent_65%)]"></div>
+                que replica el mismo markup. */}
+            <div className="bg-[#050B14] py-5 md:py-6 relative overflow-hidden border-b border-white/10">
+                <div className="absolute inset-0 hero-sweep"></div>
 
-                {/* El giro se anima en el div envolvente, no en el <svg> (ver nota
-                    en PageHero.astro: varios navegadores no aceleran por
-                    hardware transforms CSS sobre el propio elemento SVG). */}
-                <div className="hero-seal absolute -top-14 -right-14 md:-top-16 md:-right-10 w-[240px] h-[240px] md:w-[320px] md:h-[320px] pointer-events-none">
-                    <svg viewBox="0 0 200 200" className="w-full h-full" aria-hidden="true">
-                        <circle cx="100" cy="100" r="94" fill="none" stroke="rgba(125,211,252,0.22)" strokeWidth="1" />
-                        <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(125,211,252,0.14)" strokeWidth="1" />
-                        {SEAL_TICKS.map((t, i) => (
-                            <line
-                                key={i}
-                                x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-                                stroke={t.accent ? '#F59E0B' : 'rgba(226,240,255,0.3)'}
-                                strokeWidth={t.accent ? 2 : 1}
-                                strokeLinecap="round"
-                            />
-                        ))}
-                    </svg>
-                </div>
-
-                <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 animate-in slide-in-from-bottom-8 duration-700">
-                    <div className="max-w-2xl">
-                        <h1 className="font-serif font-semibold text-3xl sm:text-4xl md:text-5xl text-[#F5F8FC] tracking-tight leading-[1.05]">
+                <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-5">
+                        <h1 className="hero-in-1 text-xl sm:text-2xl md:text-[28px] font-extrabold text-white tracking-tight leading-tight shrink-0">
                             Validador de Certificados
                         </h1>
-                        <div className="flex items-center gap-2 my-4">
-                            <span className="h-px w-12 md:w-16 bg-cyan-300/40"></span>
-                            <span className="w-1.5 h-1.5 bg-amber-400"></span>
-                        </div>
-                        <p className="text-sm md:text-base text-white/70 font-normal leading-relaxed max-w-lg">
+                        <span className="hero-in-2 hidden sm:block w-px h-8 bg-white/15 shrink-0"></span>
+                        <p className="hero-in-3 hidden sm:block text-sm text-white/65 leading-snug max-w-lg">
                             Verifique la autenticidad y vigencia de las certificaciones emitidas por Wylar ingresando el RUT de la persona o el Código del Certificado.
                         </p>
                     </div>
                 </div>
+
+                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-600 via-cyan-400 to-amber-500"></div>
             </div>
 
             <div className="max-w-4xl mx-auto px-4 mt-8 relative z-20">

@@ -1,0 +1,33 @@
+---
+// Botón de descarga de la Ficha Ocupacional en PDF (opcional, cargada desde
+// el CRM). No se renderiza nada si el perfil no tiene fichaUrl. Se usa una
+// sola vez en [id].astro para que aplique a las 4 plantillas de ficha por
+// igual, sin duplicar el bloque en cada una.
+import { FileText, Download } from 'lucide-react';
+
+const { fichaUrl } = Astro.props;
+---
+
+{fichaUrl && (
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-50 w-11 h-11 rounded-xl flex items-center justify-center shrink-0">
+                    <FileText size={20} className="text-blue-600" />
+                </div>
+                <div>
+                    <p class="font-bold text-slate-900 text-sm sm:text-base">Ficha Ocupacional</p>
+                    <p class="text-slate-500 text-xs sm:text-sm">Descarga el detalle oficial de esta certificación en PDF.</p>
+                </div>
+            </div>
+            <a
+                href={fichaUrl}
+                target="_blank"
+                rel="noreferrer"
+                class="inline-flex items-center justify-center gap-2 bg-[#0B1E40] hover:bg-blue-900 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-md shrink-0"
+            >
+                <Download size={18} /> Descargar PDF
+            </a>
+        </div>
+    </div>
+)}

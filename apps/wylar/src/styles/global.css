@@ -13,27 +13,48 @@
 }
 
 /*
- * Cabecera interna (catálogo, ChileValora, contacto, validador): en vez de
- * una animación decorativa abstracta, un anillo de sello de verificación
- * — el objeto real que define a Wylar (certificados con sello) — que gira
- * muy lento en la esquina. Son clases globales (no un <style> por página)
- * para que tanto el componente .astro (PageHero) como el componente React
- * del validador (que no puede importar un componente .astro) compartan
- * exactamente el mismo anillo y animación.
+ * Cabecera interna corta (catálogo, ChileValora, contacto, validador): una
+ * franja baja con un barrido de luz que cruza el fondo en loop y una
+ * entrada escalonada del título/subtítulo al cargar. Son clases globales
+ * (no un <style> por página) para que tanto el componente .astro (PageHero)
+ * como el componente React del validador (que no puede importar un
+ * componente .astro) compartan exactamente el mismo movimiento.
  */
-.hero-seal {
-  transform-origin: center;
-  animation: hero-seal-spin 90s linear infinite;
-  will-change: transform;
+.hero-sweep {
+  background: linear-gradient(115deg, transparent 40%, rgba(94, 234, 212, 0.1) 47%, rgba(165, 243, 252, 0.32) 50%, rgba(94, 234, 212, 0.1) 53%, transparent 60%);
+  background-size: 260% 260%;
+  animation: hero-sweep-move 5.5s ease-in-out infinite;
+  will-change: background-position;
 }
 
-@keyframes hero-seal-spin {
-  to { transform: rotate(360deg); }
+@keyframes hero-sweep-move {
+  0% { background-position: 115% 0%; }
+  100% { background-position: -15% 100%; }
+}
+
+.hero-in-1,
+.hero-in-2,
+.hero-in-3 {
+  animation: hero-in-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero-in-2 { animation-delay: 0.08s; }
+.hero-in-3 { animation-delay: 0.16s; }
+
+@keyframes hero-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-seal {
+  .hero-sweep {
     animation: none;
+  }
+  .hero-in-1,
+  .hero-in-2,
+  .hero-in-3 {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }
 
