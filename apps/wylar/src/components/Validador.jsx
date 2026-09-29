@@ -3,6 +3,22 @@ import { Search, CheckCircle, AlertTriangle, Users, Shield, Download } from 'luc
 
 const CRM_ORIGIN = import.meta.env.PUBLIC_CRM_ORIGIN || 'https://wylar-crm.vercel.app';
 
+// Marcas radiales del sello del hero — idénticas a PageHero.astro (ver ese
+// archivo para la explicación del diseño). Módulo, no useMemo: son estáticas.
+// Coordenadas a 1 decimal (SVG liviano).
+const round = (n) => Math.round(n * 10) / 10;
+const SEAL_TICKS = Array.from({ length: 28 }, (_, i) => {
+    const angle = (i / 28) * 2 * Math.PI - Math.PI / 2;
+    const [r1, r2] = [86, 94];
+    return {
+        x1: round(100 + r1 * Math.cos(angle)),
+        y1: round(100 + r1 * Math.sin(angle)),
+        x2: round(100 + r2 * Math.cos(angle)),
+        y2: round(100 + r2 * Math.sin(angle)),
+        accent: i === 0,
+    };
+});
+
 // Solo vigente o sin vencimiento es válido; vencido y revocado se muestran en rojo.
 const isValid = (cert) => cert.status === 'VIGENTE' || cert.status === 'SIN_VENCIMIENTO';
 
@@ -50,31 +66,46 @@ export default function Validador() {
 
     return (
         <div className="animate-in fade-in duration-500 bg-slate-50 min-h-screen pb-20">
-            {/* Cabecera interna premium — mismo lenguaje visual que PageHero.astro
-                (catálogo, ChileValora, contacto). Este componente es React, no
-                puede importar un componente .astro, así que replica sus clases:
-                mesh gradient + resplandor en movimiento (.page-hero-mesh /
-                .page-hero-glow, definidas como CSS global en styles/global.css). */}
+            {/* Cabecera interna — mismo lenguaje visual que PageHero.astro (catálogo,
+                ChileValora, contacto): anillo de sello de verificación en vez de un
+                gradiente abstracto, girando lento (.hero-seal en global.css). Este
+                componente es React, no puede importar un componente .astro, así
+                que replica el mismo anillo (ver SEAL_TICKS arriba). */}
             <div
-                className="bg-[#050B14] pt-16 pb-11 md:pt-20 md:pb-14 relative overflow-hidden border-b border-white/10"
+                className="bg-[#050B14] pt-16 pb-12 md:pt-24 md:pb-16 relative overflow-hidden border-b border-white/10"
                 style={{ clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 20px), 50% 100%, 0 calc(100% - 20px))' }}
             >
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#22d3ee12_1px,transparent_1px),linear-gradient(to_bottom,#22d3ee12_1px,transparent_1px)] bg-[size:28px_28px]"></div>
-                <div className="absolute inset-0 page-hero-mesh mix-blend-screen"></div>
-                <div className="absolute -inset-1/2 page-hero-glow"></div>
-                <div className="absolute inset-0 bg-gradient-to-b from-[#050B14]/50 via-transparent to-[#050B14]"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(60%_80%_at_82%_0%,rgba(34,211,238,0.12),transparent_65%)]"></div>
+
+                {/* El giro se anima en el div envolvente, no en el <svg> (ver nota
+                    en PageHero.astro: varios navegadores no aceleran por
+                    hardware transforms CSS sobre el propio elemento SVG). */}
+                <div className="hero-seal absolute -top-14 -right-14 md:-top-16 md:-right-10 w-[240px] h-[240px] md:w-[320px] md:h-[320px] pointer-events-none">
+                    <svg viewBox="0 0 200 200" className="w-full h-full" aria-hidden="true">
+                        <circle cx="100" cy="100" r="94" fill="none" stroke="rgba(125,211,252,0.22)" strokeWidth="1" />
+                        <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(125,211,252,0.14)" strokeWidth="1" />
+                        {SEAL_TICKS.map((t, i) => (
+                            <line
+                                key={i}
+                                x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
+                                stroke={t.accent ? '#F59E0B' : 'rgba(226,240,255,0.3)'}
+                                strokeWidth={t.accent ? 2 : 1}
+                                strokeLinecap="round"
+                            />
+                        ))}
+                    </svg>
+                </div>
 
                 <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 animate-in slide-in-from-bottom-8 duration-700">
                     <div className="max-w-2xl">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="bg-white/10 w-9 h-9 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/20 shrink-0">
-                                <CheckCircle size={18} className="text-cyan-300" />
-                            </div>
-                            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight text-glow">
-                                Validador de Certificados
-                            </h1>
+                        <h1 className="font-serif font-semibold text-3xl sm:text-4xl md:text-5xl text-[#F5F8FC] tracking-tight leading-[1.05]">
+                            Validador de Certificados
+                        </h1>
+                        <div className="flex items-center gap-2 my-4">
+                            <span className="h-px w-12 md:w-16 bg-cyan-300/40"></span>
+                            <span className="w-1.5 h-1.5 bg-amber-400"></span>
                         </div>
-                        <p className="text-sm md:text-base text-cyan-100/80 font-medium leading-snug">
+                        <p className="text-sm md:text-base text-white/70 font-normal leading-relaxed max-w-lg">
                             Verifique la autenticidad y vigencia de las certificaciones emitidas por Wylar ingresando el RUT de la persona o el Código del Certificado.
                         </p>
                     </div>
