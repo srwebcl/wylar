@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://wylar.vercel.app/sitemap.xml
