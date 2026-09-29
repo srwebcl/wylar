@@ -50,18 +50,38 @@ export default function Validador() {
 
     return (
         <div className="animate-in fade-in duration-500 bg-slate-50 min-h-screen pb-20">
-            <div className="bg-[#0f172a] py-24 text-white text-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-blue-600/10 mix-blend-overlay"></div>
-                <div className="max-w-3xl mx-auto px-4 relative z-10 animate-in slide-in-from-bottom-8 duration-700">
-                    <div className="bg-white/10 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 backdrop-blur-md border border-white/20">
-                        <CheckCircle size={40} className="text-cyan-300" />
+            {/* Cabecera interna premium — mismo lenguaje visual que PageHero.astro
+                (catálogo, ChileValora, contacto). Este componente es React, no
+                puede importar un componente .astro, así que replica sus clases:
+                mesh gradient + resplandor en movimiento (.page-hero-mesh /
+                .page-hero-glow, definidas como CSS global en styles/global.css). */}
+            <div
+                className="bg-[#050B14] pt-16 pb-11 md:pt-20 md:pb-14 relative overflow-hidden border-b border-white/10"
+                style={{ clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 20px), 50% 100%, 0 calc(100% - 20px))' }}
+            >
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#22d3ee12_1px,transparent_1px),linear-gradient(to_bottom,#22d3ee12_1px,transparent_1px)] bg-[size:28px_28px]"></div>
+                <div className="absolute inset-0 page-hero-mesh mix-blend-screen"></div>
+                <div className="absolute -inset-1/2 page-hero-glow"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-[#050B14]/50 via-transparent to-[#050B14]"></div>
+
+                <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 animate-in slide-in-from-bottom-8 duration-700">
+                    <div className="max-w-2xl">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="bg-white/10 w-9 h-9 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/20 shrink-0">
+                                <CheckCircle size={18} className="text-cyan-300" />
+                            </div>
+                            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight text-glow">
+                                Validador de Certificados
+                            </h1>
+                        </div>
+                        <p className="text-sm md:text-base text-cyan-100/80 font-medium leading-snug">
+                            Verifique la autenticidad y vigencia de las certificaciones emitidas por Wylar ingresando el RUT de la persona o el Código del Certificado.
+                        </p>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-black mb-6 tracking-tight">Validador de Certificados</h1>
-                    <p className="text-lg md:text-xl text-slate-300 font-light">Verifique la autenticidad y vigencia de las certificaciones emitidas por Wylar ingresando el RUT de la persona o el Código del Certificado.</p>
                 </div>
             </div>
 
-            <div className="max-w-4xl mx-auto px-4 -mt-12 relative z-20">
+            <div className="max-w-4xl mx-auto px-4 mt-8 relative z-20">
                 <form onSubmit={handleValidate} className="bg-white p-8 md:p-10 rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-slate-100 animate-in zoom-in-95 duration-700 delay-200">
                     <label className="block text-slate-700 font-black mb-4 text-lg" htmlFor="searchInput">
                         Ingrese RUT o Código de Certificado

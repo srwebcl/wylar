@@ -15,6 +15,48 @@
   }
 }
 
+/*
+ * Cabecera interna premium (catálogo, ChileValora, contacto, validador):
+ * mesh gradient oscuro que se desplaza muy lento + un resplandor que se mueve
+ * por encima de la malla técnica. Son clases globales (no un <style> por
+ * página) para que tanto los componentes .astro (PageHero) como el
+ * componente React del validador (que no puede importar un componente
+ * .astro) compartan exactamente la misma animación.
+ */
+.page-hero-mesh {
+  background-image:
+    radial-gradient(38% 60% at 12% 20%, rgba(34, 211, 238, 0.35), transparent 60%),
+    radial-gradient(45% 65% at 88% 15%, rgba(37, 99, 235, 0.4), transparent 60%),
+    radial-gradient(42% 55% at 55% 95%, rgba(14, 165, 233, 0.28), transparent 65%);
+  background-size: 200% 200%;
+  animation: page-hero-mesh-drift 24s ease-in-out infinite alternate;
+  will-change: background-position;
+}
+
+.page-hero-glow {
+  background: radial-gradient(circle, rgba(103, 232, 249, 0.22), transparent 62%);
+  animation: page-hero-glow-move 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes page-hero-mesh-drift {
+  0% { background-position: 0% 30%, 100% 10%, 50% 100%; }
+  50% { background-position: 25% 55%, 70% 45%, 65% 75%; }
+  100% { background-position: 10% 15%, 85% 55%, 40% 90%; }
+}
+
+@keyframes page-hero-glow-move {
+  0%, 100% { transform: translate(-8%, -12%) scale(1); }
+  50% { transform: translate(28%, 14%) scale(1.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-hero-mesh,
+  .page-hero-glow {
+    animation: none;
+  }
+}
+
 html {
   scroll-behavior: smooth;
 }
