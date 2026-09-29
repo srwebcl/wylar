@@ -26,6 +26,7 @@ export interface ProfileFormInitial {
     title: string;
     description: string;
     image: string;
+    cardImage: string;
     category: string;
     sector: string;
     subsector: string;
@@ -64,6 +65,7 @@ export function ProfileForm({ initial }: { initial?: ProfileFormInitial }) {
     const [title, setTitle] = useState(initial?.title ?? '');
     const [description, setDescription] = useState(initial?.description ?? '');
     const [image, setImage] = useState(initial?.image ?? '');
+    const [cardImage, setCardImage] = useState(initial?.cardImage ?? '');
     const [category, setCategory] = useState(initial?.category ?? '');
     const [sector, setSector] = useState(initial?.sector ?? '');
     const [subsector, setSubsector] = useState(initial?.subsector ?? '');
@@ -118,6 +120,7 @@ export function ProfileForm({ initial }: { initial?: ProfileFormInitial }) {
             title,
             description,
             image,
+            cardImage,
             category,
             sector,
             subsector,
@@ -195,8 +198,12 @@ export function ProfileForm({ initial }: { initial?: ProfileFormInitial }) {
                     <Field label="Descripción (tarjeta del catálogo)" className="md:col-span-2">
                         <textarea value={description} onChange={(e) => setDescription(e.target.value)} className={inputClass} rows={2} required />
                     </Field>
-                    <Field label="Imagen (ruta o URL)">
+                    <Field label="Imagen Banner Hero (ruta o URL)">
                         <input value={image} onChange={(e) => setImage(e.target.value)} placeholder="/images/hero_electricista.jpg" className={inputClass} required />
+                    </Field>
+                    <Field label="Imagen Tarjeta Vertical (opcional)">
+                        <input value={cardImage} onChange={(e) => setCardImage(e.target.value)} placeholder="/images/card_electricista.jpg" className={inputClass} />
+                        <p className="text-xs text-slate-500 mt-1">Si se deja en blanco, se usará la imagen del banner.</p>
                     </Field>
                     <Field label="Categoría">
                         <input value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass} required />

@@ -19,31 +19,11 @@ const FALLBACK_SLIDE = {
 const AUTOPLAY_MS = 5500;
 
 // `customSlides` viene del Módulo de Hero del CRM (editable desde /hero);
-// `perfiles` es el catálogo (Módulo de Catálogo) — los perfiles marcados
-// como destacados se agregan automáticamente como slides adicionales,
-// después de los slides personalizados.
-export default function HeroSlider({ customSlides = [], perfiles = [] }) {
+export default function HeroSlider({ customSlides = [] }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
 
-    const mainSlides = (customSlides.length > 0 ? customSlides : [FALLBACK_SLIDE]).map((s) => ({ ...s, ctaIcon: Users }));
-    const profileSlides = perfiles
-        .filter((p) => p.isFeatured)
-        .map((p) => ({
-            id: p.id,
-            image: p.image,
-            categoryLabel: p.category,
-            eyebrowLead: p.isChileValora ? 'Centro Acreditado' : 'Certificación',
-            eyebrowAccent: p.isChileValora ? 'ChileValora' : 'Privada Wylar',
-            title: 'Certifícate como',
-            titleHighlight: p.title,
-            description: p.description,
-            ctaLabel: 'Ver perfil completo',
-            ctaHref: p.link,
-            ctaIcon: ArrowRight,
-        }));
-
-    const slides = [...mainSlides, ...profileSlides];
+    const slides = (customSlides.length > 0 ? customSlides : [FALLBACK_SLIDE]).map((s) => ({ ...s, ctaIcon: Users }));
 
     const goTo = (i) => setCurrentIndex(((i % slides.length) + slides.length) % slides.length);
 

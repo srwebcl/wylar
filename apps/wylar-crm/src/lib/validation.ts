@@ -101,7 +101,14 @@ export const profileSchema = z.object({
     templateType: z.enum(PROFILE_TEMPLATE_TYPE_VALUES),
     title: z.string().trim().min(2, 'Falta el título.').max(200),
     description: z.string().trim().min(2, 'Falta la descripción.').max(2000),
-    image: z.string().trim().min(1, 'Falta la imagen.').max(500),
+    image: z.string().trim().min(1, 'Falta la imagen.').max(500).refine(isSafeUrl, 'La imagen debe ser una ruta que empiece con "/" o una URL https://.'),
+    cardImage: z
+        .string()
+        .trim()
+        .max(500)
+        .optional()
+        .nullable()
+        .refine((v) => !v || isSafeUrl(v), 'La imagen debe ser una ruta que empiece con "/" o una URL https://.'),
     category: z.string().trim().min(1, 'Falta la categoría.').max(100),
     sector: z.string().trim().min(1, 'Falta el sector.').max(100),
     subsector: z.string().trim().min(1, 'Falta el subsector.').max(100),

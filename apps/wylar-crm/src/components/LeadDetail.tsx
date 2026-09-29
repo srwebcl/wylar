@@ -214,9 +214,12 @@ export function LeadDetail({ lead, users }: { lead: LeadWithRelations; users: Us
 
                     <form ref={noteFormRef} action={activityAction} className="p-4 bg-white border-t border-slate-100 space-y-2">
                         <div className="flex items-end space-x-3 bg-slate-50 p-2 rounded-2xl border border-slate-200 focus-within:border-[#0B1E40] focus-within:ring-2 focus-within:ring-[#0B1E40]/20 transition-all">
-                            <select name="type" defaultValue="NOTA" className="bg-transparent text-sm font-semibold text-slate-600 outline-none shrink-0">
-                                {ACTIVITY_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                            </select>
+                            <div className="flex flex-col gap-1 shrink-0 pb-0.5">
+                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide px-1">Tipo de registro</span>
+                                <select name="type" defaultValue="NOTA" className="bg-slate-200/60 hover:bg-slate-200 border border-slate-300 text-sm font-semibold text-slate-700 outline-none rounded-lg py-1.5 px-2 cursor-pointer transition-colors">
+                                    {ACTIVITY_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                                </select>
+                            </div>
 
                             <textarea
                                 name="text"

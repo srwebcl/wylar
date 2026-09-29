@@ -23,8 +23,8 @@ setCdnCache(Astro, perfiles.length > 0);
     <section
       class="relative bg-[#050B14] min-h-[85vh] flex items-center border-b border-white/10 overflow-hidden"
     >
-      {/* Hero Slider: slide principal + perfiles destacados del catálogo */}
-      <HeroSlider client:only="react" customSlides={heroSlides} perfiles={perfiles} />
+      {/* Hero Slider: slides personalizados desde el CRM */}
+      <HeroSlider client:only="react" customSlides={heroSlides} />
     </section>
 
     {/* CATÁLOGO DE PERFILES */}

@@ -36,7 +36,9 @@ export async function saveProfile(input: ProfileInput, profileId?: number | null
         return { error: `El slug "${data.slug}" ya está en uso por otro perfil.` };
     }
 
-    const previousImage = profileId ? (await prisma.profile.findUnique({ where: { id: profileId }, select: { image: true } }))?.image : null;
+    const prev = profileId ? (await prisma.profile.findUnique({ where: { id: profileId }, select: { image: true, cardImage: true } })) : null;
+    const previousImage = prev?.image;
+    const previousCardImage = prev?.cardImage;
 
     const profileData = {
         slug: data.slug,
@@ -44,6 +46,7 @@ export async function saveProfile(input: ProfileInput, profileId?: number | null
         title: data.title,
         description: data.description,
         image: data.image,
+        cardImage: data.cardImage || null,
         category: data.category,
         sector: data.sector,
         subsector: data.subsector,
@@ -101,6 +104,7 @@ export async function saveProfile(input: ProfileInput, profileId?: number | null
     });
 
     if (previousImage && previousImage !== data.image) await deleteBlobIfUnused(previousImage);
+    if (previousCardImage && previousCardImage !== data.cardImage) await deleteBlobIfUnused(previousCardImage);
     await audit(currentUser, profileId ? 'PERFIL_ACTUALIZADO' : 'PERFIL_CREADO', 'perfil', data.slug, data.title);
     revalidatePath('/catalogo');
     return { success: profileId ? 'Perfil actualizado.' : 'Perfil creado.' };
@@ -113,6 +117,7 @@ export async function deleteProfile(profileId: number): Promise<CatalogFormState
     if (!profile) return { error: 'El perfil no existe.' };
     await prisma.profile.delete({ where: { id: profileId } });
     await deleteBlobIfUnused(profile.image);
+    if (profile.cardImage) await deleteBlobIfUnused(profile.cardImage);
     await audit(admin, 'PERFIL_ELIMINADO', 'perfil', profile.slug, profile.title);
     revalidatePath('/catalogo');
     return { success: 'Perfil eliminado.' };

@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, ArrowLeft } from 'lucide-react';
 import { saveHeroSlide } from '@/actions/hero';
+import { ImageUploadField } from '@/components/ImageUploadField';
 
 export interface HeroSlideFormInitial {
     id?: number;
@@ -21,8 +22,16 @@ export interface HeroSlideFormInitial {
 
 const FIELD_CLASS = 'w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#0B1E40]/20 focus:border-[#0B1E40]';
 const LABEL_CLASS = 'block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider';
+const INTERNAL_PAGES = [
+    { label: 'Catálogo Principal', value: '/catalogo' },
+    { label: 'Home - Portales', value: '/#portales' },
+    { label: 'Empresas', value: '/empresas' },
+    { label: 'Instituciones', value: '/instituciones' },
+    { label: 'Contacto', value: '/contacto' },
+    { label: 'Portal ChileValora', value: '/chilevalora' }
+];
 
-export function HeroSlideForm({ initial }: { initial?: HeroSlideFormInitial }) {
+export function HeroSlideForm({ initial, profiles = [] }: { initial?: HeroSlideFormInitial, profiles?: { id: number, title: string, link: string }[] }) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
@@ -36,6 +45,13 @@ export function HeroSlideForm({ initial }: { initial?: HeroSlideFormInitial }) {
     const [description, setDescription] = useState(initial?.description ?? '');
     const [ctaLabel, setCtaLabel] = useState(initial?.ctaLabel ?? '');
     const [ctaHref, setCtaHref] = useState(initial?.ctaHref ?? '/catalogo');
+
+    const [linkType, setLinkType] = useState(() => {
+        if (!initial?.ctaHref) return 'internal';
+        if (INTERNAL_PAGES.some(p => p.value === initial.ctaHref)) return 'internal';
+        if (profiles.some(p => p.link === initial.ctaHref)) return 'profile';
+        return 'custom';
+    });
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -57,9 +73,9 @@ export function HeroSlideForm({ initial }: { initial?: HeroSlideFormInitial }) {
             </label>
 
             <div>
-                <label className={LABEL_CLASS}>Imagen (ruta o URL)</label>
-                <input value={image} onChange={(e) => setImage(e.target.value)} required placeholder="/images/hero_principal.jpg" className={FIELD_CLASS} />
-                <p className="text-xs text-slate-400 mt-1">Misma carpeta pública del sitio (/images/...) o una URL completa.</p>
+                <label className={LABEL_CLASS}>Imagen del Banner</label>
+                <ImageUploadField value={image} onChange={setImage} />
+                <p className="text-xs text-slate-400 mt-2">Sube una imagen. Se guardará en la carpeta pública del CRM y se compartirá con la web.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -95,8 +111,41 @@ export function HeroSlideForm({ initial }: { initial?: HeroSlideFormInitial }) {
                     <input value={ctaLabel} onChange={(e) => setCtaLabel(e.target.value)} required placeholder="Quiero Certificarme" className={FIELD_CLASS} />
                 </div>
                 <div>
-                    <label className={LABEL_CLASS}>Destino del botón</label>
-                    <input value={ctaHref} onChange={(e) => setCtaHref(e.target.value)} required placeholder="/catalogo" className={FIELD_CLASS} />
+                    <label className={LABEL_CLASS}>Tipo de enlace</label>
+                    <select 
+                        value={linkType} 
+                        onChange={(e) => {
+                            setLinkType(e.target.value);
+                            setCtaHref('');
+                        }}
+                        className={FIELD_CLASS}
+                    >
+                        <option value="internal">Página Interna</option>
+                        <option value="profile">Perfil del Catálogo</option>
+                        <option value="custom">URL Personalizada</option>
+                    </select>
+                </div>
+                <div className="col-span-2">
+                    <label className={LABEL_CLASS}>Destino seleccionado</label>
+                    {linkType === 'internal' && (
+                        <select value={ctaHref} onChange={(e) => setCtaHref(e.target.value)} className={FIELD_CLASS} required>
+                            <option value="" disabled>Selecciona una página interna...</option>
+                            {INTERNAL_PAGES.map(p => (
+                                <option key={p.value} value={p.value}>{p.label}</option>
+                            ))}
+                        </select>
+                    )}
+                    {linkType === 'profile' && (
+                        <select value={ctaHref} onChange={(e) => setCtaHref(e.target.value)} className={FIELD_CLASS} required>
+                            <option value="" disabled>Selecciona un perfil...</option>
+                            {profiles.map(p => (
+                                <option key={p.id} value={p.link}>{p.title}</option>
+                            ))}
+                        </select>
+                    )}
+                    {linkType === 'custom' && (
+                        <input value={ctaHref} onChange={(e) => setCtaHref(e.target.value)} required placeholder="https://..." className={FIELD_CLASS} />
+                    )}
                 </div>
             </div>
 

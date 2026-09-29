@@ -19,6 +19,7 @@ export interface ProfileWizardInitial {
     description: string;
     descriptionLong: string;
     image: string;
+    cardImage: string;
     category: string;
     sector: string;
     subsector: string;
@@ -47,6 +48,7 @@ export function ProfileWizard({ initial }: { initial?: ProfileWizardInitial }) {
     const [description, setDescription] = useState(initial?.description ?? '');
     const [descriptionLong, setDescriptionLong] = useState(initial?.descriptionLong ?? '');
     const [image, setImage] = useState(initial?.image ?? '');
+    const [cardImage, setCardImage] = useState(initial?.cardImage ?? '');
     
     // Valores por defecto ocultos
     const category = initial?.category || 'General';
@@ -98,6 +100,7 @@ export function ProfileWizard({ initial }: { initial?: ProfileWizardInitial }) {
                     title,
                     description,
                     image,
+                    cardImage,
                     category,
                     sector,
                     subsector,
@@ -199,9 +202,16 @@ export function ProfileWizard({ initial }: { initial?: ProfileWizardInitial }) {
 
             {/* Imagen y Configuración Final */}
             <div className="glass-card p-6 space-y-6">
-                <div>
-                    <label className={LABEL_CLASS}>Imagen de la certificación</label>
-                    <ImageUploadField value={image} onChange={setImage} />
+                <div className="space-y-6">
+                    <div>
+                        <label className={LABEL_CLASS}>Imagen de la certificación</label>
+                        <ImageUploadField value={image} onChange={setImage} />
+                    </div>
+                    <div>
+                        <label className={LABEL_CLASS}>Imagen Tarjeta Vertical (opcional)</label>
+                        <ImageUploadField value={cardImage} onChange={setCardImage} />
+                        <p className="text-xs text-slate-500 mt-1">Si se deja en blanco, se usará la imagen del banner.</p>
+                    </div>
                 </div>
                 
                 <div className="flex flex-wrap gap-6 pt-4 border-t border-slate-100">

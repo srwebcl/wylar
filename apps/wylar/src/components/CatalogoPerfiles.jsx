@@ -51,9 +51,9 @@ export default function CatalogoPerfiles({ perfiles = [], featuredOnly = false, 
                             {/* Imagen */}
                             <div className="w-full sm:w-2/5 h-48 sm:h-auto bg-slate-900 relative overflow-hidden shrink-0">
                                 <img 
-                                    src={perfil.image} 
+                                    src={perfil.cardImage || perfil.image} 
                                     alt={perfil.title} 
-                                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-95"
+                                    className="absolute inset-0 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 opacity-95"
                                 />
                             </div>
                             
@@ -65,11 +65,11 @@ export default function CatalogoPerfiles({ perfiles = [], featuredOnly = false, 
                                         {getCategoryIcon(perfil.category)} {perfil.category}
                                     </div>
                                     {perfil.isChileValora ? (
-                                        <div className="bg-white rounded-lg p-1.5 shadow-sm border border-slate-100">
+                                        <div className="bg-white rounded-lg p-1.5 shadow-sm border border-slate-100 shrink-0">
                                             <img src="/images/logo-chilevalora.png" alt="ChileValora" className="h-8 md:h-10 object-contain shrink-0" />
                                         </div>
                                     ) : (
-                                        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg px-2.5 py-1.5 shadow-md flex items-center gap-1.5">
+                                        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg px-2.5 py-1.5 shadow-md flex items-center gap-1.5 shrink-0">
                                             <ShieldCheck size={14} className="text-white" />
                                             <span className="text-[10px] font-black text-white uppercase tracking-widest">Privada</span>
                                         </div>

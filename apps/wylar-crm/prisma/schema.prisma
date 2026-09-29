@@ -129,6 +129,8 @@ model Profile {
   // usa la plantilla ESTANDAR, como cuerpo principal de la ficha.
   descriptionLong String? @db.Text
   image       String
+  // Imagen vertical especial para la tarjeta del catálogo (si es null se usa image)
+  cardImage   String? 
 
   category  String
   sector    String

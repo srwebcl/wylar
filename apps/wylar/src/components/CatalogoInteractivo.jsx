@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowRight, ShieldCheck, Wrench, Users, Construction, Filter, Search } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Wrench, Users, Construction, Filter, Search, X } from 'lucide-react';
 
 const getCategoryIcon = (category) => {
     switch(category) {
@@ -11,10 +11,21 @@ const getCategoryIcon = (category) => {
 };
 
 export default function CatalogoInteractivo({ perfiles = [] }) {
+    const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
     const [filterTipo, setFilterTipo] = useState('all');
     const [filterPublico, setFilterPublico] = useState('all');
     const [filterArea, setFilterArea] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Prevent scroll when modal is open
+    React.useEffect(() => {
+        if (isMobileFiltersOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isMobileFiltersOpen]);
 
     const areasUnicas = useMemo(() => {
         const areas = new Set(perfiles.map(p => p.category));
@@ -41,15 +52,31 @@ export default function CatalogoInteractivo({ perfiles = [] }) {
     }, [filterTipo, filterPublico, filterArea, searchQuery]);
 
     return (
-        <section className="py-12 bg-slate-50 relative">
+        <section className="pb-16 pt-4 relative">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-                <div className="flex flex-col lg:flex-row gap-8">
+                <div className="flex flex-col gap-8">
                     
                     {/* SIDEBAR FILTERS */}
-                    <div className="w-full lg:w-1/4">
-                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm sticky top-24">
-                            <div className="flex items-center gap-2 text-[#0B1E40] font-bold text-lg mb-6 border-b border-slate-100 pb-4">
-                                <Filter size={20} /> Filtros de Búsqueda
+                    {/* BACKDROP */}
+                    {isMobileFiltersOpen && (
+                        <div 
+                            className="fixed inset-0 bg-slate-900/50 z-[999]" 
+                            onClick={() => setIsMobileFiltersOpen(false)} 
+                        />
+                    )}
+                    
+                    <div className={`fixed inset-y-0 left-0 z-[1000] w-[85%] max-w-sm bg-white p-6 shadow-2xl overflow-y-auto transform transition-transform duration-300 ${isMobileFiltersOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                        <div className="bg-white">
+                            <div className="flex items-center justify-between text-[#0B1E40] font-bold text-lg mb-6 border-b border-slate-100 pb-4">
+                                <div className="flex items-center gap-2">
+                                    <Filter size={20} /> Filtros
+                                </div>
+                                <button 
+                                    className="p-2 text-slate-400 hover:text-slate-600 bg-slate-50 rounded-full"
+                                    onClick={() => setIsMobileFiltersOpen(false)}
+                                >
+                                    <X size={18} />
+                                </button>
                             </div>
                             
                             {/* Search */}
@@ -125,9 +152,16 @@ export default function CatalogoInteractivo({ perfiles = [] }) {
                     </div>
 
                     {/* RESULTS GRID */}
-                    <div className="w-full lg:w-3/4">
+                    <div className="w-full">
                         <div className="mb-6 flex items-center justify-between">
                             <h2 className="text-xl font-extrabold text-[#0B1E40]">Resultados ({filteredPerfiles.length})</h2>
+                            <button 
+                                onClick={() => setIsMobileFiltersOpen(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-blue-300 hover:bg-slate-50 transition-colors rounded-full shadow-sm text-[#0B1E40] font-bold text-sm"
+                            >
+                                <Filter size={16} /> 
+                                Filtros
+                            </button>
                         </div>
                         
                         {filteredPerfiles.length === 0 ? (
@@ -143,54 +177,51 @@ export default function CatalogoInteractivo({ perfiles = [] }) {
                                 </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 {filteredPerfiles.map((perfil) => (
                                     <a 
                                         key={perfil.id}
                                         href={perfil.link} 
-                                        className={`group flex flex-col bg-white rounded-xl overflow-hidden transition-all duration-300 relative ${
+                                        className={`group flex flex-col sm:flex-row bg-slate-50 rounded-xl overflow-hidden transition-all duration-300 relative ${
                                             perfil.isChileValora 
-                                                ? 'border border-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:-translate-y-1' 
-                                                : 'border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:-translate-y-1'
+                                                ? 'border border-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]' 
+                                                : 'border border-slate-200 hover:border-blue-300 hover:shadow-lg'
                                         }`}
                                     >
                                         {/* Imagen */}
-                                        <div className="w-full h-48 bg-slate-900 relative overflow-hidden shrink-0">
+                                        <div className="w-full sm:w-2/5 h-48 sm:h-auto bg-slate-900 relative overflow-hidden shrink-0">
                                             <img 
-                                                src={perfil.image} 
+                                                src={perfil.cardImage || perfil.image} 
                                                 alt={perfil.title} 
-                                                className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ${!perfil.isChileValora ? 'opacity-90' : 'opacity-100'}`} 
+                                                className="absolute inset-0 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 opacity-95"
                                             />
-                                            {/* Tag over image */}
-                                            <div className="absolute top-4 right-4 z-20">
-                                                {perfil.isChileValora ? (
-                                                    <span className="bg-cyan-500/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm border border-white/20">
-                                                        Certificada
-                                                    </span>
-                                                ) : (
-                                                    <span className="bg-gradient-to-r from-blue-600 to-cyan-500 shadow-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-                                                        Privada
-                                                    </span>
-                                                )}
-                                            </div>
                                         </div>
                                         
                                         {/* Contenido */}
-                                        <div className="p-6 flex-1 flex flex-col justify-start">
-                                            <div className="flex items-start justify-between mb-4 gap-2">
+                                        <div className="p-6 w-full sm:w-3/5 flex flex-col justify-center bg-white">
+                                            {/* Header del contenido con la categoría y el logo */}
+                                            <div className="flex items-start justify-between mb-3 gap-2">
                                                 <div className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${perfil.isChileValora ? 'text-cyan-600' : 'text-blue-600'}`}>
                                                     {getCategoryIcon(perfil.category)} {perfil.category}
                                                 </div>
-                                                {perfil.isChileValora && (
-                                                    <img src="/images/logo-chilevalora.png" alt="ChileValora" className="h-5 object-contain shrink-0" />
+                                                {perfil.isChileValora ? (
+                                                    <div className="bg-white rounded-lg p-1.5 shadow-sm border border-slate-100 shrink-0">
+                                                        <img src="/images/logo-chilevalora.png" alt="ChileValora" className="h-8 md:h-10 object-contain shrink-0" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg px-2.5 py-1.5 shadow-md flex items-center gap-1.5 shrink-0">
+                                                        <ShieldCheck size={14} className="text-white" />
+                                                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Privada</span>
+                                                    </div>
                                                 )}
                                             </div>
                                             
-                                            <h3 className="text-lg font-extrabold text-[#0B1E40] mb-3 leading-tight group-hover:text-blue-700 transition-colors">{perfil.title}</h3>
-                                            <p className="text-sm text-slate-600 mb-8 line-clamp-3 leading-relaxed">{perfil.description}</p>
+                                            <h3 className="text-xl font-bold text-slate-900 mb-2 leading-tight group-hover:text-blue-700 transition-colors">{perfil.title}</h3>
+                                            <p className="text-sm text-slate-600 mb-6 line-clamp-3">{perfil.description}</p>
                                             
                                             <div className="mt-auto">
-                                                <span className="w-full justify-center relative overflow-hidden group-hover:shadow-blue-900/40 bg-slate-50 group-hover:bg-gradient-to-r group-hover:from-[#0B1E40] group-hover:to-blue-900 text-[#0B1E40] group-hover:text-white px-6 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-sm font-bold text-sm border border-slate-200 group-hover:border-transparent">
+                                                <span className="relative overflow-hidden group-hover:shadow-blue-900/40 bg-gradient-to-r from-[#0B1E40] to-blue-900 text-white px-6 py-2.5 rounded-full inline-flex items-center gap-2 transition-all shadow-md font-bold text-sm group-hover:-translate-y-0.5">
+                                                    <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
                                                     <span className="relative z-10">Ver Perfil</span>
                                                     <ArrowRight size={16} className="relative z-10" />
                                                 </span>

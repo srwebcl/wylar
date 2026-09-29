@@ -35,6 +35,7 @@ function commonFields(p) {
         title: p.title,
         description: p.description,
         image: p.image,
+        cardImage: p.cardImage,
         category: p.category,
         sector: p.sector,
         subsector: p.subsector,
