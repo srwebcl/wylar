@@ -16,8 +16,10 @@ export async function POST(request: Request) {
     const origin = request.headers.get('origin');
     const headers = corsHeaders(origin);
 
-    // Anti-spam: 6 envíos cada 10 minutos por IP (un usuario real envía 1 o 2).
-    const limit = await rateLimit('leads', clientIp(request.headers), 6, 600);
+    // Anti-spam: 15 envíos cada 10 minutos por IP. Es generoso a propósito: varias
+    // personas pueden compartir la misma IP (oficina, wifi compartido) y un usuario
+    // real puede reintentar varias veces si corrige datos o prueba el formulario.
+    const limit = await rateLimit('leads', clientIp(request.headers), 15, 600);
     if (!limit.ok) return tooManyRequests(limit.retryAfter, headers);
 
     let body: unknown;
