@@ -91,7 +91,7 @@ export default function Portales() {
 
                 <div className="max-w-4xl mx-auto">
                     {/* Selector: una pregunta, no tres cajas */}
-                    <div className="flex flex-wrap lg:flex-nowrap justify-center gap-3 mb-8" role="tablist" aria-label="Selecciona tu perfil">
+                    <div className="flex overflow-x-auto flex-nowrap justify-start lg:justify-center gap-3 mb-8 pb-4 px-4 lg:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x" role="tablist" aria-label="Selecciona tu perfil">
                         {AUDIENCIAS.map((a) => {
                             const Icon = a.icon;
                             const isActive = a.key === activeKey;
@@ -102,7 +102,7 @@ export default function Portales() {
                                     role="tab"
                                     aria-selected={isActive}
                                     onClick={() => setActiveKey(a.key)}
-                                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full border-2 font-bold text-sm transition-colors ${
+                                    className={`flex-shrink-0 snap-center flex items-center gap-2 px-5 py-2.5 rounded-full border-2 font-bold text-sm transition-colors ${
                                         isActive
                                             ? 'bg-[#0B1E40] border-[#0B1E40] text-white'
                                             : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
@@ -119,7 +119,7 @@ export default function Portales() {
                     <div
                         key={active.key}
                         style={{ animation: 'portalPanelIn 480ms cubic-bezier(0.22,1,0.36,1)' }}
-                        className={`relative overflow-hidden rounded-3xl p-8 sm:p-10 pl-16 sm:pl-20 pr-16 sm:pr-20 flex flex-col sm:flex-row gap-8 ${active.gradient} ${active.glow}`}
+                        className={`relative overflow-hidden rounded-[2rem] p-6 sm:p-10 sm:pl-20 sm:pr-20 flex flex-col sm:flex-row gap-6 sm:gap-8 ${active.gradient} ${active.glow}`}
                     >
                         {/* Ícono gigante de fondo, decorativo */}
                         <ActiveIcon
@@ -128,13 +128,14 @@ export default function Portales() {
                             className="pointer-events-none absolute -right-10 -bottom-14 text-white/[0.07] rotate-6"
                         />
 
-                        <div className="relative flex-none w-16 h-16 rounded-2xl flex items-center justify-center bg-white/15 ring-1 ring-white/25 shadow-[0_0_30px_rgba(255,255,255,0.15)] backdrop-blur-sm">
-                            <ActiveIcon size={30} className="text-white" />
-                        </div>
-                        <div className="relative flex-1 min-w-0">
-                            <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-5 tracking-tight leading-tight">
-                                {active.headline}
-                            </h3>
+                        <div className="relative flex flex-col sm:flex-row gap-5 sm:gap-8 sm:items-start flex-1">
+                            <div className="flex-none w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-white/15 ring-1 ring-white/25 shadow-[0_0_30px_rgba(255,255,255,0.15)] backdrop-blur-sm">
+                                <ActiveIcon size={28} className="text-white sm:w-[30px] sm:h-[30px]" />
+                            </div>
+                            <div className="relative flex-1 min-w-0">
+                                <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-4 sm:mb-5 tracking-tight leading-tight">
+                                    {active.headline}
+                                </h3>
                             <ul className="space-y-3 mb-8">
                                 {active.bullets.map((b) => (
                                     <li key={b} className="flex items-start gap-3 text-sm sm:text-base text-white/85">
@@ -144,13 +145,14 @@ export default function Portales() {
                                         {b}
                                     </li>
                                 ))}
-                            </ul>
-                            <a
-                                href={active.href}
-                                className="inline-flex items-center gap-2 font-bold px-6 py-3 rounded-full text-sm bg-white text-[#0B1E40] hover:bg-slate-50 shadow-xl transition-all hover:-translate-y-0.5 group/link"
-                            >
-                                {active.ctaLabel} <ArrowRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
-                            </a>
+                                </ul>
+                                <a
+                                    href={active.href}
+                                    className="inline-flex justify-center items-center gap-2 font-bold px-6 py-3.5 sm:py-3 rounded-full text-sm bg-white text-[#0B1E40] hover:bg-slate-50 shadow-xl transition-all hover:-translate-y-0.5 group/link w-full sm:w-auto"
+                                >
+                                    {active.ctaLabel} <ArrowRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
+                                </a>
+                            </div>
                         </div>
 
                         {/* Flechas: navegar el carrusel de perfiles sin depender de las pestañas */}
@@ -158,7 +160,7 @@ export default function Portales() {
                             type="button"
                             aria-label="Perfil anterior"
                             onClick={() => goTo(activeIndex - 1)}
-                            className="absolute z-10 left-3 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-white/25 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-sm transition-all hover:scale-105"
+                            className="hidden sm:flex absolute z-10 left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-white/25 bg-white/10 hover:bg-white/20 text-white items-center justify-center backdrop-blur-sm transition-all hover:scale-105"
                         >
                             <ChevronLeft size={20} />
                         </button>
@@ -166,7 +168,7 @@ export default function Portales() {
                             type="button"
                             aria-label="Siguiente perfil"
                             onClick={() => goTo(activeIndex + 1)}
-                            className="absolute z-10 right-3 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-white/25 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-sm transition-all hover:scale-105"
+                            className="hidden sm:flex absolute z-10 right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-white/25 bg-white/10 hover:bg-white/20 text-white items-center justify-center backdrop-blur-sm transition-all hover:scale-105"
                         >
                             <ChevronRight size={20} />
                         </button>
