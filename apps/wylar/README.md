@@ -67,3 +67,4 @@ Sin esta variable, los formularios apuntan a un dominio de ejemplo y el envío f
 
 <!-- prueba de auto-deploy: 2026-09-17 10:12 -->
 <!-- node version fix: Mon Sep 21 11:32:18 -03 2026 -->
+<!-- redeploy: PUBLIC_CRM_ORIGIN/API_URL ahora apuntan a crm.wylar.cl -->
