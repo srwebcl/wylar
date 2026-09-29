@@ -19,14 +19,14 @@ const { title, subtitle } = Astro.props;
     <div class="absolute inset-0 hero-sweep"></div>
 
     <div class="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-5">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-5">
             <h1 class="hero-in-1 text-xl sm:text-2xl md:text-[28px] font-extrabold text-white tracking-tight leading-tight shrink-0">
                 {title}
             </h1>
             {subtitle && (
                 <>
                     <span class="hero-in-2 hidden sm:block w-px h-8 bg-white/15 shrink-0"></span>
-                    <p class="hero-in-3 hidden sm:block text-sm text-white/65 leading-snug max-w-lg">
+                    <p class="hero-in-3 text-xs sm:text-sm text-white/65 leading-snug max-w-lg">
                         {subtitle}
                     </p>
                 </>

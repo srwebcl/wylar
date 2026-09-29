@@ -179,12 +179,12 @@ export default function CatalogoInteractivo({ perfiles = [] }) {
                         ) : (
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 {filteredPerfiles.map((perfil) => (
-                                    <a 
+                                    <a
                                         key={perfil.id}
-                                        href={perfil.link} 
-                                        className={`group flex flex-col sm:flex-row bg-transparent sm:bg-slate-50 rounded-xl overflow-hidden transition-all duration-300 relative min-h-[320px] sm:min-h-0 ${
-                                            perfil.isChileValora 
-                                                ? 'border border-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]' 
+                                        href={perfil.link}
+                                        className={`group flex flex-col sm:flex-row bg-transparent sm:bg-slate-50 rounded-xl overflow-hidden transition-all duration-300 relative aspect-[4/5] sm:aspect-auto ${
+                                            perfil.isChileValora
+                                                ? 'border border-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]'
                                                 : 'border border-slate-200 hover:border-blue-300 hover:shadow-lg'
                                         }`}
                                     >
@@ -195,17 +195,17 @@ export default function CatalogoInteractivo({ perfiles = [] }) {
                                                 alt={perfil.title}
                                                 className="absolute inset-0 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 opacity-95"
                                             />
-                                            {/* Overlay móvil: el texto ocupa ~70% inferior de la tarjeta (justify-end),
-                                                así que la capa oscura tiene que cubrir esa misma franja — no solo el
-                                                borde — o el título y la categoría quedan sobre lo que le tocó de foto. */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/80 to-slate-950/25 sm:hidden z-10"></div>
+                                            {/* Overlay móvil: oscuro solo donde vive el texto (mitad inferior),
+                                                dejando la parte superior de la foto clara — como un póster, no un
+                                                velo parejo sobre toda la imagen. */}
+                                            <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(2,6,23,0.96)_0%,rgba(2,6,23,0.88)_32%,rgba(2,6,23,0.5)_50%,rgba(2,6,23,0.05)_68%,transparent_80%)] sm:hidden z-10"></div>
                                         </div>
-                                        
-                                        {/* Contenido */}
-                                        <div className="p-6 w-full sm:w-3/5 flex flex-col justify-end sm:justify-center bg-transparent sm:bg-white relative z-10 min-h-[320px] sm:min-h-0">
-                                            {/* Header del contenido con la categoría y el logo */}
-                                            <div className="flex items-start justify-between mb-3 gap-2">
-                                                <div className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${perfil.isChileValora ? 'text-cyan-400 sm:text-cyan-600' : 'text-blue-300 sm:text-blue-600'}`}>
+
+                                        {/* Contenido — en mobile, categoría/sello arriba y ficha abajo, con la
+                                            foto respirando entre ambos (tarjeta vertical tipo post). */}
+                                        <div className="p-5 sm:p-6 w-full sm:w-3/5 h-full sm:h-auto flex flex-col justify-between sm:justify-center bg-transparent sm:bg-white relative z-10">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-black/30 backdrop-blur-[2px] sm:bg-transparent sm:backdrop-blur-none sm:px-0 sm:py-0 ${perfil.isChileValora ? 'text-cyan-300 sm:text-cyan-600' : 'text-blue-200 sm:text-blue-600'}`}>
                                                     {getCategoryIcon(perfil.category)} {perfil.category}
                                                 </div>
                                                 {perfil.isChileValora ? (
@@ -219,11 +219,11 @@ export default function CatalogoInteractivo({ perfiles = [] }) {
                                                     </div>
                                                 )}
                                             </div>
-                                            
-                                            <h3 className="text-xl font-bold text-white sm:text-slate-900 mb-2 leading-tight group-hover:text-cyan-100 sm:group-hover:text-blue-700 transition-colors">{perfil.title}</h3>
-                                            <p className="text-sm text-slate-200 sm:text-slate-600 mb-6 line-clamp-3">{perfil.description}</p>
-                                            
-                                            <div className="mt-auto">
+
+                                            <div>
+                                                <h3 className="text-xl font-bold text-white sm:text-slate-900 mb-2 leading-tight group-hover:text-cyan-100 sm:group-hover:text-blue-700 transition-colors">{perfil.title}</h3>
+                                                <p className="text-sm text-slate-200 sm:text-slate-600 mb-6 line-clamp-3">{perfil.description}</p>
+
                                                 <span className="relative overflow-hidden group-hover:shadow-blue-900/40 bg-gradient-to-r from-[#0B1E40] to-blue-900 text-white px-6 py-2.5 rounded-full inline-flex items-center gap-2 transition-all shadow-md font-bold text-sm group-hover:-translate-y-0.5">
                                                     <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
                                                     <span className="relative z-10">Ver Perfil</span>

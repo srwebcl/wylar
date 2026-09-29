@@ -3,22 +3,42 @@ import { ChevronRight, MapPin, Mail, Phone } from 'lucide-react';
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="bg-[#050B14] text-slate-400 py-16 border-t-[4px] border-[#0B1E40]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-5 gap-12">
+<footer class="bg-[#050B14] text-slate-400 py-12 md:py-16 border-t-[4px] border-[#0B1E40]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-5 gap-10 md:gap-12">
         <div class="col-span-1 md:col-span-2">
-            <div class="mb-8">
-                <img src="/images/logo-blanco.webp" alt="Wylar Logo" class="h-14 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity" />
+            <div class="mb-6 md:mb-8">
+                <img src="/images/logo-blanco.webp" alt="Wylar Logo" class="h-12 md:h-14 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity" />
             </div>
-            <p class="mb-8 pr-8 text-slate-400 leading-relaxed font-medium">
+            <p class="mb-6 md:mb-8 md:pr-8 text-slate-400 leading-relaxed font-medium">
                 Centro de Evaluación y Certificación de Competencias Laborales acreditado por ChileValora. Transmitimos confianza, respaldo institucional y excelencia técnica en cada proceso.
             </p>
-            <div class="flex flex-col sm:flex-row gap-6 items-start sm:items-center mt-4">
-                <img src="/logos-clientes/sello-chilevalora-circular.png" alt="Sello ChileValora" class="w-32 h-32 md:w-40 md:h-40 object-contain bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-105 transition-all duration-300 border-2 border-white/10" />
-                <img src="/logos-clientes/sence.png" alt="Sence" class="h-20 md:h-24 w-auto object-contain bg-white rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-105 transition-all duration-300 border-2 border-white/10 px-6 py-4" />
+            <div class="flex flex-row flex-wrap gap-4 sm:gap-6 items-center">
+                <img src="/logos-clientes/sello-chilevalora-circular.png" alt="Sello ChileValora" class="w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-105 transition-all duration-300 border-2 border-white/10" />
+                <img src="/logos-clientes/sence.png" alt="Sence" class="h-14 sm:h-20 md:h-24 w-auto object-contain bg-white rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-105 transition-all duration-300 border-2 border-white/10 px-4 py-3 md:px-6 md:py-4" />
             </div>
         </div>
-        
-        <div>
+
+        {/* Navegación — en mobile, "Portales" y "Menú Principal" son las mismas
+            páginas que ya están a un toque en el menú hamburguesa: mantenerlas
+            como dos listas separadas solo alargaba el footer sin agregar nada.
+            Se combinan en una sola grilla compacta de 2 columnas. En desktop
+            (con espacio horizontal de sobra) se mantienen las dos columnas
+            originales, sin cambios. */}
+        <div class="md:hidden">
+            <h4 class="text-white font-bold mb-4 text-sm">Explora el sitio</h4>
+            <ul class="grid grid-cols-2 gap-x-4 gap-y-3 font-medium text-[15px]">
+                <li><a href="/" class="hover:text-white transition-colors">Inicio</a></li>
+                <li><a href="/catalogo" class="hover:text-white transition-colors">Catálogo</a></li>
+                <li><a href="/chilevalora" class="hover:text-white transition-colors">Sobre ChileValora</a></li>
+                <li><a href="/validador" class="hover:text-white transition-colors">Validar Certificados</a></li>
+                <li><a href="/personas" class="hover:text-white transition-colors">Personas</a></li>
+                <li><a href="/empresas" class="hover:text-white transition-colors">Empresas</a></li>
+                <li><a href="/otec" class="hover:text-white transition-colors">OTEC</a></li>
+                <li><a href="/instituciones" class="hover:text-white transition-colors">Instituciones</a></li>
+            </ul>
+        </div>
+
+        <div class="hidden md:block">
             <h4 class="text-white font-bold mb-6 uppercase text-sm tracking-widest">Portales</h4>
             <ul class="space-y-4 font-medium text-[15px]">
                 <li><a href="/personas" class="hover:text-white transition-colors flex items-center gap-2"><ChevronRight size={14} className="text-blue-500" /> Personas</a></li>
@@ -27,8 +47,8 @@ const currentYear = new Date().getFullYear();
                 <li><a href="/instituciones" class="hover:text-white transition-colors flex items-center gap-2"><ChevronRight size={14} className="text-blue-500" /> Instituciones de Educación</a></li>
             </ul>
         </div>
-        
-        <div>
+
+        <div class="hidden md:block">
             <h4 class="text-white font-bold mb-6 uppercase text-sm tracking-widest">Menú Principal</h4>
             <ul class="space-y-4 font-medium text-[15px]">
                 <li><a href="/" class="hover:text-white transition-colors flex items-center gap-2"><ChevronRight size={14} className="text-blue-500" /> Inicio</a></li>
@@ -40,8 +60,8 @@ const currentYear = new Date().getFullYear();
         </div>
 
         <div>
-            <h4 class="text-white font-bold mb-6 uppercase text-sm tracking-widest">Contacto Directo</h4>
-            <ul class="space-y-5 font-medium text-[15px]">
+            <h4 class="text-white font-bold mb-4 md:mb-6 text-sm md:uppercase md:tracking-widest">Contacto directo</h4>
+            <ul class="space-y-4 md:space-y-5 font-medium text-[15px]">
                 <li class="flex items-start gap-3">
                     <MapPin size={18} className="text-blue-500 mt-0.5 flex-shrink-0" />
                     <span>Casa Matriz<br/><span class="text-slate-500 text-sm">Río Blanco 1371, Barrio Industrial, Arica.</span></span>
@@ -61,8 +81,8 @@ const currentYear = new Date().getFullYear();
             </ul>
         </div>
     </div>
-    
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pt-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500 font-medium">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 md:mt-16 pt-6 md:pt-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500 font-medium">
         <p>© {currentYear} WYLAR Ltda.</p>
         <div class="flex items-center gap-4">
             <a href="/politicas-privacidad" class="hover:text-white transition-colors">Políticas de Privacidad</a>

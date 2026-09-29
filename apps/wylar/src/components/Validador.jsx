@@ -1,10 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { Search, CheckCircle, AlertTriangle, Users, Shield, Download } from 'lucide-react';
+import { Search, CheckCircle, AlertTriangle, Clock, XCircle, Users, Shield, Download } from 'lucide-react';
 
 const CRM_ORIGIN = import.meta.env.PUBLIC_CRM_ORIGIN || 'https://wylar-crm.vercel.app';
 
-// Solo vigente o sin vencimiento es válido; vencido y revocado se muestran en rojo.
-const isValid = (cert) => cert.status === 'VIGENTE' || cert.status === 'SIN_VENCIMIENTO';
+// Se muestra solo antes de la primera búsqueda (ver !hasSearched más abajo)
+// para llenar el espacio con algo útil — no decorativo — en vez de dejar la
+// pantalla vacía: el proceso real de validación. Es una secuencia de verdad
+// (el paso 2 depende del 1, el 3 del 2), así que se dibuja como una línea de
+// tiempo conectada en vez de 3 tarjetas sueltas — ver el bloque más abajo.
+const STEPS = [
+    { title: 'Ingresa el RUT o el código', text: 'El mismo dato que aparece impreso en el certificado o en su código QR.' },
+    { title: 'Lo verificamos al instante', text: 'Se cruza con el registro oficial de certificados emitidos por Wylar.' },
+    { title: 'Revisa el resultado', text: 'Vigente, vencido o revocado — con el PDF firmado si corresponde.' },
+];
+
+// Vigente y sin vencimiento son el mismo estado visual (verde). Vencido y
+// revocado se distinguen: un certificado vencido fue legítimo y expiró por
+// tiempo (ámbar), uno revocado fue invalidado activamente (rojo) — son
+// situaciones distintas para quien está verificando, así que se marcan
+// distinto en vez de agrupar todo lo "no vigente" en un solo rojo.
+const STATUS_TONE = {
+    VIGENTE: { icon: CheckCircle, bar: 'bg-emerald-500', chip: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    SIN_VENCIMIENTO: { icon: CheckCircle, bar: 'bg-emerald-500', chip: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    VENCIDO: { icon: Clock, bar: 'bg-amber-500', chip: 'bg-amber-50 text-amber-700 border-amber-200' },
+    REVOCADO: { icon: XCircle, bar: 'bg-red-500', chip: 'bg-red-50 text-red-700 border-red-200' },
+};
 
 export default function Validador() {
     const [query, setQuery] = useState('');
@@ -59,12 +79,12 @@ export default function Validador() {
                 <div className="absolute inset-0 hero-sweep"></div>
 
                 <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-5">
                         <h1 className="hero-in-1 text-xl sm:text-2xl md:text-[28px] font-extrabold text-white tracking-tight leading-tight shrink-0">
                             Validador de Certificados
                         </h1>
                         <span className="hero-in-2 hidden sm:block w-px h-8 bg-white/15 shrink-0"></span>
-                        <p className="hero-in-3 hidden sm:block text-sm text-white/65 leading-snug max-w-lg">
+                        <p className="hero-in-3 text-xs sm:text-sm text-white/65 leading-snug max-w-lg">
                             Verifique la autenticidad y vigencia de las certificaciones emitidas por Wylar ingresando el RUT de la persona o el Código del Certificado.
                         </p>
                     </div>
@@ -73,22 +93,20 @@ export default function Validador() {
                 <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-600 via-cyan-400 to-amber-500"></div>
             </div>
 
-            <div className="max-w-4xl mx-auto px-4 mt-8 relative z-20">
-                <form onSubmit={handleValidate} className="bg-white p-8 md:p-10 rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-slate-100 animate-in zoom-in-95 duration-700 delay-200">
-                    <label className="block text-slate-700 font-black mb-4 text-lg" htmlFor="searchInput">
-                        Ingrese RUT o Código de Certificado
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-6 sm:mt-8 relative z-20">
+                <form onSubmit={handleValidate}>
+                    <label className="block text-slate-700 font-bold mb-2.5 text-sm" htmlFor="searchInput">
+                        Ingresa el RUT de la persona o el código del certificado
                     </label>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="relative flex-grow group">
-                            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                <Search className="text-slate-400 group-focus-within:text-blue-600 transition-colors" size={24} />
-                            </div>
+                    <div className="flex flex-col sm:flex-row bg-white border border-slate-200 rounded-2xl shadow-sm focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-500/10 transition-shadow overflow-hidden">
+                        <div className="relative flex-grow flex items-center">
+                            <Search className="absolute left-4 text-slate-400" size={20} />
                             <input
                                 id="searchInput"
                                 type="text"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                className="w-full pl-14 pr-6 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all text-xl font-medium"
+                                className="w-full pl-11 pr-4 py-4 bg-transparent outline-none text-base sm:text-lg font-medium text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
                                 placeholder="Ej: 11.817.652-9 o WYL-2026-K3F9A2"
                                 required
                             />
@@ -96,105 +114,125 @@ export default function Validador() {
                         <button
                             type="submit"
                             disabled={isSearching}
-                            className="bg-blue-700 hover:bg-blue-800 text-white font-black text-lg py-5 px-10 rounded-2xl transition-all shadow-[0_8px_20px_-6px_rgba(29,78,216,0.6)] hover:shadow-[0_12px_25px_-6px_rgba(29,78,216,0.8)] flex items-center justify-center gap-3 disabled:bg-blue-400 disabled:shadow-none min-w-[200px]"
+                            className="bg-blue-700 hover:bg-blue-800 text-white font-bold text-sm sm:text-base py-4 px-6 sm:px-8 transition-colors flex items-center justify-center gap-2.5 disabled:bg-blue-400 shrink-0"
                         >
                             {isSearching ? (
                                 <>
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                    Buscando...
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    Buscando
                                 </>
-                            ) : 'Validar Ahora'}
+                            ) : 'Validar'}
                         </button>
                     </div>
                 </form>
 
+                {/* Antes de buscar: cómo funciona, no un vacío. Desaparece en cuanto hay
+                    resultados. Los 3 pasos van conectados por una línea (vertical en
+                    mobile, horizontal en desktop) porque son una secuencia real, no 3
+                    características independientes — el paso 2 depende del 1. */}
+                {!hasSearched && (
+                    <div className="mt-14 sm:mt-20 sm:grid sm:grid-cols-3 relative">
+                        {/* Línea — mobile: vertical a la izquierda. Desktop: horizontal entre los círculos. */}
+                        <div className="absolute left-4 top-4 bottom-4 w-px bg-slate-200 sm:left-[16.6667%] sm:right-[16.6667%] sm:top-4 sm:bottom-auto sm:w-auto sm:h-px"></div>
+
+                        {STEPS.map((step, i) => (
+                            <div key={step.title} className="relative flex gap-4 pb-10 last:pb-0 sm:flex-col sm:items-center sm:text-center sm:px-4 sm:pb-0">
+                                <div className="relative z-10 w-8 h-8 rounded-full bg-white border-2 border-blue-600 text-blue-700 font-bold text-sm flex items-center justify-center shrink-0">
+                                    {i + 1}
+                                </div>
+                                <div className="sm:mt-4 sm:max-w-[15rem]">
+                                    <p className="font-bold text-slate-900 text-sm mb-1">{step.title}</p>
+                                    <p className="text-slate-500 text-sm leading-relaxed">{step.text}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
                 {/* RESULTADOS */}
                 {hasSearched && (
-                    <div className="mt-16 animate-in slide-in-from-bottom-8 duration-700">
+                    <div className="mt-10 sm:mt-12">
                         {errorMessage ? (
-                            <div className="bg-red-50 border border-red-100 text-red-800 p-8 rounded-[2rem] flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left shadow-lg shadow-red-900/5">
-                                <div className="bg-red-100 p-4 rounded-full flex-shrink-0">
-                                    <AlertTriangle size={36} className="text-red-600" />
-                                </div>
+                            <div className="border-l-[3px] border-red-400 bg-red-50/60 rounded-r-xl p-5 flex items-start gap-3.5">
+                                <AlertTriangle size={20} className="text-red-500 shrink-0 mt-0.5" />
                                 <div>
-                                    <h4 className="font-black text-xl mb-2">No pudimos completar la búsqueda</h4>
-                                    <p className="text-red-700/80 text-lg">{errorMessage}</p>
+                                    <p className="font-bold text-red-900 text-sm">No pudimos completar la búsqueda</p>
+                                    <p className="text-red-700/90 text-sm mt-0.5">{errorMessage}</p>
                                 </div>
                             </div>
                         ) : (
                             <>
-                                <div className="flex items-center justify-between border-b-2 border-slate-100 pb-4 mb-8">
-                                    <h3 className="text-2xl font-black text-slate-900">Resultados de la búsqueda</h3>
-                                    <span className="bg-slate-100 text-slate-600 px-4 py-1.5 rounded-full font-bold text-sm">
-                                        {results.length} encontrado{results.length !== 1 ? 's' : ''}
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-base font-bold text-slate-900">Resultados de la búsqueda</h3>
+                                    <span className="text-slate-500 text-sm font-medium">
+                                        {results.length} {results.length === 1 ? 'coincidencia' : 'coincidencias'}
                                     </span>
                                 </div>
 
                                 {results.length === 0 ? (
-                                    <div className="bg-red-50 border border-red-100 text-red-800 p-8 rounded-[2rem] flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left shadow-lg shadow-red-900/5">
-                                        <div className="bg-red-100 p-4 rounded-full flex-shrink-0">
-                                            <AlertTriangle size={36} className="text-red-600" />
-                                        </div>
+                                    <div className="border-l-[3px] border-red-400 bg-red-50/60 rounded-r-xl p-5 flex items-start gap-3.5">
+                                        <AlertTriangle size={20} className="text-red-500 shrink-0 mt-0.5" />
                                         <div>
-                                            <h4 className="font-black text-xl mb-2">No se encontraron resultados</h4>
-                                            <p className="text-red-700/80 text-lg">Verifique que el RUT o Código esté escrito correctamente. Si el problema persiste, es posible que el certificado no exista en nuestros registros.</p>
+                                            <p className="font-bold text-red-900 text-sm">No encontramos ningún certificado</p>
+                                            <p className="text-red-700/90 text-sm mt-0.5">Revisa que el RUT o el código estén escritos correctamente. Si el problema persiste, es posible que el certificado no exista en nuestros registros.</p>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="space-y-8">
-                                        {results.map((cert) => (
-                                            <div key={cert.code} className="bg-white rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden flex flex-col md:flex-row transform hover:-translate-y-1 transition-transform duration-300">
-                                                <div className={`w-full md:w-6 flex md:flex-col items-center justify-center p-2 md:p-0 ${isValid(cert) ? 'bg-green-500' : 'bg-red-500'}`}>
-                                                    <span className="md:-rotate-90 text-white font-black tracking-widest text-xs uppercase opacity-90 whitespace-nowrap">{cert.statusLabel}</span>
-                                                </div>
+                                    <div className="space-y-4">
+                                        {results.map((cert) => {
+                                            const tone = STATUS_TONE[cert.status] ?? STATUS_TONE.REVOCADO;
+                                            const StatusIcon = tone.icon;
+                                            return (
+                                                <div key={cert.code} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                                                    <div className={`h-[3px] ${tone.bar}`}></div>
 
-                                                <div className="p-8 md:p-10 flex-grow">
-                                                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8 border-b border-slate-100 pb-8">
-                                                        <div>
-                                                            <div className="inline-flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 bg-blue-50 px-3 py-1 rounded-full">
-                                                                <Shield size={14} /> {cert.categoryLabel}
+                                                    <div className="p-5 sm:p-7">
+                                                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-6 pb-6 border-b border-slate-100">
+                                                            <div>
+                                                                <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 mb-1.5">
+                                                                    <Shield size={13} /> {cert.categoryLabel}
+                                                                </div>
+                                                                <h4 className="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug">{cert.certificationTitle}</h4>
                                                             </div>
-                                                            <h4 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight">{cert.certificationTitle}</h4>
+                                                            <div className={`px-3 py-1.5 rounded-lg font-bold text-xs inline-flex items-center gap-1.5 self-start shrink-0 border ${tone.chip}`}>
+                                                                <StatusIcon size={14} /> {cert.statusLabel}
+                                                            </div>
                                                         </div>
-                                                        <div className={`px-5 py-2 rounded-xl font-black text-sm inline-flex items-center gap-2 self-start shadow-sm border ${isValid(cert) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
-                                                            {isValid(cert) ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
-                                                            {cert.statusLabel.toUpperCase()}
-                                                        </div>
-                                                    </div>
 
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 text-sm mb-8">
-                                                        <div>
-                                                            <span className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1"><Users size={14} /> Titular</span>
-                                                            <span className="text-slate-900 font-bold text-lg">{cert.holderName}</span>
+                                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-5 gap-x-4 text-sm mb-6">
+                                                            <div>
+                                                                <span className="flex items-center gap-1 text-slate-400 text-xs font-medium mb-1"><Users size={12} /> Titular</span>
+                                                                <span className="text-slate-900 font-semibold">{cert.holderName}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="block text-slate-400 text-xs font-medium mb-1">RUT</span>
+                                                                <span className="text-slate-900 font-semibold">{cert.holderRut}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="block text-slate-400 text-xs font-medium mb-1">Código</span>
+                                                                <span className="text-blue-900 font-mono font-semibold">{cert.code}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="block text-slate-400 text-xs font-medium mb-1">Vigencia</span>
+                                                                <span className="text-slate-900 font-semibold block">{new Date(cert.issueDate).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                                                                <span className="text-slate-500 text-xs">{cert.expiryDate ? `hasta ${new Date(cert.expiryDate).toLocaleDateString('es-CL', { month: 'short', year: 'numeric' })}` : 'Sin fecha de vencimiento'}</span>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <span className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">RUT</span>
-                                                            <span className="text-slate-900 font-bold text-lg">{cert.holderRut}</span>
-                                                        </div>
-                                                        <div>
-                                                            <span className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Código</span>
-                                                            <span className="text-blue-900 font-mono font-bold bg-blue-50 px-3 py-1 rounded-lg text-lg border border-blue-100">{cert.code}</span>
-                                                        </div>
-                                                        <div>
-                                                            <span className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Período de Vigencia</span>
-                                                            <span className="text-slate-900 font-bold text-base block">{new Date(cert.issueDate).toLocaleDateString('es-CL', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
-                                                            <span className="text-slate-500 font-medium text-sm">{cert.expiryDate ? `hasta ${new Date(cert.expiryDate).toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })}` : 'Sin fecha de vencimiento'}</span>
-                                                        </div>
-                                                    </div>
 
-                                                    {cert.pdfUrl && (
-                                                    <a
-                                                            href={`${CRM_ORIGIN}${cert.pdfUrl}`}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className="inline-flex items-center gap-2 bg-[#0B1E40] hover:bg-blue-900 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-md"
-                                                        >
-                                                            <Download size={18} /> Descargar Certificado (PDF)
-                                                        </a>
-                                                    )}
+                                                        {cert.pdfUrl && (
+                                                            <a
+                                                                href={`${CRM_ORIGIN}${cert.pdfUrl}`}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="inline-flex items-center gap-2 bg-[#0B1E40] hover:bg-blue-900 text-white font-bold text-sm px-5 py-2.5 rounded-lg transition-colors"
+                                                            >
+                                                                <Download size={16} /> Descargar certificado (PDF)
+                                                            </a>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </>

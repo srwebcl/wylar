@@ -109,54 +109,78 @@ export default function HeroSlider({ customSlides = [] }) {
                         </a>
                     </div>
 
-                    {/* Miniaturas: reemplazan a los dots, muestran la foto real de cada slide */}
-                    <div
-                        className="flex items-center gap-2 mt-6 sm:mt-8 md:mt-12 overflow-x-auto px-3 -mx-3 py-3 -my-3 justify-center md:justify-start [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                        role="tablist"
-                        aria-label="Slides del hero"
-                    >
-                        {slides.map((s, index) => {
-                            const isActive = index === currentIndex;
-                            return (
-                                <button
-                                    key={s.id}
-                                    type="button"
-                                    role="tab"
-                                    aria-label={`Ir al slide ${index + 1} de ${slides.length}: ${s.categoryLabel}`}
-                                    aria-selected={isActive}
-                                    onClick={() => goTo(index)}
-                                    className={`relative flex-shrink-0 w-12 h-9 sm:w-16 sm:h-11 rounded-lg overflow-hidden bg-cover bg-center border-2 transition-all duration-300 ${
-                                        isActive
-                                            ? 'border-cyan-300 scale-110 shadow-[0_0_0_2px_rgba(103,232,249,0.25)]'
-                                            : 'border-white/25 opacity-60 hover:opacity-90 hover:border-white/50'
-                                    }`}
-                                    style={{ backgroundImage: `url('${s.image}')` }}
-                                >
-                                    {!isActive && <span className="absolute inset-0 bg-[#050B14]/40" />}
-                                    {isActive && (
-                                        <span className="absolute left-0 bottom-0 h-[3px] bg-cyan-300/90 w-full origin-left">
-                                            <span
-                                                className="block h-full bg-white"
-                                                style={{
-                                                    animation: `heroProgressFill ${AUTOPLAY_MS}ms linear forwards`,
-                                                    animationPlayState: isPaused ? 'paused' : 'running',
-                                                }}
-                                            />
-                                        </span>
-                                    )}
-                                </button>
-                            );
-                        })}
+                    {/* Miniaturas: reemplazan a los dots, muestran la foto real de cada slide.
+                        En mobile las flechas van en la misma fila (no flotando aparte abajo,
+                        donde chocaban con el botón de WhatsApp) — flanquean el carrusel. */}
+                    <div className="flex items-center gap-2 mt-6 sm:mt-8 md:mt-12">
+                        <button
+                            type="button"
+                            aria-label="Slide anterior"
+                            onClick={() => goTo(currentIndex - 1)}
+                            className="md:hidden flex-shrink-0 w-8 h-8 rounded-full border border-white/20 bg-[#050B14]/50 hover:bg-[#050B14]/80 text-white flex items-center justify-center backdrop-blur-md transition-colors"
+                        >
+                            <ChevronLeft size={16} strokeWidth={2.5} />
+                        </button>
+
+                        <div
+                            className="flex items-center gap-2 overflow-x-auto px-1 py-3 -my-3 flex-1 justify-center md:justify-start md:flex-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                            role="tablist"
+                            aria-label="Slides del hero"
+                        >
+                            {slides.map((s, index) => {
+                                const isActive = index === currentIndex;
+                                return (
+                                    <button
+                                        key={s.id}
+                                        type="button"
+                                        role="tab"
+                                        aria-label={`Ir al slide ${index + 1} de ${slides.length}: ${s.categoryLabel}`}
+                                        aria-selected={isActive}
+                                        onClick={() => goTo(index)}
+                                        className={`relative flex-shrink-0 w-12 h-9 sm:w-16 sm:h-11 rounded-lg overflow-hidden bg-cover bg-center border-2 transition-all duration-300 ${
+                                            isActive
+                                                ? 'border-cyan-300 scale-110 shadow-[0_0_0_2px_rgba(103,232,249,0.25)]'
+                                                : 'border-white/25 opacity-60 hover:opacity-90 hover:border-white/50'
+                                        }`}
+                                        style={{ backgroundImage: `url('${s.image}')` }}
+                                    >
+                                        {!isActive && <span className="absolute inset-0 bg-[#050B14]/40" />}
+                                        {isActive && (
+                                            <span className="absolute left-0 bottom-0 h-[3px] bg-cyan-300/90 w-full origin-left">
+                                                <span
+                                                    className="block h-full bg-white"
+                                                    style={{
+                                                        animation: `heroProgressFill ${AUTOPLAY_MS}ms linear forwards`,
+                                                        animationPlayState: isPaused ? 'paused' : 'running',
+                                                    }}
+                                                />
+                                            </span>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <button
+                            type="button"
+                            aria-label="Siguiente slide"
+                            onClick={() => goTo(currentIndex + 1)}
+                            className="md:hidden flex-shrink-0 w-8 h-8 rounded-full border border-white/20 bg-[#050B14]/50 hover:bg-[#050B14]/80 text-white flex items-center justify-center backdrop-blur-md transition-colors"
+                        >
+                            <ChevronRight size={16} strokeWidth={2.5} />
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* Flechas: navegación tradicional, ancladas a los bordes de la imagen */}
+            {/* Flechas de escritorio: ancladas a los bordes de la imagen, a la altura
+                del centro. En mobile no van aquí — flanquean el carrusel de miniaturas
+                arriba, donde hay espacio real y no chocan con el botón de WhatsApp. */}
             <button
                 type="button"
                 aria-label="Slide anterior"
                 onClick={() => goTo(currentIndex - 1)}
-                className="absolute left-3 md:left-5 lg:left-8 bottom-8 md:bottom-auto md:top-1/2 md:-translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full border border-white/20 bg-[#050B14]/40 hover:bg-[#050B14]/70 text-white flex items-center justify-center backdrop-blur-md transition-all hover:scale-105 shadow-lg"
+                className="hidden md:flex absolute md:left-5 lg:left-8 md:top-1/2 md:-translate-y-1/2 z-30 md:w-14 md:h-14 rounded-full border border-white/20 bg-[#050B14]/40 hover:bg-[#050B14]/70 text-white items-center justify-center backdrop-blur-md transition-all hover:scale-105 shadow-lg"
             >
                 <ChevronLeft size={26} strokeWidth={2.25} />
             </button>
@@ -164,7 +188,7 @@ export default function HeroSlider({ customSlides = [] }) {
                 type="button"
                 aria-label="Siguiente slide"
                 onClick={() => goTo(currentIndex + 1)}
-                className="absolute right-20 md:right-5 lg:right-8 bottom-8 md:bottom-auto md:top-1/2 md:-translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full border border-white/20 bg-[#050B14]/40 hover:bg-[#050B14]/70 text-white flex items-center justify-center backdrop-blur-md transition-all hover:scale-105 shadow-lg"
+                className="hidden md:flex absolute md:right-5 lg:right-8 md:top-1/2 md:-translate-y-1/2 z-30 md:w-14 md:h-14 rounded-full border border-white/20 bg-[#050B14]/40 hover:bg-[#050B14]/70 text-white items-center justify-center backdrop-blur-md transition-all hover:scale-105 shadow-lg"
             >
                 <ChevronRight size={26} strokeWidth={2.25} />
             </button>
