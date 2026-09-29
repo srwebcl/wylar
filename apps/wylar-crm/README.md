@@ -127,3 +127,4 @@ Cuando exista la cuenta de WhatsApp Business API, el punto de integración natur
 - Un usuario desactivado (`/equipo`) pierde el acceso de inmediato, sin esperar a que expire su sesión.
 - El validador de certificados (`/api/public/certificates/validate`) expone el RUT completo del titular — decisión de producto (el validador busca por RUT o código). Se mitiga con búsqueda indexada, límite de consultas y respuesta acotada a 20 resultados. Evalúa con asesoría legal si conviene enmascararlo.
 - El sitio consulta catálogo y banners con caché de CDN (30 s) y las páginas del sitio se cachean 60 s: los cambios hechos aquí se ven en 1–3 minutos, sin desplegar.
+<!-- redeploy: PUBLIC_FORM_ORIGINS ahora incluye wylar.cl -->
