@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import { saveProfile } from '@/actions/catalog';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { ImageUploadField } from '@/components/ImageUploadField';
+import { DocumentUploadField } from '@/components/DocumentUploadField';
 import { slugify } from '@/lib/slugify';
 import { ESTANDAR_SECTION_KEYS, ESTANDAR_SECTION_LABELS } from '@/lib/catalogSpec';
 
@@ -20,6 +21,7 @@ export interface ProfileWizardInitial {
     descriptionLong: string;
     image: string;
     cardImage: string;
+    fichaUrl: string;
     category: string;
     sector: string;
     subsector: string;
@@ -49,6 +51,7 @@ export function ProfileWizard({ initial }: { initial?: ProfileWizardInitial }) {
     const [descriptionLong, setDescriptionLong] = useState(initial?.descriptionLong ?? '');
     const [image, setImage] = useState(initial?.image ?? '');
     const [cardImage, setCardImage] = useState(initial?.cardImage ?? '');
+    const [fichaUrl, setFichaUrl] = useState(initial?.fichaUrl ?? '');
     
     // Valores por defecto ocultos
     const category = initial?.category || 'General';
@@ -101,6 +104,7 @@ export function ProfileWizard({ initial }: { initial?: ProfileWizardInitial }) {
                     description,
                     image,
                     cardImage,
+                    fichaUrl,
                     category,
                     sector,
                     subsector,
@@ -211,6 +215,11 @@ export function ProfileWizard({ initial }: { initial?: ProfileWizardInitial }) {
                         <label className={LABEL_CLASS}>Imagen Tarjeta Vertical (opcional)</label>
                         <ImageUploadField value={cardImage} onChange={setCardImage} />
                         <p className="text-xs text-slate-500 mt-1">Si se deja en blanco, se usará la imagen del banner.</p>
+                    </div>
+                    <div>
+                        <label className={LABEL_CLASS}>Ficha Ocupacional en PDF (opcional)</label>
+                        <DocumentUploadField value={fichaUrl} onChange={setFichaUrl} />
+                        <p className="text-xs text-slate-500 mt-1">Si se sube, en wylar.cl aparece un botón para descargarla desde la ficha del perfil.</p>
                     </div>
                 </div>
                 

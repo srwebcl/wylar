@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/auth';
 import { buildLeadsWhere } from '@/lib/leadsFilter';
 import { LeadsSearchBar } from '@/components/LeadsSearchBar';
 import { LeadsTable } from '@/components/LeadsTable';
@@ -7,6 +8,7 @@ import { LeadsTable } from '@/components/LeadsTable';
 const PAGE_SIZE = 50;
 
 export default async function LeadsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+    const currentUser = await requireUser();
     const params = await searchParams;
     const page = Math.max(1, Number.parseInt(params.page ?? '1', 10) || 1);
     const where = buildLeadsWhere(params);
@@ -38,7 +40,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
             </div>
 
             <LeadsSearchBar users={users} />
-            <LeadsTable leads={leads} />
+            <LeadsTable leads={leads} isAdmin={currentUser.role === 'ADMIN'} />
 
             {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-4 text-sm text-slate-600">

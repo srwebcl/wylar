@@ -44,6 +44,7 @@ export async function GET(request: Request) {
         description: profile.description,
         image: profile.image,
         cardImage: profile.cardImage,
+        fichaUrl: profile.fichaUrl,
         category: profile.category,
         sector: profile.sector,
         subsector: profile.subsector,

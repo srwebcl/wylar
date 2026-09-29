@@ -130,7 +130,10 @@ model Profile {
   descriptionLong String? @db.Text
   image       String
   // Imagen vertical especial para la tarjeta del catálogo (si es null se usa image)
-  cardImage   String? 
+  cardImage   String?
+  // Ficha Ocupacional en PDF (opcional) — si existe, wylar.cl muestra un
+  // botón de descarga en la ficha del perfil.
+  fichaUrl    String?
 
   category  String
   sector    String

@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react';
 import { saveProfile } from '@/actions/catalog';
+import { DocumentUploadField } from '@/components/DocumentUploadField';
 import type { ProfileInput } from '@/lib/validation';
 import { PROFILE_TEMPLATE_TYPES, TARGET_AUDIENCES, sectionSpecsFor, type ProfileSectionSpec } from '@/lib/catalogSpec';
 
@@ -27,6 +28,7 @@ export interface ProfileFormInitial {
     description: string;
     image: string;
     cardImage: string;
+    fichaUrl: string;
     category: string;
     sector: string;
     subsector: string;
@@ -66,6 +68,7 @@ export function ProfileForm({ initial }: { initial?: ProfileFormInitial }) {
     const [description, setDescription] = useState(initial?.description ?? '');
     const [image, setImage] = useState(initial?.image ?? '');
     const [cardImage, setCardImage] = useState(initial?.cardImage ?? '');
+    const [fichaUrl, setFichaUrl] = useState(initial?.fichaUrl ?? '');
     const [category, setCategory] = useState(initial?.category ?? '');
     const [sector, setSector] = useState(initial?.sector ?? '');
     const [subsector, setSubsector] = useState(initial?.subsector ?? '');
@@ -121,6 +124,7 @@ export function ProfileForm({ initial }: { initial?: ProfileFormInitial }) {
             description,
             image,
             cardImage,
+            fichaUrl: fichaUrl || null,
             category,
             sector,
             subsector,
@@ -204,6 +208,10 @@ export function ProfileForm({ initial }: { initial?: ProfileFormInitial }) {
                     <Field label="Imagen Tarjeta Vertical (opcional)">
                         <input value={cardImage} onChange={(e) => setCardImage(e.target.value)} placeholder="/images/card_electricista.jpg" className={inputClass} />
                         <p className="text-xs text-slate-500 mt-1">Si se deja en blanco, se usará la imagen del banner.</p>
+                    </Field>
+                    <Field label="Ficha Ocupacional en PDF (opcional)" className="md:col-span-2">
+                        <DocumentUploadField value={fichaUrl} onChange={setFichaUrl} />
+                        <p className="text-xs text-slate-500 mt-1">Si se sube, en wylar.cl aparece un botón para descargarla desde la ficha del perfil.</p>
                     </Field>
                     <Field label="Categoría">
                         <input value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass} required />

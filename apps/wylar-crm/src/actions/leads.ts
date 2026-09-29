@@ -2,9 +2,10 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
-import { requireUser } from '@/lib/auth';
+import { requireUser, requireAdmin } from '@/lib/auth';
 import { activityEntrySchema, assignSchema, statusChangeSchema } from '@/lib/validation';
 import { SYSTEM_ACTIVITY_TYPES, statusLabel } from '@/lib/constants';
+import { audit } from '@/lib/audit';
 
 export interface LeadFormState {
     error?: string;
@@ -105,6 +106,27 @@ export async function assignLead(leadId: number, formData: FormData) {
     revalidatePath(`/leads/${leadId}`);
     revalidatePath('/');
     revalidatePath('/leads');
+}
+
+/**
+ * Elimina un prospecto (ej. registros de prueba). Solo administradores —
+ * la baja queda registrada en /auditoria (quién, cuándo, código y datos
+ * del lead borrado) porque es destructiva e irreversible. Los certificados
+ * que estuvieran vinculados a este lead no se borran, solo pierden el
+ * vínculo (Certificate.leadId queda en null, ver schema.prisma).
+ */
+export async function deleteLead(leadId: number): Promise<LeadFormState> {
+    const admin = await requireAdmin();
+
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+    if (!lead) return { error: 'El prospecto no existe.' };
+
+    await prisma.lead.delete({ where: { id: leadId } });
+    await audit(admin, 'LEAD_ELIMINADO', 'lead', lead.code, `${lead.name} · ${lead.email}`);
+
+    revalidatePath('/leads');
+    revalidatePath('/');
+    return { success: `Prospecto ${lead.code} eliminado.` };
 }
 
 /** Auditoría de Tiempos de Respuesta: registra la fecha de la primera atención, una sola vez. */

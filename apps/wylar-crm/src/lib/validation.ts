@@ -109,6 +109,14 @@ export const profileSchema = z.object({
         .optional()
         .nullable()
         .refine((v) => !v || isSafeUrl(v), 'La imagen debe ser una ruta que empiece con "/" o una URL https://.'),
+    // Ficha Ocupacional en PDF, opcional.
+    fichaUrl: z
+        .string()
+        .trim()
+        .max(500)
+        .optional()
+        .nullable()
+        .refine((v) => !v || isSafeUrl(v), 'El archivo debe ser una ruta que empiece con "/" o una URL https://.'),
     category: z.string().trim().min(1, 'Falta la categoría.').max(100),
     sector: z.string().trim().min(1, 'Falta el sector.').max(100),
     subsector: z.string().trim().min(1, 'Falta el subsector.').max(100),

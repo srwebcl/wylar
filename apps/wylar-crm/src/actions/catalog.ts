@@ -36,9 +36,10 @@ export async function saveProfile(input: ProfileInput, profileId?: number | null
         return { error: `El slug "${data.slug}" ya está en uso por otro perfil.` };
     }
 
-    const prev = profileId ? (await prisma.profile.findUnique({ where: { id: profileId }, select: { image: true, cardImage: true } })) : null;
+    const prev = profileId ? (await prisma.profile.findUnique({ where: { id: profileId }, select: { image: true, cardImage: true, fichaUrl: true } })) : null;
     const previousImage = prev?.image;
     const previousCardImage = prev?.cardImage;
+    const previousFichaUrl = prev?.fichaUrl;
 
     const profileData = {
         slug: data.slug,
@@ -47,6 +48,7 @@ export async function saveProfile(input: ProfileInput, profileId?: number | null
         description: data.description,
         image: data.image,
         cardImage: data.cardImage || null,
+        fichaUrl: data.fichaUrl || null,
         category: data.category,
         sector: data.sector,
         subsector: data.subsector,
@@ -105,6 +107,7 @@ export async function saveProfile(input: ProfileInput, profileId?: number | null
 
     if (previousImage && previousImage !== data.image) await deleteBlobIfUnused(previousImage);
     if (previousCardImage && previousCardImage !== data.cardImage) await deleteBlobIfUnused(previousCardImage);
+    if (previousFichaUrl && previousFichaUrl !== data.fichaUrl) await deleteBlobIfUnused(previousFichaUrl);
     await audit(currentUser, profileId ? 'PERFIL_ACTUALIZADO' : 'PERFIL_CREADO', 'perfil', data.slug, data.title);
     revalidatePath('/catalogo');
     return { success: profileId ? 'Perfil actualizado.' : 'Perfil creado.' };
@@ -118,6 +121,7 @@ export async function deleteProfile(profileId: number): Promise<CatalogFormState
     await prisma.profile.delete({ where: { id: profileId } });
     await deleteBlobIfUnused(profile.image);
     if (profile.cardImage) await deleteBlobIfUnused(profile.cardImage);
+    if (profile.fichaUrl) await deleteBlobIfUnused(profile.fichaUrl);
     await audit(admin, 'PERFIL_ELIMINADO', 'perfil', profile.slug, profile.title);
     revalidatePath('/catalogo');
     return { success: 'Perfil eliminado.' };

@@ -52,3 +52,41 @@ export async function uploadProfileImage(formData: FormData): Promise<UploadImag
         return { error: 'No se pudo subir la imagen. Intenta de nuevo.' };
     }
 }
+
+const MAX_PDF_BYTES = 15 * 1024 * 1024; // 15MB
+
+// Firma real de un PDF: siempre empieza con "%PDF-" (0x25 0x50 0x44 0x46 0x2D).
+function isPdf(bytes: Uint8Array): boolean {
+    const sig = [0x25, 0x50, 0x44, 0x46, 0x2d];
+    return sig.every((b, i) => bytes[i] === b);
+}
+
+/** Sube la Ficha Ocupacional (PDF) de un perfil del catálogo a Vercel Blob. */
+export async function uploadProfileDocument(formData: FormData): Promise<UploadImageResult> {
+    await requireUser();
+
+    const file = formData.get('file');
+    if (!(file instanceof File)) {
+        return { error: 'No se recibió ningún archivo.' };
+    }
+    if (file.type !== 'application/pdf') {
+        return { error: 'El archivo debe ser un PDF.' };
+    }
+    if (file.size > MAX_PDF_BYTES) {
+        return { error: 'El PDF pesa más de 15MB. Comprímelo e intenta de nuevo.' };
+    }
+
+    const header = new Uint8Array(await file.slice(0, 5).arrayBuffer());
+    if (!isPdf(header)) {
+        return { error: 'El archivo no es un PDF válido.' };
+    }
+
+    const filename = `catalogo/fichas/${Date.now()}-${randomUUID().slice(0, 8)}.pdf`;
+
+    try {
+        const blob = await put(filename, file, { access: 'public', contentType: 'application/pdf' });
+        return { url: blob.url };
+    } catch {
+        return { error: 'No se pudo subir el PDF. Intenta de nuevo.' };
+    }
+}

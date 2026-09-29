@@ -1,5 +1,10 @@
+'use client';
+
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
+import { Trash2, Loader2 } from 'lucide-react';
 import { leadTypeLabel, sourceLabel, statusLabel } from '@/lib/constants';
+import { deleteLead } from '@/actions/leads';
 import type { Lead } from '@prisma/client';
 import type { SafeUser as User } from '@/lib/safeUser';
 
@@ -12,7 +17,22 @@ const STATUS_BADGE: Record<string, string> = {
     CERRADO: 'bg-emerald-50 text-emerald-700 border-emerald-200',
 };
 
-export function LeadsTable({ leads }: { leads: LeadWithAssignee[] }) {
+export function LeadsTable({ leads, isAdmin = false }: { leads: LeadWithAssignee[]; isAdmin?: boolean }) {
+    const [isPending, startTransition] = useTransition();
+    const [pendingId, setPendingId] = useState<number | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    function handleDelete(id: number, code: string, name: string) {
+        if (!confirm(`¿Eliminar el prospecto ${code} (${name})? Esta acción no se puede deshacer. Queda registrado en la auditoría.`)) return;
+        setError(null);
+        setPendingId(id);
+        startTransition(async () => {
+            const result = await deleteLead(id);
+            if (result.error) setError(result.error);
+            setPendingId(null);
+        });
+    }
+
     if (leads.length === 0) {
         return (
             <div className="glass-card p-10 text-center text-slate-500">
@@ -23,6 +43,7 @@ export function LeadsTable({ leads }: { leads: LeadWithAssignee[] }) {
 
     return (
         <div className="glass-card overflow-hidden">
+            {error && <div className="bg-red-50 border-b border-red-100 text-red-700 text-sm px-4 py-3">{error}</div>}
             <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead>
@@ -37,6 +58,7 @@ export function LeadsTable({ leads }: { leads: LeadWithAssignee[] }) {
                             <th className="px-4 py-3">Responsable</th>
                             <th className="px-4 py-3">Estado</th>
                             <th className="px-4 py-3">Hora de Ingreso</th>
+                            {isAdmin && <th className="px-4 py-3"></th>}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -69,6 +91,19 @@ export function LeadsTable({ leads }: { leads: LeadWithAssignee[] }) {
                                 <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
                                     {new Intl.DateTimeFormat('es-CL', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.createdAt))}
                                 </td>
+                                {isAdmin && (
+                                    <td className="px-4 py-3 whitespace-nowrap">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDelete(lead.id, lead.code, lead.name)}
+                                            disabled={isPending && pendingId === lead.id}
+                                            title="Eliminar prospecto"
+                                            className="text-slate-300 hover:text-red-600 disabled:opacity-50 transition-colors"
+                                        >
+                                            {isPending && pendingId === lead.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                                        </button>
+                                    </td>
+                                )}
                             </tr>
                         ))}
                     </tbody>
