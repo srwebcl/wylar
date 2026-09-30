@@ -12,11 +12,18 @@ import { jwtVerify } from 'jose';
 // dejaría inalcanzables.
 const PUBLIC_PREFIXES = ['/login', '/api/health', '/api/public'];
 
-const PUBLIC_STATIC_FILES = ['/favicon.svg', '/logo-wylar.webp', '/robots.txt'];
+// Cualquier archivo estático de public/ (favicons, logos, robots.txt) es
+// público por naturaleza — nada sensible vive ahí (lo que sube el CRM va a
+// Vercel Blob, en otro dominio). Se excluye por extensión en vez de listar
+// cada archivo a mano: la lista explícita anterior (favicon.svg,
+// logo-wylar.webp) se desactualizó en cuanto se agregaron los favicons
+// reales — /favicon.ico y cualquier imagen nueva bajo /images/ quedaban
+// redirigidos a /login en vez de servirse.
+const STATIC_FILE_PATTERN = /\.(?:ico|png|jpe?g|svg|webp|gif|txt|xml|webmanifest|css|js)$/i;
 
 function isPublicPath(pathname: string) {
     if (pathname.startsWith('/_next/')) return true;
-    if (PUBLIC_STATIC_FILES.includes(pathname)) return true;
+    if (STATIC_FILE_PATTERN.test(pathname)) return true;
 
     return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
@@ -59,7 +66,11 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
     matcher: [
-        // Todas las rutas salvo assets internos de Next.
-        '/((?!_next/static|_next/image|favicon.svg|robots.txt).*)',
+        // Todas las rutas salvo los internos de Next — el resto de las
+        // excepciones (estáticos de public/, rutas públicas) se resuelven
+        // todas en isPublicPath(), una sola fuente de verdad en vez de
+        // mantener dos listas (acá y en isPublicPath) que se desincronizan
+        // en cuanto se agrega un archivo nuevo — que es justo lo que pasó.
+        '/((?!_next/static|_next/image).*)',
     ],
 };
