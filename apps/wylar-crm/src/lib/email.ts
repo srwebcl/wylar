@@ -94,13 +94,17 @@ export async function sendLeadNotificationEmail(lead: Lead) {
     `);
 
     try {
-        await resend.emails.send({
+        const { error } = await resend.emails.send({
             from: FROM,
             to: TEAM_EMAIL,
             replyTo: lead.email,
             subject: `Nuevo prospecto: ${lead.name} (${lead.code})`,
             html,
         });
+        // El SDK de Resend no lanza excepción por errores de la API (key
+        // inválida, dominio no verificado, etc.) — devuelve { error } sin más.
+        // Sin este chequeo, un envío que en realidad falló queda invisible.
+        if (error) console.error('[email] Resend rechazó el aviso de lead nuevo:', error);
     } catch (error) {
         console.error('[email] no se pudo enviar el aviso de lead nuevo:', error);
     }
@@ -119,13 +123,14 @@ export async function sendLeadConfirmationEmail(lead: Lead) {
     `);
 
     try {
-        await resend.emails.send({
+        const { error } = await resend.emails.send({
             from: FROM,
             to: lead.email,
             replyTo: REPLY_TO,
             subject: 'Recibimos tu solicitud — Wylar',
             html,
         });
+        if (error) console.error('[email] Resend rechazó la confirmación al cliente:', error);
     } catch (error) {
         console.error('[email] no se pudo enviar la confirmación al cliente:', error);
     }
