@@ -52,7 +52,10 @@ const perfiles = await getCatalogList();
 setCdnCache(Astro, perfiles.length > 0);
 ---
 
-<Layout title="Certificación para Personas | Wylar">
+<Layout
+    title="Certificación para Personas | Wylar"
+    description="Certifica formalmente lo que sabes hacer, sin importar cómo lo aprendiste. Conoce el proceso de evaluación y certificación de competencias para personas en Wylar."
+>
     <div class="animate-in fade-in duration-700 bg-slate-50">
 
         {/* HERO */}

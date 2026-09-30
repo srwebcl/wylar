@@ -78,7 +78,10 @@ const perfiles = await getCatalogList();
 setCdnCache(Astro, perfiles.length > 0);
 ---
 
-<Layout title="Certificación para Empresas | Wylar">
+<Layout
+    title="Certificación para Empresas | Wylar"
+    description="Certifica las competencias de tu equipo con validez nacional. Wylar evalúa y certifica el desempeño real de tus trabajadores, acreditado por ChileValora."
+>
     <div class="animate-in fade-in duration-700 bg-slate-50">
 
         {/* HERO */}

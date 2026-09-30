@@ -12,7 +12,10 @@ const perfiles = await getCatalogList();
 setCdnCache(Astro, perfiles.length > 0);
 ---
 
-<Layout title="Certificaciones | Wylar">
+<Layout
+    title="Certificaciones | Wylar"
+    description="Explora el catálogo de certificaciones de Wylar: perfiles ChileValora y certificaciones privadas para electricistas, riggers, soldadores, cuidadores y más."
+>
     <div class="animate-in fade-in duration-500 bg-slate-50">
 
         <PageHero

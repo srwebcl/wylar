@@ -17,7 +17,10 @@ const heroSlides = await getHeroSlides();
 setCdnCache(Astro, perfiles.length > 0);
 ---
 
-<Layout title="Wylar - Certificadora de Competencias Laborales">
+<Layout
+  title="Wylar - Certificadora de Competencias Laborales"
+  description="Centro de Evaluación y Certificación de Competencias Laborales acreditado por ChileValora. Certifica lo que sabes hacer, con respaldo oficial en todo Chile."
+>
   <div class="animate-in fade-in duration-700">
     {/* HERO SECTION - SLIDER CON FOTO A LA VISTA */}
     <section

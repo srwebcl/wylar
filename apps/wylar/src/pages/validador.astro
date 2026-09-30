@@ -3,6 +3,9 @@ import Layout from '../layouts/Layout.astro';
 import ValidadorComponent from '../components/Validador.jsx';
 ---
 
-<Layout title="Validador de Certificados | Wylar">
+<Layout
+    title="Validador de Certificados | Wylar"
+    description="Verifica la autenticidad y vigencia de un certificado emitido por Wylar ingresando el RUT del titular o el código del certificado."
+>
     <ValidadorComponent client:load />
 </Layout>

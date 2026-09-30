@@ -7,10 +7,38 @@ import Footer from '../components/Footer.astro';
 interface Props {
 	title: string;
     description?: string;
+    image?: string;
 }
 
-const { title, description = "Wylar - Centro de Evaluación y Certificación de Competencias Laborales" } = Astro.props;
+const { title, description = "Wylar - Centro de Evaluación y Certificación de Competencias Laborales", image } = Astro.props;
 const currentPath = Astro.url.pathname;
+
+// Imagen para compartir en redes: la propia del perfil/página si la pasaron
+// (ej. la foto real de la certificación), si no el logo. Puede venir como
+// ruta relativa (/images/...) o absoluta (Vercel Blob) — se normaliza a URL
+// completa para que las redes sociales puedan cargarla.
+const ogImage = image
+    ? (image.startsWith('http') ? image : Astro.url.origin + image)
+    : Astro.url.origin + '/images/logo.webp';
+
+// Datos de la organización (mismos en todas las páginas): le dice a Google
+// quién es Wylar — nombre, logo, contacto, acreditación — para resultados
+// enriquecidos y el panel de conocimiento.
+const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'EducationalOrganization',
+    name: 'Wylar',
+    legalName: 'Wylar Ltda.',
+    url: 'https://www.wylar.cl',
+    logo: 'https://www.wylar.cl/images/logo.webp',
+    description: 'Centro de Evaluación y Certificación de Competencias Laborales acreditado por ChileValora.',
+    address: [
+        { '@type': 'PostalAddress', streetAddress: 'Río Blanco 1371, Barrio Industrial', addressLocality: 'Arica', addressCountry: 'CL' },
+        { '@type': 'PostalAddress', streetAddress: "Av. Libertador Bernardo O'Higgins 252, oficina 21", addressLocality: 'Santiago', addressCountry: 'CL' },
+    ],
+    contactPoint: { '@type': 'ContactPoint', telephone: '+56-9-2956-6326', email: 'contacto@wylar.cl', contactType: 'customer service' },
+    sameAs: [],
+};
 ---
 
 <!doctype html>
@@ -28,9 +56,10 @@ const currentPath = Astro.url.pathname;
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={Astro.url.origin + Astro.url.pathname} />
-		<meta property="og:image" content={Astro.url.origin + '/images/logo.webp'} />
-		<meta name="twitter:card" content="summary" />
+		<meta property="og:image" content={ogImage} />
+		<meta name="twitter:card" content="summary_large_image" />
 		<title>{title}</title>
+		<script type="application/ld+json" is:inline set:html={JSON.stringify(organizationSchema)} />
 	</head>
 	<body class="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col relative overflow-x-hidden">
         <Header client:load currentPath={currentPath} />

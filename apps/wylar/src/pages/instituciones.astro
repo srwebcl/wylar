@@ -58,7 +58,10 @@ const perfiles = await getCatalogList();
 setCdnCache(Astro, perfiles.length > 0);
 ---
 
-<Layout title="Alianzas para Instituciones de Educación | Wylar">
+<Layout
+    title="Alianzas para Instituciones de Educación | Wylar"
+    description="Suma certificaciones ChileValora con validez nacional a tu oferta formativa junto a Wylar, Centro de Evaluación y Certificación acreditado."
+>
     <div class="animate-in fade-in duration-700 bg-slate-50">
 
         {/* HERO */}

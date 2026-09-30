@@ -19,9 +19,29 @@ if (!perfil) {
     return Astro.rewrite('/404');
 }
 setCdnCache(Astro);
+
+// Structured data de la certificación: el tipo de schema.org pensado
+// justamente para esto (credenciales/certificaciones profesionales), no un
+// genérico Article/Product — así Google puede entender que esta página es
+// una certificación laboral real, quién la reconoce y a quién está dirigida.
+const credentialSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'EducationalOccupationalCredential',
+    name: perfil.title,
+    description: perfil.description,
+    url: Astro.url.href,
+    ...(perfil.image ? { image: perfil.image } : {}),
+    credentialCategory: perfil.isChileValora ? 'Certificación ChileValora' : perfil.category,
+    ...(perfil.isChileValora
+        ? { recognizedBy: { '@type': 'GovernmentOrganization', name: 'ChileValora', url: 'https://www.chilevalora.cl' } }
+        : {}),
+    about: { '@type': 'Occupation', name: perfil.title },
+    provider: { '@type': 'EducationalOrganization', name: 'Wylar', url: 'https://www.wylar.cl' },
+};
 ---
 
-<Layout title={`${perfil.title} | Wylar`}>
+<Layout title={`${perfil.title} | Wylar`} description={perfil.description} image={perfil.image}>
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(credentialSchema)} />
     <div class="animate-in fade-in duration-500">
         {perfil.type === 'estandar' && <FichaEstandar perfil={perfil} />}
         {perfil.type === 'soldadura' && <FichaSoldadura perfil={perfil} />}

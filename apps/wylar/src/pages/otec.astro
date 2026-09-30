@@ -67,7 +67,10 @@ const perfiles = await getCatalogList();
 setCdnCache(Astro, perfiles.length > 0);
 ---
 
-<Layout title="Certificación para OTEC | Wylar">
+<Layout
+    title="Certificación para OTEC | Wylar"
+    description="Wylar trabaja con Organismos Técnicos de Capacitación (OTEC) para certificar las competencias de sus participantes con validez ante ChileValora."
+>
     <div class="animate-in fade-in duration-700 bg-slate-50">
 
         {/* HERO */}
