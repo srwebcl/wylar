@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { publicLeadSchema } from '@/lib/validation';
 import { SYSTEM_ACTIVITY_TYPES } from '@/lib/constants';
 import { resolveSource } from '@/lib/leadSource';
+import { sendLeadNotificationEmail, sendLeadConfirmationEmail } from '@/lib/email';
 
 /**
  * Módulo de Captura de Oportunidades: crea un lead a partir del formulario
@@ -45,7 +46,7 @@ export async function createLeadFromPublicForm(input: unknown, refererHeader: st
     // El código de referencia se deriva del id autoincremental, solo
     // disponible después del insert.
     const code = `LEAD-${1000 + lead.id}`;
-    await prisma.lead.update({ where: { id: lead.id }, data: { code } });
+    const updatedLead = await prisma.lead.update({ where: { id: lead.id }, data: { code } });
 
     await prisma.leadActivity.create({
         data: {
@@ -56,6 +57,12 @@ export async function createLeadFromPublicForm(input: unknown, refererHeader: st
             text: `Prospecto ingresado automáticamente desde el sitio web (canal: ${source}).`,
         },
     });
+
+    // Se espera (await) en vez de "disparar y olvidar": una función serverless
+    // puede congelarse apenas se responde la petición, así que una promesa sin
+    // esperar corre el riesgo de no llegar a completarse. Cada función atrapa
+    // sus propios errores — un correo que falla nunca debe tumbar el alta del lead.
+    await Promise.all([sendLeadNotificationEmail(updatedLead), sendLeadConfirmationEmail(updatedLead)]);
 
     revalidatePath('/');
     revalidatePath('/leads');
