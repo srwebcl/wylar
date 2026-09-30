@@ -14,11 +14,8 @@ const styles = StyleSheet.create({
     value: { fontSize: 12, fontFamily: 'Helvetica', textTransform: 'uppercase' },
 
     stampContainer: { marginTop: 60, alignItems: 'center' },
-    stampCircle: { width: 140, height: 140, borderRadius: 70, border: '1 solid #0B1E40', alignItems: 'center', justifyContent: 'center', position: 'relative' },
-    stampLogo: { width: 80 },
-    stampTextTop: { position: 'absolute', top: 10, fontSize: 6, color: '#0B1E40', textAlign: 'center', width: '100%' },
-    stampTextBottom: { position: 'absolute', bottom: 10, fontSize: 6, color: '#0B1E40', textAlign: 'center', width: '100%' },
-    
+    stampImage: { width: 140, height: 140 },
+
     signatureName: { fontSize: 12, marginTop: 16, fontStyle: 'italic' },
     signatureRole: { fontSize: 12, marginTop: 4, fontStyle: 'italic' },
     
@@ -48,8 +45,9 @@ export interface CertificatePdfProps {
 }
 
 export function CertificatePdf({ code, holderName, holderRut, certificationTitle, categoryLabel: _categoryLabel, issueDate, expiryDate, statusLabel: _statusLabel, qrDataUrl }: CertificatePdfProps) {
-    // Resolve local path for the logo to avoid network issues during SSR
+    // Resolve local paths to avoid network issues during SSR
     const logoPath = path.join(process.cwd(), 'public', 'images', 'logo.png');
+    const stampPath = path.join(process.cwd(), 'public', 'images', 'timbre-wylar.png');
     const today = new Date().toLocaleDateString('es-CL');
 
     return (
@@ -81,11 +79,7 @@ export function CertificatePdf({ code, holderName, holderRut, certificationTitle
                 </View>
 
                 <View style={styles.stampContainer}>
-                    <View style={styles.stampCircle}>
-                        <Text style={styles.stampTextTop}>CERTIFICADORA Y EVALUADORA DE</Text>
-                        <Image src={logoPath} style={styles.stampLogo} />
-                        <Text style={styles.stampTextBottom}>COMPETENCIAS LABORALES</Text>
-                    </View>
+                    <Image src={stampPath} style={styles.stampImage} />
                     <Text style={styles.signatureName}>Wylar</Text>
                     <Text style={styles.signatureRole}>Certificadora de Competencias Laborales</Text>
                 </View>
