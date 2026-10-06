@@ -55,6 +55,7 @@ export async function issueCertificate(input: CertificateInput): Promise<Certifi
             profileId: data.profileId || null,
             certificationTitle: data.certificationTitle,
             categoryLabel: data.categoryLabel,
+            detailText: data.detailText || null,
             issueDate: data.issueDate,
             expiryDate: data.expiryDate || null,
             leadId: data.leadId || null,

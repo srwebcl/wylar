@@ -41,6 +41,30 @@ const STATUS_TONE: Record<CertificateRow['status'], string> = {
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
 
+// Plantillas predeterminadas para el párrafo que va bajo el nombre de la
+// certificación en el PDF. Son solo un punto de partida: quedan en el
+// textarea para editarlas (completar horas, fechas, nota, etc.) antes de
+// guardar. "" = sin texto adicional (el PDF no muestra ese párrafo).
+const DETAIL_TEMPLATES: { value: string; label: string; text: string }[] = [
+    { value: 'ninguna', label: 'Sin texto adicional', text: '' },
+    {
+        value: 'curso-evaluado',
+        label: 'Curso con evaluación (nota mínima)',
+        text: 'Con una duración total de [X] horas, distribuidas en [X] horas teóricas y [X] horas prácticas, realizado los días [DD] y [DD] de [mes] de [aaaa]. El participante obtuvo un resultado final de [XX]%, superando la nota mínima exigida de [XX]%, por lo cual se certifica su aprobación. Este certificado tiene una vigencia de [X] años contados desde la fecha de emisión.',
+    },
+    {
+        value: 'curso-participacion',
+        label: 'Curso de participación (sin evaluación)',
+        text: 'Con una duración total de [X] horas, realizado los días [DD] al [DD] de [mes] de [aaaa]. Este certificado acredita la participación y asistencia del titular a la totalidad de la capacitación.',
+    },
+    {
+        value: 'chilevalora',
+        label: 'Certificación de competencias ChileValora',
+        text: 'Certificación otorgada en el marco del Sistema Nacional de Certificación de Competencias Laborales de ChileValora, conforme al Perfil Ocupacional evaluado, con resultado APTO.',
+    },
+    { value: 'personalizada', label: 'Personalizado...', text: '' },
+];
+
 export function CertificateManagement({ profiles, closedLeads, certificates, isAdmin }: { profiles: Profile[]; closedLeads: ClosedLead[]; certificates: CertificateRow[]; isAdmin: boolean }) {
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
@@ -55,6 +79,14 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
     const [expiryMode, setExpiryMode] = useState<string>('indefinida');
     const [expiryDate, setExpiryDate] = useState('');
     const [leadId, setLeadId] = useState<string>('');
+    const [detailTemplate, setDetailTemplate] = useState<string>('ninguna');
+    const [detailText, setDetailText] = useState('');
+
+    function handleDetailTemplateChange(value: string) {
+        setDetailTemplate(value);
+        const template = DETAIL_TEMPLATES.find((t) => t.value === value);
+        if (template && template.value !== 'personalizada') setDetailText(template.text);
+    }
 
     function handleProfileChange(value: string) {
         setProfileId(value);
@@ -83,6 +115,8 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
         setExpiryMode('indefinida');
         setExpiryDate('');
         setLeadId('');
+        setDetailTemplate('ninguna');
+        setDetailText('');
     }
 
     function handleSubmit(e: React.FormEvent) {
@@ -114,6 +148,7 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
                 issueDate: new Date(issueDate),
                 expiryDate: computedExpiryDate,
                 leadId: leadId ? Number(leadId) : null,
+                detailText: detailText.trim() || null,
             });
             if (result.error) {
                 setError(result.error);
@@ -194,6 +229,27 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
                         </div>
                     </Field>
                 </div>
+
+                <Field label="Texto bajo la certificación (opcional, va en el PDF)">
+                    <div className="flex flex-col gap-2">
+                        <select value={detailTemplate} onChange={(e) => handleDetailTemplateChange(e.target.value)} className={inputClass}>
+                            {DETAIL_TEMPLATES.map((t) => (
+                                <option key={t.value} value={t.value}>
+                                    {t.label}
+                                </option>
+                            ))}
+                        </select>
+                        {detailTemplate !== 'ninguna' && (
+                            <textarea
+                                value={detailText}
+                                onChange={(e) => setDetailText(e.target.value)}
+                                rows={4}
+                                placeholder="Describe duración, fechas, nota obtenida, vigencia, etc."
+                                className={inputClass}
+                            />
+                        )}
+                    </div>
+                </Field>
 
                 <div className="flex justify-end">
                     <button

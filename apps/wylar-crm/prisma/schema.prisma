@@ -251,6 +251,10 @@ model Certificate {
   // Etiqueta mostrada en el validador, ej. "Certificación ChileValora" o
   // "Calificación Técnica" (ver PROFILE_SECTION_SPECS / categoryLabel).
   categoryLabel      String
+  // Párrafo libre que va bajo el nombre de la certificación en el PDF (ej.
+  // duración del curso, fechas, nota obtenida, vigencia). Opcional, solo se
+  // usa en el PDF — el validador público no lo muestra.
+  detailText         String? @db.Text
 
   issueDate  DateTime
   // Vigencia; null = no vence (ej. certificaciones ChileValora). El estado
