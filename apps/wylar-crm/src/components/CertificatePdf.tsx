@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
     qrTextBlock: { marginLeft: 10, maxWidth: 150 },
     qrHint: { fontSize: 8, color: MUTED, lineHeight: 1.4 },
     qrCode: { fontSize: 8, fontWeight: 700, color: NAVY, marginTop: 2 },
+    qrDate: { fontSize: 8, color: MUTED, marginTop: 2 },
 
     signatureBlock: { alignItems: 'center', position: 'relative' },
     signatureImage: { width: 118, height: 38, objectFit: 'contain' },
@@ -63,17 +64,12 @@ const styles = StyleSheet.create({
     // --- Centro ---
     main: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 },
 
-    kicker: { fontSize: 10, fontStyle: 'italic', color: CYAN },
     title: { fontSize: 32, fontWeight: 900, color: NAVY, marginTop: 4 },
-    titleSub: { fontSize: 14, fontWeight: 500, fontStyle: 'italic', color: NAVY, marginTop: 1 },
+    institution: { fontSize: 11, fontWeight: 600, color: CYAN, marginTop: 3, textAlign: 'center' },
 
     extiende: { fontSize: 10, fontStyle: 'italic', color: MUTED, marginTop: 20 },
     holderName: { fontSize: 25, fontWeight: 700, color: NAVY, marginTop: 4, textAlign: 'center' },
-
-    metaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 12 },
-    rut: { fontSize: 10, fontWeight: 500, color: MUTED },
-    tag: { borderWidth: 1, borderColor: AMBER, paddingVertical: 2.5, paddingHorizontal: 9 },
-    tagText: { fontSize: 8, fontWeight: 600, color: NAVY },
+    rut: { fontSize: 10, fontWeight: 500, color: MUTED, marginTop: 6 },
 
     divider: { width: 240, height: 1, backgroundColor: NAVY, opacity: 0.18, marginTop: 16, marginBottom: 16 },
 
@@ -81,16 +77,19 @@ const styles = StyleSheet.create({
     courseTitle: { fontSize: 17, fontWeight: 700, fontStyle: 'italic', color: NAVY, marginTop: 7, textAlign: 'center', maxWidth: 440 },
 
     detailText: { fontSize: 9.5, color: INK, marginTop: 14, textAlign: 'center', lineHeight: 1.55, maxWidth: 440 },
-    validityText: { fontSize: 9, color: MUTED, marginTop: 8, textAlign: 'center', maxWidth: 440 },
+    validityText: { fontSize: 9.5, fontWeight: 600, color: NAVY, marginTop: 10, textAlign: 'center' },
 });
 
+// Las fechas se guardan sin hora (medianoche UTC) — hay que forzar
+// timeZone: 'UTC' al formatear o el resultado puede correrse un día
+// según la zona horaria del entorno donde corra el servidor.
 function formatIssueDate(date: Date): string {
-    return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
+    return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 }
 
-function expiryClause(date: Date | null): string {
-    if (!date) return 'Esta certificación no tiene fecha de vencimiento.';
-    return `Vigente hasta el ${date.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
+function formatVigenciaMonthYear(date: Date): string {
+    const label = date.toLocaleDateString('es-CL', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+    return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 export interface CertificatePdfProps {
@@ -112,7 +111,7 @@ export function CertificatePdf({
     holderName,
     holderRut,
     certificationTitle,
-    categoryLabel,
+    categoryLabel: _categoryLabel,
     detailText,
     issueDate,
     expiryDate,
@@ -141,18 +140,12 @@ export function CertificatePdf({
                     </View>
 
                     <View style={styles.main}>
-                        <Text style={styles.kicker}>Diploma de certificación</Text>
                         <Text style={styles.title}>Certificado</Text>
-                        <Text style={styles.titleSub}>de Competencia Laboral</Text>
+                        <Text style={styles.institution}>Certificadora de Competencias Laborales Wylar Ltda.</Text>
 
                         <Text style={styles.extiende}>Extiende el presente certificado a</Text>
                         <Text style={styles.holderName}>{holderName}</Text>
-                        <View style={styles.metaRow}>
-                            <Text style={styles.rut}>RUT {holderRut}</Text>
-                            <View style={styles.tag}>
-                                <Text style={styles.tagText}>{categoryLabel}</Text>
-                            </View>
-                        </View>
+                        <Text style={styles.rut}>RUT {holderRut}</Text>
 
                         <View style={styles.divider} />
 
@@ -160,9 +153,7 @@ export function CertificatePdf({
                         <Text style={styles.courseTitle}>&ldquo;{certificationTitle}&rdquo;</Text>
 
                         {detailText ? <Text style={styles.detailText}>{detailText}</Text> : null}
-                        <Text style={styles.validityText}>
-                            {expiryClause(expiryDate)} Emitido en Chile, el {formatIssueDate(issueDate)}.
-                        </Text>
+                        {expiryDate ? <Text style={styles.validityText}>Fecha de Vigencia: {formatVigenciaMonthYear(expiryDate)}</Text> : null}
                     </View>
 
                     <View style={styles.bottomRow}>
@@ -171,6 +162,7 @@ export function CertificatePdf({
                             <View style={styles.qrTextBlock}>
                                 <Text style={styles.qrHint}>Verifica la autenticidad de este certificado en wylar.cl/validador</Text>
                                 <Text style={styles.qrCode}>{code}</Text>
+                                <Text style={styles.qrDate}>Emitido el {formatIssueDate(issueDate)}</Text>
                             </View>
                         </View>
 
