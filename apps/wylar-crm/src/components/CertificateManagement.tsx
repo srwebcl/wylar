@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from 'react';
 import { Ban, Download, Plus, ShieldCheck, X } from 'lucide-react';
 import { issueCertificate, revokeCertificate } from '@/actions/certificates';
+import { CertificatesSearchBar } from '@/components/CertificatesSearchBar';
 
 // Etiqueta interna fija: ya no se pide en el formulario (no aparece en el
 // PDF del diploma desde el rediseño), pero el registro la sigue guardando
@@ -56,7 +57,7 @@ const DETAIL_TEMPLATES: { value: string; label: string; text: string }[] = [
     { value: 'personalizada', label: 'Personalizado...', text: '' },
 ];
 
-export function CertificateManagement({ certificates, isAdmin }: { certificates: CertificateRow[]; isAdmin: boolean }) {
+export function CertificateManagement({ certificates, isAdmin, total }: { certificates: CertificateRow[]; isAdmin: boolean; total: number }) {
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -151,18 +152,24 @@ export function CertificateManagement({ certificates, isAdmin }: { certificates:
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div>
+                    <h1 className="text-2xl font-extrabold text-slate-900">Certificados</h1>
+                    <p className="text-slate-500 text-sm mt-1">Emisión y validación de certificados — se consultan desde wylar.cl/validador. {total} en total.</p>
+                </div>
                 <button
                     onClick={() => {
                         setError(null);
                         setSuccess(null);
                         setShowForm(true);
                     }}
-                    className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+                    className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm shrink-0"
                 >
                     <Plus size={18} /> Emitir certificado
                 </button>
             </div>
+
+            <CertificatesSearchBar />
 
             {!showForm && error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
             {!showForm && success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
@@ -251,34 +258,34 @@ export function CertificateManagement({ certificates, isAdmin }: { certificates:
             )}
 
             {certificates.length === 0 ? (
-                <div className="glass-card p-10 text-center text-slate-500">Aún no se han emitido certificados.</div>
+                <div className="glass-card p-10 text-center text-slate-400">Aún no se han emitido certificados.</div>
             ) : (
                 <div className="glass-card overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">
-                                    <th className="px-4 py-3">Titular</th>
-                                    <th className="px-4 py-3">RUT</th>
-                                    <th className="px-4 py-3">Certificación</th>
-                                    <th className="px-4 py-3">Código</th>
-                                    <th className="px-4 py-3">Estado</th>
-                                    <th className="px-4 py-3">Emitido por</th>
-                                    <th className="px-4 py-3"></th>
+                                <tr className="border-b border-slate-100 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
+                                    <th className="px-5 py-3">Titular</th>
+                                    <th className="px-5 py-3">RUT</th>
+                                    <th className="px-5 py-3">Certificación</th>
+                                    <th className="px-5 py-3">Código</th>
+                                    <th className="px-5 py-3">Estado</th>
+                                    <th className="px-5 py-3">Emitido por</th>
+                                    <th className="px-5 py-3 text-right">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody>
                                 {certificates.map((c) => (
-                                    <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
-                                        <td className="px-4 py-3 font-medium text-slate-800 whitespace-nowrap">{c.holderName}</td>
-                                        <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">{c.holderRut}</td>
-                                        <td className="px-4 py-3 text-slate-600 max-w-[260px] truncate">{c.certificationTitle}</td>
-                                        <td className="px-4 py-3 font-mono text-xs text-slate-500 whitespace-nowrap">{c.code}</td>
-                                        <td className="px-4 py-3 whitespace-nowrap">
+                                    <tr key={c.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
+                                        <td className="px-5 py-3.5 font-bold text-slate-900 whitespace-nowrap">{c.holderName}</td>
+                                        <td className="px-5 py-3.5 text-slate-400 text-xs whitespace-nowrap">{c.holderRut}</td>
+                                        <td className="px-5 py-3.5 text-slate-700 max-w-[260px] truncate">{c.certificationTitle}</td>
+                                        <td className="px-5 py-3.5 font-mono text-xs text-slate-600 whitespace-nowrap">{c.code}</td>
+                                        <td className="px-5 py-3.5 whitespace-nowrap">
                                             <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full ${STATUS_TONE[c.status]}`}>{c.statusLabel}</span>
                                         </td>
-                                        <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{c.issuedByName ?? '—'}</td>
-                                        <td className="px-4 py-3 whitespace-nowrap">
+                                        <td className="px-5 py-3.5 text-slate-500 whitespace-nowrap">{c.issuedByName ?? '—'}</td>
+                                        <td className="px-5 py-3.5 whitespace-nowrap">
                                             <div className="flex items-center justify-end gap-1">
                                                 {c.status !== 'REVOCADO' && (
                                                     <a
