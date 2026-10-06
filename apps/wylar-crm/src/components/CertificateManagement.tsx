@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { Ban, Download, ShieldCheck } from 'lucide-react';
+import { useEffect, useState, useTransition } from 'react';
+import { Ban, Download, Plus, ShieldCheck, X } from 'lucide-react';
 import { issueCertificate, revokeCertificate } from '@/actions/certificates';
 import { suggestedCategoryLabel } from '@/lib/catalogSpec';
 
@@ -69,6 +69,16 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const [showForm, setShowForm] = useState(false);
+
+    useEffect(() => {
+        if (!showForm) return;
+        function onKeyDown(e: KeyboardEvent) {
+            if (e.key === 'Escape') setShowForm(false);
+        }
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [showForm]);
 
     const [holderName, setHolderName] = useState('');
     const [holderRut, setHolderRut] = useState('');
@@ -156,6 +166,7 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
             }
             setSuccess(result.success ?? 'Certificado emitido.');
             resetForm();
+            setShowForm(false);
         });
     }
 
@@ -172,13 +183,43 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
 
     return (
         <div className="space-y-6">
-            <form onSubmit={handleSubmit} className="glass-card p-6 space-y-4">
-                <h2 className="font-bold text-slate-900">Emitir certificado</h2>
+            <div className="flex items-center justify-end">
+                <button
+                    onClick={() => {
+                        setError(null);
+                        setSuccess(null);
+                        setShowForm(true);
+                    }}
+                    className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+                >
+                    <Plus size={18} /> Emitir certificado
+                </button>
+            </div>
 
-                {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
-                {success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
+            {!showForm && error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
+            {!showForm && success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {showForm && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+                    onClick={() => setShowForm(false)}
+                >
+                    <form
+                        onSubmit={handleSubmit}
+                        onClick={(e) => e.stopPropagation()}
+                        className="glass-card bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4"
+                    >
+                        <div className="flex items-center justify-between">
+                            <h2 className="font-bold text-slate-900">Emitir certificado</h2>
+                            <button type="button" onClick={() => setShowForm(false)} className="p-1 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Cerrar">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
+                        {success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Field label="Lead cerrado (opcional)">
                         <select value={leadId} onChange={(e) => handleLeadChange(e.target.value)} className={inputClass}>
                             <option value="">— Sin vincular —</option>
@@ -260,7 +301,9 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
                         <ShieldCheck size={16} /> {isPending ? 'Emitiendo…' : 'Emitir certificado'}
                     </button>
                 </div>
-            </form>
+                    </form>
+                </div>
+            )}
 
             <div className="glass-card overflow-hidden">
                 <table className="w-full text-sm">
