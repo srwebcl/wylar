@@ -27,7 +27,6 @@ Font.registerHyphenationCallback((word) => [word]);
 // textura), no un color plano.
 const NAVY = '#0B1E40';
 const CYAN = '#0891b2';
-const AMBER = '#f59e0b';
 const INK = '#2B3240';
 const MUTED = '#6B7280';
 
@@ -36,11 +35,11 @@ const styles = StyleSheet.create({
     paper: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
 
     frame: { flex: 1, margin: 20, borderWidth: 1.5, borderColor: NAVY, padding: 28, position: 'relative' },
-    frameInner: { position: 'absolute', top: 5, left: 5, right: 5, bottom: 5, borderWidth: 0.5, borderColor: AMBER },
+    frameInner: { position: 'absolute', top: 5, left: 5, right: 5, bottom: 5, borderWidth: 0.5, borderColor: CYAN },
 
     // --- Esquinas ---
     cornerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-    logo: { width: 136 },
+    logo: { width: 176 },
     codeBox: { alignItems: 'flex-end' },
     codeLabel: { fontSize: 9, color: MUTED },
     codeValue: { fontSize: 12, fontFamily: 'Bitter', fontWeight: 700, color: NAVY, marginTop: 2 },
