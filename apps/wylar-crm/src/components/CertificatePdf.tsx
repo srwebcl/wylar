@@ -45,8 +45,12 @@ const styles = StyleSheet.create({
         right: FRAME,
         bottom: FRAME,
         backgroundColor: '#FFFFFF',
-        padding: 34,
+        padding: 18,
     },
+
+    // Borde delgado dentro del marco grueso: espacio blanco, línea azul,
+    // espacio blanco, y recién ahí el contenido.
+    innerLine: { flex: 1, borderWidth: 1, borderColor: CYAN, padding: 34 },
 
     // --- Esquinas ---
     cornerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
@@ -149,6 +153,7 @@ export function CertificatePdf({
                 </Svg>
 
                 <View style={styles.card}>
+                <View style={styles.innerLine}>
                     <View style={styles.cornerRow}>
                         <Image src={logoPath} style={styles.logo} />
                         <View style={styles.codeBox}>
@@ -193,6 +198,7 @@ export function CertificatePdf({
                             <Text style={styles.signerRole}>Representante Legal</Text>
                         </View>
                     </View>
+                </View>
                 </View>
             </Page>
         </Document>
