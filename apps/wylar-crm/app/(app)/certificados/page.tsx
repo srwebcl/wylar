@@ -11,7 +11,7 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
     const params = await searchParams;
     const page = Math.max(1, Number.parseInt(params.page ?? '1', 10) || 1);
 
-    const [certificates, total, profiles, closedLeads] = await Promise.all([
+    const [certificates, total] = await Promise.all([
         prisma.certificate.findMany({
             orderBy: { createdAt: 'desc' },
             include: { issuedBy: { select: { name: true } } },
@@ -19,8 +19,6 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
             skip: (page - 1) * PAGE_SIZE,
         }),
         prisma.certificate.count(),
-        prisma.profile.findMany({ where: { active: true }, orderBy: { title: 'asc' }, select: { id: true, title: true, templateType: true } }),
-        prisma.lead.findMany({ where: { status: 'CERRADO' }, orderBy: { name: 'asc' }, select: { id: true, name: true, email: true, certificationInterest: true } }),
     ]);
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -34,8 +32,6 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
 
             <CertificateManagement
                 isAdmin={currentUser.role === 'ADMIN'}
-                profiles={profiles}
-                closedLeads={closedLeads}
                 certificates={certificates.map((c) => {
                     const status = certificateStatus(c.expiryDate, c.revokedAt);
                     return {

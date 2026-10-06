@@ -3,20 +3,11 @@
 import { useEffect, useState, useTransition } from 'react';
 import { Ban, Download, Plus, ShieldCheck, X } from 'lucide-react';
 import { issueCertificate, revokeCertificate } from '@/actions/certificates';
-import { suggestedCategoryLabel } from '@/lib/catalogSpec';
 
-interface Profile {
-    id: number;
-    title: string;
-    templateType: string;
-}
-
-interface ClosedLead {
-    id: number;
-    name: string;
-    email: string;
-    certificationInterest: string | null;
-}
+// Etiqueta interna fija: ya no se pide en el formulario (no aparece en el
+// PDF del diploma desde el rediseño), pero el registro la sigue guardando
+// como metadato para la tabla de administración.
+const DEFAULT_CATEGORY_LABEL = 'Certificación Wylar';
 
 interface CertificateRow {
     id: number;
@@ -65,7 +56,7 @@ const DETAIL_TEMPLATES: { value: string; label: string; text: string }[] = [
     { value: 'personalizada', label: 'Personalizado...', text: '' },
 ];
 
-export function CertificateManagement({ profiles, closedLeads, certificates, isAdmin }: { profiles: Profile[]; closedLeads: ClosedLead[]; certificates: CertificateRow[]; isAdmin: boolean }) {
+export function CertificateManagement({ certificates, isAdmin }: { certificates: CertificateRow[]; isAdmin: boolean }) {
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -82,13 +73,10 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
 
     const [holderName, setHolderName] = useState('');
     const [holderRut, setHolderRut] = useState('');
-    const [profileId, setProfileId] = useState<string>('');
     const [certificationTitle, setCertificationTitle] = useState('');
-    const [categoryLabel, setCategoryLabel] = useState('');
     const [issueDate, setIssueDate] = useState(todayIso());
     const [expiryMode, setExpiryMode] = useState<string>('indefinida');
     const [expiryDate, setExpiryDate] = useState('');
-    const [leadId, setLeadId] = useState<string>('');
     const [detailTemplate, setDetailTemplate] = useState<string>('ninguna');
     const [detailText, setDetailText] = useState('');
 
@@ -98,33 +86,13 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
         if (template && template.value !== 'personalizada') setDetailText(template.text);
     }
 
-    function handleProfileChange(value: string) {
-        setProfileId(value);
-        const profile = profiles.find((p) => String(p.id) === value);
-        if (profile) {
-            setCertificationTitle(profile.title);
-            setCategoryLabel(suggestedCategoryLabel(profile.templateType));
-        }
-    }
-
-    function handleLeadChange(value: string) {
-        setLeadId(value);
-        const lead = closedLeads.find((l) => String(l.id) === value);
-        if (lead) {
-            setHolderName(lead.name);
-        }
-    }
-
     function resetForm() {
         setHolderName('');
         setHolderRut('');
-        setProfileId('');
         setCertificationTitle('');
-        setCategoryLabel('');
         setIssueDate(todayIso());
         setExpiryMode('indefinida');
         setExpiryDate('');
-        setLeadId('');
         setDetailTemplate('ninguna');
         setDetailText('');
     }
@@ -152,12 +120,12 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
             const result = await issueCertificate({
                 holderName,
                 holderRut,
-                profileId: profileId ? Number(profileId) : null,
+                profileId: null,
                 certificationTitle,
-                categoryLabel,
+                categoryLabel: DEFAULT_CATEGORY_LABEL,
                 issueDate: new Date(issueDate),
                 expiryDate: computedExpiryDate,
-                leadId: leadId ? Number(leadId) : null,
+                leadId: null,
                 detailText: detailText.trim() || null,
             });
             if (result.error) {
@@ -220,26 +188,6 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
                         {success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Field label="Lead cerrado (opcional)">
-                        <select value={leadId} onChange={(e) => handleLeadChange(e.target.value)} className={inputClass}>
-                            <option value="">— Sin vincular —</option>
-                            {closedLeads.map((l) => (
-                                <option key={l.id} value={l.id}>
-                                    {l.name} ({l.email})
-                                </option>
-                            ))}
-                        </select>
-                    </Field>
-                    <Field label="Perfil del catálogo (opcional)">
-                        <select value={profileId} onChange={(e) => handleProfileChange(e.target.value)} className={inputClass}>
-                            <option value="">— Sin vincular —</option>
-                            {profiles.map((p) => (
-                                <option key={p.id} value={p.id}>
-                                    {p.title}
-                                </option>
-                            ))}
-                        </select>
-                    </Field>
                     <Field label="Nombre completo del titular">
                         <input value={holderName} onChange={(e) => setHolderName(e.target.value)} className={inputClass} required />
                     </Field>
@@ -248,9 +196,6 @@ export function CertificateManagement({ profiles, closedLeads, certificates, isA
                     </Field>
                     <Field label="Nombre de la certificación">
                         <input value={certificationTitle} onChange={(e) => setCertificationTitle(e.target.value)} className={inputClass} required />
-                    </Field>
-                    <Field label="Categoría (etiqueta del validador)">
-                        <input value={categoryLabel} onChange={(e) => setCategoryLabel(e.target.value)} placeholder="Certificación ChileValora" className={inputClass} required />
                     </Field>
                     <Field label="Fecha de emisión">
                         <input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className={inputClass} required />
