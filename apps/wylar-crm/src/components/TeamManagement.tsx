@@ -1,17 +1,36 @@
 'use client';
 
-import { useActionState, useState, useTransition } from 'react';
-import { Shield, Plus, X, Power } from 'lucide-react';
+import { useActionState, useEffect, useState, useTransition } from 'react';
+import { Shield, Plus, X, Power, Pencil, Trash2 } from 'lucide-react';
 import type { SafeUser as User } from '@/lib/safeUser';
-import { createUser, toggleUserActive, type UserFormState } from '@/actions/users';
+import { createUser, updateUser, deleteUser, toggleUserActive, type UserFormState } from '@/actions/users';
 import { ROLES, roleLabel } from '@/lib/constants';
 
 const initialState: UserFormState = {};
 
 export function TeamManagement({ users, currentUserId }: { users: User[]; currentUserId: number }) {
     const [showForm, setShowForm] = useState(false);
+    const [editingUser, setEditingUser] = useState<User | null>(null);
     const [state, formAction, pending] = useActionState(createUser, initialState);
     const [, startTransition] = useTransition();
+    const [deleteError, setDeleteError] = useState<string | null>(null);
+    const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+
+    function openEdit(user: User) {
+        setShowForm(false);
+        setEditingUser(user);
+    }
+
+    function handleDelete(user: User) {
+        if (!confirm(`¿Eliminar a ${user.name} (${user.email})? Esta acción no se puede deshacer.`)) return;
+        setDeleteError(null);
+        setPendingDeleteId(user.id);
+        startTransition(async () => {
+            const result = await deleteUser(user.id);
+            if (result.error) setDeleteError(result.error);
+            setPendingDeleteId(null);
+        });
+    }
 
     return (
         <div className="space-y-6">
@@ -24,7 +43,10 @@ export function TeamManagement({ users, currentUserId }: { users: User[]; curren
                     <p className="text-slate-500 text-sm mt-1">Administra quién puede acceder al CRM y a quién se le asignan los prospectos.</p>
                 </div>
                 {!showForm && (
-                    <button onClick={() => setShowForm(true)} className="flex items-center px-4 py-2.5 bg-[#0B1E40] text-white rounded-xl hover:bg-[#122b59] transition-colors shadow-md font-medium text-sm">
+                    <button
+                        onClick={() => { setEditingUser(null); setShowForm(true); }}
+                        className="flex items-center px-4 py-2.5 bg-[#0B1E40] text-white rounded-xl hover:bg-[#122b59] transition-colors shadow-md font-medium text-sm"
+                    >
                         <Plus size={18} className="mr-2" /> Nuevo miembro
                     </button>
                 )}
@@ -54,7 +76,7 @@ export function TeamManagement({ users, currentUserId }: { users: User[]; curren
                             </div>
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 mb-1.5">Contraseña *</label>
-                                <input name="password" required type="password" minLength={4} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none" placeholder="Mínimo 4 caracteres" />
+                                <input name="password" required type="password" minLength={12} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none" placeholder="Mínimo 12 caracteres" />
                             </div>
                         </div>
 
@@ -68,6 +90,10 @@ export function TeamManagement({ users, currentUserId }: { users: User[]; curren
                     </form>
                 </div>
             )}
+
+            {editingUser && <EditUserForm user={editingUser} onClose={() => setEditingUser(null)} />}
+
+            {deleteError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-medium rounded-xl p-3">{deleteError}</div>}
 
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <table className="w-full text-left border-collapse">
@@ -102,13 +128,30 @@ export function TeamManagement({ users, currentUserId }: { users: User[]; curren
                                     </span>
                                 </td>
                                 <td className="p-4 text-right pr-6">
-                                    {u.id !== currentUserId && (
-                                        <button
-                                            onClick={() => startTransition(() => toggleUserActive(u.id))}
-                                            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-red-600 transition-colors"
-                                        >
-                                            <Power size={14} /> {u.active ? 'Desactivar' : 'Activar'}
-                                        </button>
+                                    {u.id === currentUserId ? (
+                                        <span className="text-xs text-slate-400 italic">Tu cuenta — edítala en /cuenta</span>
+                                    ) : (
+                                        <div className="flex items-center justify-end gap-4">
+                                            <button
+                                                onClick={() => openEdit(u)}
+                                                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#0B1E40] transition-colors"
+                                            >
+                                                <Pencil size={14} /> Editar
+                                            </button>
+                                            <button
+                                                onClick={() => startTransition(() => toggleUserActive(u.id))}
+                                                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-amber-600 transition-colors"
+                                            >
+                                                <Power size={14} /> {u.active ? 'Desactivar' : 'Activar'}
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(u)}
+                                                disabled={pendingDeleteId === u.id}
+                                                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-red-600 transition-colors disabled:opacity-50"
+                                            >
+                                                <Trash2 size={14} /> {pendingDeleteId === u.id ? 'Eliminando…' : 'Eliminar'}
+                                            </button>
+                                        </div>
                                     )}
                                 </td>
                             </tr>
@@ -116,6 +159,60 @@ export function TeamManagement({ users, currentUserId }: { users: User[]; curren
                     </tbody>
                 </table>
             </div>
+        </div>
+    );
+}
+
+/** Formulario de edición, pre-rellenado — una instancia propia de useActionState
+ * ligada (bind) al id del usuario que se está editando. */
+function EditUserForm({ user, onClose }: { user: User; onClose: () => void }) {
+    const boundUpdateUser = updateUser.bind(null, user.id);
+    const [state, formAction, pending] = useActionState(boundUpdateUser, initialState);
+
+    useEffect(() => {
+        if (state.success) onClose();
+    }, [state.success, onClose]);
+
+    return (
+        <div className="glass-card p-6 border-t-4 border-t-cyan-500 relative">
+            <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <X size={24} />
+            </button>
+            <h3 className="text-lg font-bold text-slate-800 mb-6">Editar a {user.name}</h3>
+            <form action={formAction} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Nombre completo *</label>
+                        <input name="name" required type="text" defaultValue={user.name} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Rol *</label>
+                        <select name="role" required defaultValue={user.role} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none">
+                            {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Correo corporativo *</label>
+                        <input name="email" required type="email" defaultValue={user.email} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Nueva contraseña</label>
+                        <input name="password" type="password" minLength={12} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none" placeholder="Dejar en blanco para no cambiarla" />
+                    </div>
+                </div>
+
+                {state.error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-medium rounded-xl p-3">{state.error}</div>}
+                {state.success && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium rounded-xl p-3">{state.success}</div>}
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" onClick={onClose} className="px-5 py-2.5 text-slate-600 font-bold rounded-lg hover:bg-slate-100 transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" disabled={pending} className="px-6 py-2.5 bg-[#0B1E40] text-white font-bold rounded-lg hover:bg-[#122b59] transition-colors shadow-md disabled:opacity-70">
+                        {pending ? 'Guardando...' : 'Guardar cambios'}
+                    </button>
+                </div>
+            </form>
         </div>
     );
 }

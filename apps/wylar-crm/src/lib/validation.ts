@@ -47,6 +47,17 @@ export const userSchema = z.object({
     password: z.string().min(12, 'La contraseña debe tener al menos 12 caracteres.').max(200),
 });
 
+// Editar un miembro existente: la contraseña es opcional (dejarla en blanco
+// = no cambiarla). Si se envía, se exige el mismo mínimo que al crear.
+export const userUpdateSchema = z.object({
+    name: z.string().trim().min(2, 'Ingresa el nombre completo.'),
+    email: z.string().trim().email('Correo corporativo inválido.'),
+    role: z.enum(ROLE_VALUES),
+    password: z
+        .union([z.literal(''), z.string().min(12, 'La nueva contraseña debe tener al menos 12 caracteres.').max(200)])
+        .optional(),
+});
+
 export const changePasswordSchema = z
     .object({
         currentPassword: z.string().min(1, 'Ingresa tu contraseña actual.'),
