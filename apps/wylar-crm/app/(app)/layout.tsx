@@ -1,9 +1,11 @@
 import { requireUser } from '@/lib/auth';
 import { toSafeUser } from '@/lib/safeUser';
 import { Sidebar } from '@/components/Sidebar';
+import { TopBar } from '@/components/TopBar';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
     const currentUser = await requireUser();
+    const safeUser = toSafeUser(currentUser);
 
     return (
         <div className="flex min-h-screen bg-slate-50 font-sans">
@@ -12,9 +14,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 <div className="absolute bottom-[-10%] right-[-5%] w-[30%] h-[40%] rounded-full bg-amber-100/40 blur-[100px]"></div>
             </div>
 
-            <Sidebar currentUser={toSafeUser(currentUser)} />
+            <Sidebar currentUser={safeUser} />
 
-            <div className="flex-1 relative z-10 min-w-0">
+            <div className="flex-1 relative z-10 min-w-0 flex flex-col">
+                <TopBar currentUser={safeUser} />
                 <main className="p-6 md:p-8">
                     <div className="max-w-7xl mx-auto">{children}</div>
                 </main>

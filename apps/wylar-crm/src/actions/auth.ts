@@ -2,10 +2,11 @@
 
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { createHash } from 'node:crypto';
 import { prisma } from '@/lib/prisma';
 import { createSession, destroySession, hashPassword, requireUser, verifyPassword } from '@/lib/auth';
-import { changePasswordSchema, loginSchema } from '@/lib/validation';
+import { changePasswordSchema, loginSchema, updateProfileSchema } from '@/lib/validation';
 import { clientIp, rateLimit } from '@/lib/rateLimit';
 import { audit } from '@/lib/audit';
 
@@ -51,6 +52,27 @@ export async function logoutAction() {
     redirect('/login');
 }
 
+
+export interface UpdateProfileState {
+    error?: string;
+    success?: string;
+}
+
+/** Edita el nombre del usuario que tiene la sesión abierta. */
+export async function updateProfileAction(_prevState: UpdateProfileState, formData: FormData): Promise<UpdateProfileState> {
+    const user = await requireUser();
+
+    const parsed = updateProfileSchema.safeParse({ name: formData.get('name') });
+    if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Datos inválidos.' };
+
+    await prisma.user.update({ where: { id: user.id }, data: { name: parsed.data.name } });
+    await audit(user, 'PERFIL_EDITADO', 'usuario', user.id, `nombre → ${parsed.data.name}`);
+    // El nombre se muestra en el layout raíz (barra superior / sidebar), que
+    // se renderiza en el servidor — hay que invalidar todo el árbol para que
+    // se refresque sin recargar la página a mano.
+    revalidatePath('/', 'layout');
+    return { success: 'Nombre actualizado.' };
+}
 
 export interface ChangePasswordState {
     error?: string;

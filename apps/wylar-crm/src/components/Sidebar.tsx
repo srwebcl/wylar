@@ -2,11 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { KanbanSquare, ListChecks, Users, LogOut, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal, KeyRound, ScrollText } from 'lucide-react';
+import { KanbanSquare, ListChecks, Users, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal, ScrollText } from 'lucide-react';
 import clsx from 'clsx';
-import { logoutAction } from '@/actions/auth';
 import { Logo } from '@/components/Logo';
-import { roleLabel } from '@/lib/constants';
 import type { SafeUser as User } from '@/lib/safeUser';
 
 const CRM_NAV_ITEMS = [
@@ -64,27 +62,6 @@ export function Sidebar({ currentUser }: { currentUser: User }) {
                     </div>
                 </div>
             </nav>
-
-            <div className="p-5 border-t border-white/10 bg-black/20">
-                <div className="flex items-center mb-3">
-                    <div className="h-2 w-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></div>
-                    <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold">Sesión activa</p>
-                </div>
-                <div className="flex items-center justify-between bg-white/5 rounded-lg border border-white/10 p-3">
-                    <div className="min-w-0">
-                        <p className="text-sm font-bold text-white truncate">{currentUser.name}</p>
-                        <p className="text-xs text-slate-400 truncate">{roleLabel(currentUser.role)}</p>
-                    </div>
-                    <Link href="/cuenta" title="Mi cuenta / cambiar contraseña" className="p-2 text-slate-400 hover:text-cyan-400 transition-colors shrink-0">
-                        <KeyRound size={18} />
-                    </Link>
-                    <form action={logoutAction}>
-                        <button type="submit" title="Cerrar sesión" className="p-2 text-slate-400 hover:text-red-400 transition-colors shrink-0">
-                            <LogOut size={18} />
-                        </button>
-                    </form>
-                </div>
-            </div>
         </div>
     );
 }

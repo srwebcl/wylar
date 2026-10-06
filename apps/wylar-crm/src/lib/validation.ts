@@ -58,6 +58,10 @@ export const userUpdateSchema = z.object({
         .optional(),
 });
 
+export const updateProfileSchema = z.object({
+    name: z.string().trim().min(2, 'Ingresa tu nombre completo.').max(200),
+});
+
 export const changePasswordSchema = z
     .object({
         currentPassword: z.string().min(1, 'Ingresa tu contraseña actual.'),
