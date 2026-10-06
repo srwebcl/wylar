@@ -1,96 +1,122 @@
-import { Document, Page, StyleSheet, Text, View, Image, Svg, Polygon } from '@react-pdf/renderer';
+import { Document, Page, StyleSheet, Text, View, Image, Font } from '@react-pdf/renderer';
 import path from 'path';
 
+// --- Tipografía ---
+// Bitter (slab serif): usada solo en los momentos ceremoniales (título,
+// nombre del titular, nombre del curso) — una serif de trazo grueso y
+// estructural, con el carácter de una placa grabada, acorde a un
+// documento de competencia laboral de oficios técnicos.
+// Inter: la tipografía de marca que ya usa todo el CRM, para etiquetas,
+// cuerpo y metadatos — no se inventa una segunda familia sin relación
+// con el resto del producto.
+const FONT_DIR = path.join(process.cwd(), 'public', 'fonts');
+Font.register({
+    family: 'Bitter',
+    fonts: [
+        { src: path.join(FONT_DIR, 'Bitter-Medium.ttf'), fontWeight: 500 },
+        { src: path.join(FONT_DIR, 'Bitter-Bold.ttf'), fontWeight: 700 },
+        { src: path.join(FONT_DIR, 'Bitter-BoldItalic.ttf'), fontWeight: 700, fontStyle: 'italic' },
+        { src: path.join(FONT_DIR, 'Bitter-Black.ttf'), fontWeight: 900 },
+    ],
+});
+Font.register({
+    family: 'Inter',
+    fonts: [
+        { src: path.join(FONT_DIR, 'Inter-Regular.ttf'), fontWeight: 400 },
+        { src: path.join(FONT_DIR, 'Inter-Italic.ttf'), fontWeight: 400, fontStyle: 'italic' },
+        { src: path.join(FONT_DIR, 'Inter-Medium.ttf'), fontWeight: 500 },
+        { src: path.join(FONT_DIR, 'Inter-SemiBold.ttf'), fontWeight: 600 },
+        { src: path.join(FONT_DIR, 'Inter-Bold.ttf'), fontWeight: 700 },
+    ],
+});
+Font.registerHyphenationCallback((word) => [word]);
+
+// --- Paleta ---
+// Los tres tokens de marca de Wylar (navy/cian/ámbar), sin inventar un
+// cuarto color: el papel es un gris-azulado frío (no el crema cálido
+// genérico) para quedar en la misma familia cromática que la franja navy.
 const NAVY = '#0B1E40';
 const CYAN = '#0891b2';
 const AMBER = '#f59e0b';
-const INK = '#1e293b';
-const MUTED = '#64748b';
+const PAPER = '#F7F8FA';
+const INK = '#26354A';
+const MUTED = '#64748B';
 
-// Dimensiones del marco (frame) en puntos: A4 apaisado (841.89 x 595.28) menos
-// el padding de la página (28 por lado). Las esquinas decorativas se calculan
-// sobre esta caja para que calcen exactamente con el borde.
-const CORNER = 72;
+const BAND_WIDTH = 158;
 
 const styles = StyleSheet.create({
-    page: { padding: 28, fontFamily: 'Helvetica', backgroundColor: '#fdfcf9' },
-    frame: { flex: 1, borderWidth: 2, borderColor: NAVY, padding: 32, position: 'relative' },
-    frameInner: { position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderWidth: 0.75, borderColor: AMBER },
+    page: { padding: 16, fontFamily: 'Inter', backgroundColor: '#E7EAEF' },
+    card: { flex: 1, flexDirection: 'row', borderWidth: 1, borderColor: NAVY },
 
-    cornerTL: { position: 'absolute', top: -32, left: -32, width: CORNER, height: CORNER },
-    cornerTR: { position: 'absolute', top: -32, right: -32, width: CORNER, height: CORNER },
-    cornerBL: { position: 'absolute', bottom: -32, left: -32, width: CORNER, height: CORNER },
-    cornerBR: { position: 'absolute', bottom: -32, right: -32, width: CORNER, height: CORNER },
+    // --- Franja de identidad (izquierda) ---
+    band: { width: BAND_WIDTH, backgroundColor: NAVY, alignItems: 'center', paddingVertical: 30, position: 'relative' },
+    bandRule: { position: 'absolute', top: 0, right: 0, bottom: 0, width: 3, backgroundColor: AMBER },
+    seal: { width: 76, height: 76 },
+    bandWordmark: { fontFamily: 'Bitter', fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: 3, marginTop: 16 },
+    bandSpine: {
+        fontFamily: 'Inter',
+        fontWeight: 600,
+        fontSize: 7.5,
+        color: '#8FD3E8',
+        letterSpacing: 2.2,
+        textAlign: 'center',
+        transform: 'rotate(-90deg)',
+        width: 220,
+    },
 
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-    logo: { width: 130 },
-    codeBox: { alignItems: 'flex-end' },
-    codeLabel: { fontSize: 10, color: MUTED },
-    codeValue: { fontSize: 12, fontFamily: 'Helvetica-Bold', color: NAVY, marginTop: 2 },
+    // --- Contenido (derecha) ---
+    content: { flex: 1, backgroundColor: PAPER, padding: 34, flexDirection: 'column' },
 
-    body: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
-    bigTitle: { fontSize: 32, fontFamily: 'Helvetica-Bold', color: NAVY, letterSpacing: 2 },
-    institutionLine: { fontSize: 9.5, fontFamily: 'Helvetica-Bold', color: CYAN, letterSpacing: 1.3, marginTop: 4 },
+    topRow: { flexDirection: 'row', justifyContent: 'flex-end' },
+    codeTag: { fontSize: 8.5, color: MUTED, fontFamily: 'Inter' },
+    codeValue: { fontSize: 10.5, fontFamily: 'Inter', fontWeight: 700, color: NAVY, marginTop: 1 },
 
-    extiendeLine: { fontSize: 10, fontFamily: 'Helvetica-Oblique', color: MUTED, marginTop: 20 },
-    holderName: { fontSize: 28, fontFamily: 'Times-Bold', color: NAVY, marginTop: 6, textAlign: 'center' },
-    rut: { fontSize: 11, color: MUTED, marginTop: 4 },
-    divider: { width: 260, height: 1, backgroundColor: AMBER, marginTop: 10 },
+    main: { flex: 1, justifyContent: 'center' },
 
-    leadIn: { fontSize: 10.5, fontFamily: 'Helvetica-Oblique', color: INK, marginTop: 16, textAlign: 'center' },
-    certTitle: { fontSize: 16, fontFamily: 'Times-BoldItalic', color: NAVY, marginTop: 8, textAlign: 'center' },
-    categoryLabel: { fontSize: 9.5, color: AMBER, fontFamily: 'Helvetica-Bold', marginTop: 4, letterSpacing: 1 },
+    kicker: { fontSize: 9.5, fontFamily: 'Inter', fontWeight: 500, color: CYAN },
+    title: { fontSize: 33, fontFamily: 'Bitter', fontWeight: 900, color: NAVY, marginTop: 2, lineHeight: 1.05 },
+    titleSub: { fontSize: 14, fontFamily: 'Bitter', fontWeight: 500, fontStyle: 'italic', color: NAVY, marginTop: 1 },
 
-    detailText: { fontSize: 9.5, fontFamily: 'Helvetica-Oblique', color: INK, marginTop: 14, textAlign: 'center', lineHeight: 1.5, maxWidth: 480 },
-    validityLine: { fontSize: 9, color: MUTED, marginTop: 8 },
-    placeDate: { fontSize: 10, color: INK, marginTop: 10, fontFamily: 'Helvetica-Bold' },
+    extiende: { fontSize: 10, fontFamily: 'Inter', fontStyle: 'italic', color: MUTED, marginTop: 20 },
+    holderName: { fontSize: 25, fontFamily: 'Bitter', fontWeight: 700, color: NAVY, marginTop: 4 },
 
-    footerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+    metaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 7, gap: 12 },
+    rut: { fontSize: 10, fontFamily: 'Inter', fontWeight: 500, color: MUTED },
+    tag: { borderWidth: 1, borderColor: AMBER, paddingVertical: 2.5, paddingHorizontal: 8 },
+    tagText: { fontSize: 8, fontFamily: 'Inter', fontWeight: 600, color: NAVY },
 
-    qrBlock: { alignItems: 'center', width: 150 },
-    qr: { width: 64, height: 64 },
-    qrHint: { fontSize: 7, color: MUTED, marginTop: 4, textAlign: 'center', width: 150 },
+    divider: { width: 280, height: 1.5, backgroundColor: NAVY, opacity: 0.12, marginTop: 16, marginBottom: 16 },
 
-    codeBlock: { alignItems: 'center', width: 190 },
-    codeBlockLabel: { fontSize: 8, color: INK, fontFamily: 'Helvetica-Bold' },
-    codeBlockValue: { fontSize: 8, color: MUTED, marginTop: 2 },
+    leadIn: { fontSize: 10, fontFamily: 'Inter', color: MUTED },
+    quoteBlock: { flexDirection: 'row', marginTop: 7, alignItems: 'flex-start' },
+    quoteBar: { width: 2.5, backgroundColor: AMBER, marginRight: 10, alignSelf: 'stretch' },
+    courseTitle: { fontSize: 16.5, fontFamily: 'Bitter', fontWeight: 700, fontStyle: 'italic', color: NAVY, maxWidth: 400 },
 
-    signatureBlock: { width: 150, alignItems: 'center', position: 'relative' },
-    signatureImage: { width: 140, height: 44, objectFit: 'contain' },
-    stampOverSignature: { width: 90, height: 90, position: 'absolute', top: -46, left: 55, opacity: 0.92 },
-    signatureLine: { borderTopWidth: 1, borderTopColor: INK, width: 150, marginTop: 2 },
-    signerName: { fontSize: 10, fontFamily: 'Helvetica-Bold', color: NAVY, marginTop: 5 },
-    signerRole: { fontSize: 8.5, color: MUTED, marginTop: 1 },
+    detailText: { fontSize: 9.5, fontFamily: 'Inter', color: INK, marginTop: 14, lineHeight: 1.55, maxWidth: 420 },
+
+    bottomRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', paddingTop: 20 },
+
+    qrBlock: { flexDirection: 'row', alignItems: 'center' },
+    qr: { width: 52, height: 52 },
+    qrTextBlock: { marginLeft: 10 },
+    qrHint: { fontSize: 8, fontFamily: 'Inter', color: MUTED, maxWidth: 140, lineHeight: 1.4 },
+    qrCode: { fontSize: 8, fontFamily: 'Inter', fontWeight: 700, color: NAVY, letterSpacing: 0.5, marginTop: 2 },
+
+    signatureBlock: { alignItems: 'center', position: 'relative' },
+    signatureImage: { width: 118, height: 38, objectFit: 'contain' },
+    stampOverSignature: { width: 70, height: 70, position: 'absolute', top: -38, left: 62, opacity: 0.9 },
+    signatureLine: { borderTopWidth: 1, borderTopColor: INK, width: 150, marginTop: 1 },
+    signerName: { fontSize: 9.5, fontFamily: 'Inter', fontWeight: 700, color: NAVY, marginTop: 5 },
+    signerRole: { fontSize: 8, fontFamily: 'Inter', color: MUTED, marginTop: 1 },
 });
 
 function formatIssueDate(date: Date): string {
-    const label = date.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
-    return `Chile, ${label}`;
+    return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-function formatExpiry(date: Date | null): string {
-    if (!date) return 'Sin fecha de vencimiento.';
-    return `Vigente hasta ${date.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
-}
-
-/** Esquina decorativa tipo "cinta doblada", en los colores de marca (navy +
- * cian). `corner` define en qué vértice de la caja va el ángulo recto. */
-function DecorativeCorner({ corner }: { corner: 'tl' | 'tr' | 'bl' | 'br' }) {
-    const n = CORNER;
-    const inset = 24;
-    const points: Record<typeof corner, { navy: string; cyan: string }> = {
-        tl: { navy: `0,0 ${n},0 0,${n}`, cyan: `0,0 ${n - inset},0 0,${n - inset}` },
-        tr: { navy: `${n},0 0,0 ${n},${n}`, cyan: `${n},0 ${inset},0 ${n},${n - inset}` },
-        bl: { navy: `0,${n} ${n},${n} 0,0`, cyan: `0,${n} ${n - inset},${n} 0,${inset}` },
-        br: { navy: `${n},${n} 0,${n} ${n},0`, cyan: `${n},${n} ${inset},${n} ${n},${inset}` },
-    };
-    const p = points[corner];
-    return (
-        <Svg viewBox={`0 0 ${n} ${n}`} width={n} height={n}>
-            <Polygon points={p.navy} fill={NAVY} />
-            <Polygon points={p.cyan} fill={CYAN} />
-        </Svg>
-    );
+function expiryClause(date: Date | null): string {
+    if (!date) return 'Esta certificación no tiene fecha de vencimiento.';
+    return `Vigente hasta el ${date.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
 }
 
 export interface CertificatePdfProps {
@@ -119,73 +145,75 @@ export function CertificatePdf({
     statusLabel: _statusLabel,
     qrDataUrl,
 }: CertificatePdfProps) {
-    const logoPath = path.join(process.cwd(), 'public', 'images', 'logo.png');
+    const sealPath = path.join(process.cwd(), 'public', 'images', 'isotipo-wylar.png');
     const stampPath = path.join(process.cwd(), 'public', 'images', 'timbre-wylar.png');
     const signaturePath = path.join(process.cwd(), 'public', 'images', 'firma-gustavo.png');
 
     return (
         <Document title={`Certificado ${code}`}>
             <Page size="A4" orientation="landscape" style={styles.page}>
-                <View style={styles.frame}>
-                    <View style={styles.frameInner} fixed />
-
-                    <View style={styles.cornerTL}>
-                        <DecorativeCorner corner="tl" />
-                    </View>
-                    <View style={styles.cornerTR}>
-                        <DecorativeCorner corner="tr" />
-                    </View>
-                    <View style={styles.cornerBL}>
-                        <DecorativeCorner corner="bl" />
-                    </View>
-                    <View style={styles.cornerBR}>
-                        <DecorativeCorner corner="br" />
+                <View style={styles.card}>
+                    <View style={styles.band}>
+                        <View style={styles.bandRule} />
+                        <Image src={sealPath} style={styles.seal} />
+                        <Text style={styles.bandWordmark}>WYLAR</Text>
+                        <View style={{ flex: 1 }} />
+                        <Text style={styles.bandSpine}>CERTIFICADORA DE COMPETENCIAS LABORALES</Text>
+                        <View style={{ flex: 1 }} />
                     </View>
 
-                    <View style={styles.header}>
-                        <Image src={logoPath} style={styles.logo} />
-                        <View style={styles.codeBox}>
-                            <Text style={styles.codeLabel}>Certificado N°</Text>
-                            <Text style={styles.codeValue}>{code}</Text>
-                        </View>
-                    </View>
-
-                    <View style={styles.body}>
-                        <Text style={styles.bigTitle}>CERTIFICADO</Text>
-                        <Text style={styles.institutionLine}>CERTIFICADORA DE COMPETENCIAS LABORALES · WYLAR LTDA.</Text>
-
-                        <Text style={styles.extiendeLine}>Extiende el presente certificado a:</Text>
-                        <Text style={styles.holderName}>{holderName}</Text>
-                        <Text style={styles.rut}>RUT {holderRut}</Text>
-                        <View style={styles.divider} />
-
-                        <Text style={styles.leadIn}>Ha completado satisfactoriamente el curso de:</Text>
-                        <Text style={styles.certTitle}>&ldquo;{certificationTitle}&rdquo;</Text>
-                        <Text style={styles.categoryLabel}>{categoryLabel.toUpperCase()}</Text>
-
-                        {detailText ? <Text style={styles.detailText}>{detailText}</Text> : null}
-                        <Text style={styles.validityLine}>{formatExpiry(expiryDate)}</Text>
-
-                        <Text style={styles.placeDate}>{formatIssueDate(issueDate)}</Text>
-                    </View>
-
-                    <View style={styles.footerRow}>
-                        <View style={styles.qrBlock}>
-                            <Image src={qrDataUrl} style={styles.qr} />
-                            <Text style={styles.qrHint}>Verifica en wylar.cl/validador</Text>
+                    <View style={styles.content}>
+                        <View style={styles.topRow}>
+                            <View style={{ alignItems: 'flex-end' }}>
+                                <Text style={styles.codeTag}>Certificado N°</Text>
+                                <Text style={styles.codeValue}>{code}</Text>
+                            </View>
                         </View>
 
-                        <View style={styles.codeBlock}>
-                            <Text style={styles.codeBlockLabel}>Código de Certificado: {code}</Text>
-                            <Text style={styles.codeBlockValue}>Verificable en: www.wylar.cl</Text>
+                        <View style={styles.main}>
+                            <Text style={styles.kicker}>Diploma de certificación</Text>
+                            <Text style={styles.title}>Certificado</Text>
+                            <Text style={styles.titleSub}>de Competencia Laboral</Text>
+
+                            <Text style={styles.extiende}>Extiende el presente certificado a</Text>
+                            <Text style={styles.holderName}>{holderName}</Text>
+                            <View style={styles.metaRow}>
+                                <Text style={styles.rut}>RUT {holderRut}</Text>
+                                <View style={styles.tag}>
+                                    <Text style={styles.tagText}>{categoryLabel}</Text>
+                                </View>
+                            </View>
+
+                            <View style={styles.divider} />
+
+                            <Text style={styles.leadIn}>Ha completado satisfactoriamente el curso de</Text>
+                            <View style={styles.quoteBlock}>
+                                <View style={styles.quoteBar} />
+                                <Text style={styles.courseTitle}>{certificationTitle}</Text>
+                            </View>
+
+                            {detailText ? <Text style={styles.detailText}>{detailText}</Text> : null}
+                            <Text style={styles.detailText}>
+                                {expiryClause(expiryDate)} Emitido en Chile, el {formatIssueDate(issueDate)}.
+                            </Text>
                         </View>
 
-                        <View style={styles.signatureBlock}>
-                            <Image src={signaturePath} style={styles.signatureImage} />
-                            <Image src={stampPath} style={styles.stampOverSignature} />
-                            <View style={styles.signatureLine} />
-                            <Text style={styles.signerName}>Gustavo Soto Antihual</Text>
-                            <Text style={styles.signerRole}>Representante Legal · Wylar</Text>
+                        <View style={styles.bottomRow}>
+                            <View style={styles.qrBlock}>
+                                <Image src={qrDataUrl} style={styles.qr} />
+                                <View style={styles.qrTextBlock}>
+                                    <Text style={styles.qrHint}>Verifica la autenticidad de este certificado en wylar.cl/validador</Text>
+                                    <Text style={styles.qrCode}>{code}</Text>
+                                </View>
+                            </View>
+
+                            <View style={styles.signatureBlock}>
+                                <Image src={signaturePath} style={styles.signatureImage} />
+                                <Image src={stampPath} style={styles.stampOverSignature} />
+                                <View style={styles.signatureLine} />
+                                <Text style={styles.signerName}>Gustavo Soto Antihual</Text>
+                                <Text style={styles.signerRole}>Representante Legal</Text>
+                            </View>
                         </View>
                     </View>
                 </View>
