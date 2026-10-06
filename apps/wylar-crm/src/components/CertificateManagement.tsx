@@ -250,71 +250,66 @@ export function CertificateManagement({ certificates, isAdmin }: { certificates:
                 </div>
             )}
 
-            <div className="glass-card overflow-hidden">
-                <table className="w-full text-sm">
-                    <thead>
-                        <tr className="border-b border-slate-100 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
-                            <th className="px-5 py-3">Titular</th>
-                            <th className="px-5 py-3">Certificación</th>
-                            <th className="px-5 py-3">Código</th>
-                            <th className="px-5 py-3">Estado</th>
-                            <th className="px-5 py-3">Emitido por</th>
-                            <th className="px-5 py-3 text-right">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {certificates.map((c) => (
-                            <tr key={c.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
-                                <td className="px-5 py-3.5">
-                                    <p className="font-bold text-slate-900">{c.holderName}</p>
-                                    <p className="text-xs text-slate-400">{c.holderRut}</p>
-                                </td>
-                                <td className="px-5 py-3.5">
-                                    <p className="text-slate-700">{c.certificationTitle}</p>
-                                    <p className="text-xs text-slate-400">{c.categoryLabel}</p>
-                                </td>
-                                <td className="px-5 py-3.5 font-mono text-xs text-slate-600">{c.code}</td>
-                                <td className="px-5 py-3.5">
-                                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${STATUS_TONE[c.status]}`}>{c.statusLabel}</span>
-                                </td>
-                                <td className="px-5 py-3.5 text-slate-500">{c.issuedByName ?? '—'}</td>
-                                <td className="px-5 py-3.5">
-                                    <div className="flex items-center justify-end gap-1">
-                                        {c.status !== 'REVOCADO' && (
-                                            <a
-                                                href={`/api/public/certificates/${c.code}/pdf`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="p-2 text-slate-400 hover:text-cyan-700 transition-colors"
-                                                title="Descargar PDF"
-                                            >
-                                                <Download size={16} />
-                                            </a>
-                                        )}
-                                        {isAdmin && c.status !== 'REVOCADO' && (
-                                            <button
-                                                onClick={() => handleRevoke(c.id, c.code)}
-                                                disabled={isPending}
-                                                className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50"
-                                                title="Revocar certificado"
-                                            >
-                                                <Ban size={16} />
-                                            </button>
-                                        )}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                        {certificates.length === 0 && (
-                            <tr>
-                                <td colSpan={6} className="px-5 py-10 text-center text-slate-400">
-                                    Aún no se han emitido certificados.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            {certificates.length === 0 ? (
+                <div className="glass-card p-10 text-center text-slate-500">Aún no se han emitido certificados.</div>
+            ) : (
+                <div className="glass-card overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">
+                                    <th className="px-4 py-3">Titular</th>
+                                    <th className="px-4 py-3">RUT</th>
+                                    <th className="px-4 py-3">Certificación</th>
+                                    <th className="px-4 py-3">Código</th>
+                                    <th className="px-4 py-3">Estado</th>
+                                    <th className="px-4 py-3">Emitido por</th>
+                                    <th className="px-4 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {certificates.map((c) => (
+                                    <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
+                                        <td className="px-4 py-3 font-medium text-slate-800 whitespace-nowrap">{c.holderName}</td>
+                                        <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">{c.holderRut}</td>
+                                        <td className="px-4 py-3 text-slate-600 max-w-[260px] truncate">{c.certificationTitle}</td>
+                                        <td className="px-4 py-3 font-mono text-xs text-slate-500 whitespace-nowrap">{c.code}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full ${STATUS_TONE[c.status]}`}>{c.statusLabel}</span>
+                                        </td>
+                                        <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{c.issuedByName ?? '—'}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <div className="flex items-center justify-end gap-1">
+                                                {c.status !== 'REVOCADO' && (
+                                                    <a
+                                                        href={`/api/public/certificates/${c.code}/pdf`}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="p-2 text-slate-400 hover:text-cyan-700 transition-colors"
+                                                        title="Descargar PDF"
+                                                    >
+                                                        <Download size={16} />
+                                                    </a>
+                                                )}
+                                                {isAdmin && c.status !== 'REVOCADO' && (
+                                                    <button
+                                                        onClick={() => handleRevoke(c.id, c.code)}
+                                                        disabled={isPending}
+                                                        className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                                                        title="Revocar certificado"
+                                                    >
+                                                        <Ban size={16} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
