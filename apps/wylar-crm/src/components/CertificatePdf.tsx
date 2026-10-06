@@ -1,4 +1,4 @@
-import { Document, Page, StyleSheet, Text, View, Image, Font, Svg, Polygon } from '@react-pdf/renderer';
+import { Document, Page, StyleSheet, Text, View, Image, Font, Svg, Rect, Defs, LinearGradient, Stop } from '@react-pdf/renderer';
 import path from 'path';
 
 // --- Tipografía ---
@@ -28,17 +28,25 @@ const CYAN = '#0891b2';
 const INK = '#1E293B';
 const MUTED = '#64748B';
 
-const CORNER = 92;
+// A4 apaisado en puntos.
+const PAGE_W = 841.89;
+const PAGE_H = 595.28;
+// Grosor del marco degradado que rodea la tarjeta blanca interior.
+const FRAME = 30;
 
 const styles = StyleSheet.create({
-    page: { fontFamily: 'Inter', backgroundColor: '#FFFFFF' },
+    page: { fontFamily: 'Inter' },
+    gradientLayer: { position: 'absolute', top: 0, left: 0 },
 
-    frame: { flex: 1, margin: 20, borderWidth: 1, borderColor: NAVY, padding: 34, position: 'relative' },
-
-    cornerTL: { position: 'absolute', top: -20, left: -20, width: CORNER, height: CORNER },
-    cornerTR: { position: 'absolute', top: -20, right: -20, width: CORNER, height: CORNER },
-    cornerBL: { position: 'absolute', bottom: -20, left: -20, width: CORNER, height: CORNER },
-    cornerBR: { position: 'absolute', bottom: -20, right: -20, width: CORNER, height: CORNER },
+    card: {
+        position: 'absolute',
+        top: FRAME,
+        left: FRAME,
+        right: FRAME,
+        bottom: FRAME,
+        backgroundColor: '#FFFFFF',
+        padding: 34,
+    },
 
     // --- Esquinas ---
     cornerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
@@ -95,43 +103,6 @@ function formatVigenciaMonthYear(date: Date): string {
     return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-/** Esquina decorativa tipo cinta doblada en tres tonos, calcados del
- * propio degradé del isotipo de Wylar (navy → azul medio → cian). */
-function DecorativeCorner({ corner }: { corner: 'tl' | 'tr' | 'bl' | 'br' }) {
-    const n = CORNER;
-    const step = 22;
-    const points: Record<typeof corner, { a: string; b: string; c: string }> = {
-        tl: {
-            a: `0,0 ${n},0 0,${n}`,
-            b: `0,0 ${n - step},0 0,${n - step}`,
-            c: `0,0 ${n - step * 2},0 0,${n - step * 2}`,
-        },
-        tr: {
-            a: `${n},0 0,0 ${n},${n}`,
-            b: `${n},0 ${step},0 ${n},${n - step}`,
-            c: `${n},0 ${step * 2},0 ${n},${n - step * 2}`,
-        },
-        bl: {
-            a: `0,${n} ${n},${n} 0,0`,
-            b: `0,${n} ${n - step},${n} 0,${step}`,
-            c: `0,${n} ${n - step * 2},${n} 0,${step * 2}`,
-        },
-        br: {
-            a: `${n},${n} 0,${n} ${n},0`,
-            b: `${n},${n} ${step},${n} ${n},${step}`,
-            c: `${n},${n} ${step * 2},${n} ${n},${step * 2}`,
-        },
-    };
-    const p = points[corner];
-    return (
-        <Svg viewBox={`0 0 ${n} ${n}`} width={n} height={n}>
-            <Polygon points={p.a} fill={NAVY} />
-            <Polygon points={p.b} fill={BLUE} />
-            <Polygon points={p.c} fill={CYAN} />
-        </Svg>
-    );
-}
-
 export interface CertificatePdfProps {
     code: string;
     holderName: string;
@@ -165,20 +136,19 @@ export function CertificatePdf({
     return (
         <Document title={`Certificado ${code}`}>
             <Page size="A4" orientation="landscape" style={styles.page}>
-                <View style={styles.frame}>
-                    <View style={styles.cornerTL}>
-                        <DecorativeCorner corner="tl" />
-                    </View>
-                    <View style={styles.cornerTR}>
-                        <DecorativeCorner corner="tr" />
-                    </View>
-                    <View style={styles.cornerBL}>
-                        <DecorativeCorner corner="bl" />
-                    </View>
-                    <View style={styles.cornerBR}>
-                        <DecorativeCorner corner="br" />
-                    </View>
+                {/* Marco exterior: degradado navy → cian característico de Wylar.
+                    Todo lo que queda fuera de la tarjeta blanca interior toma este color. */}
+                <Svg viewBox={`0 0 ${PAGE_W} ${PAGE_H}`} width={PAGE_W} height={PAGE_H} style={styles.gradientLayer} fixed>
+                    <Defs>
+                        <LinearGradient id="wylarFrame" x1="0" y1="0" x2="1" y2="1">
+                            <Stop offset="0" stopColor={NAVY} />
+                            <Stop offset="1" stopColor={CYAN} />
+                        </LinearGradient>
+                    </Defs>
+                    <Rect x={0} y={0} width={PAGE_W} height={PAGE_H} fill="url(#wylarFrame)" />
+                </Svg>
 
+                <View style={styles.card}>
                     <View style={styles.cornerRow}>
                         <Image src={logoPath} style={styles.logo} />
                         <View style={styles.codeBox}>
