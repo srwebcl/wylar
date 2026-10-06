@@ -44,7 +44,7 @@ export function Sidebar({ currentUser }: { currentUser: User }) {
     };
 
     return (
-        <div className="w-72 bg-[#0B1E40] text-white flex flex-col shadow-2xl z-20 shrink-0 overflow-y-auto">
+        <div className="w-72 bg-[#0B1E40] text-white flex flex-col shadow-2xl z-20 shrink-0 sticky top-0 h-screen overflow-y-auto">
             <div className="p-6 flex items-center justify-center border-b border-white/10 shrink-0">
                 <Logo width={150} />
             </div>
