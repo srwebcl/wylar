@@ -1,48 +1,51 @@
-import { Document, Page, StyleSheet, Text, View, Image, Font } from '@react-pdf/renderer';
+import { Document, Page, StyleSheet, Text, View, Image, Font, Svg, Polygon } from '@react-pdf/renderer';
 import path from 'path';
 
 // --- Tipografía ---
-// Una sola familia para todo el documento (Bitter, slab serif): el
-// título, el nombre del titular, las etiquetas y el cuerpo usan la
-// misma letra con distintos pesos — nada de mezclar una serif
-// ceremonial con una sans de UI.
+// Inter: la misma familia que ya usa el CRM (ver app/layout.tsx y
+// globals.css) — el certificado se tipografía igual que el resto del
+// producto, no con una letra inventada para la ocasión.
 const FONT_DIR = path.join(process.cwd(), 'public', 'fonts');
 Font.register({
-    family: 'Bitter',
+    family: 'Inter',
     fonts: [
-        { src: path.join(FONT_DIR, 'Bitter-Regular.ttf'), fontWeight: 400 },
-        { src: path.join(FONT_DIR, 'Bitter-Italic.ttf'), fontWeight: 400, fontStyle: 'italic' },
-        { src: path.join(FONT_DIR, 'Bitter-Medium.ttf'), fontWeight: 500 },
-        { src: path.join(FONT_DIR, 'Bitter-SemiBold.ttf'), fontWeight: 600 },
-        { src: path.join(FONT_DIR, 'Bitter-Bold.ttf'), fontWeight: 700 },
-        { src: path.join(FONT_DIR, 'Bitter-BoldItalic.ttf'), fontWeight: 700, fontStyle: 'italic' },
-        { src: path.join(FONT_DIR, 'Bitter-Black.ttf'), fontWeight: 900 },
+        { src: path.join(FONT_DIR, 'Inter-Regular.ttf'), fontWeight: 400 },
+        { src: path.join(FONT_DIR, 'Inter-Italic.ttf'), fontWeight: 400, fontStyle: 'italic' },
+        { src: path.join(FONT_DIR, 'Inter-Medium.ttf'), fontWeight: 500 },
+        { src: path.join(FONT_DIR, 'Inter-SemiBold.ttf'), fontWeight: 600 },
+        { src: path.join(FONT_DIR, 'Inter-Bold.ttf'), fontWeight: 700 },
+        { src: path.join(FONT_DIR, 'Inter-ExtraBold.ttf'), fontWeight: 800 },
     ],
 });
 Font.registerHyphenationCallback((word) => [word]);
 
 // --- Paleta ---
-// Los tres tokens de marca de Wylar (navy/cian/ámbar) para tinta y
-// acentos; el papel es un gris claro con grano sutil (imagen de
-// textura), no un color plano.
+// Los tres tonos del degradé del isotipo de Wylar (navy → azul medio →
+// cian), muestreados del propio logo.png — nada de colores inventados.
 const NAVY = '#0B1E40';
+const BLUE = '#1C64B4';
 const CYAN = '#0891b2';
-const INK = '#2B3240';
-const MUTED = '#6B7280';
+const INK = '#1E293B';
+const MUTED = '#64748B';
+
+const CORNER = 92;
 
 const styles = StyleSheet.create({
-    page: { fontFamily: 'Bitter' },
-    paper: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
+    page: { fontFamily: 'Inter', backgroundColor: '#FFFFFF' },
 
-    frame: { flex: 1, margin: 20, borderWidth: 1.5, borderColor: NAVY, padding: 28, position: 'relative' },
-    frameInner: { position: 'absolute', top: 5, left: 5, right: 5, bottom: 5, borderWidth: 0.5, borderColor: CYAN },
+    frame: { flex: 1, margin: 20, borderWidth: 1, borderColor: NAVY, padding: 34, position: 'relative' },
+
+    cornerTL: { position: 'absolute', top: -20, left: -20, width: CORNER, height: CORNER },
+    cornerTR: { position: 'absolute', top: -20, right: -20, width: CORNER, height: CORNER },
+    cornerBL: { position: 'absolute', bottom: -20, left: -20, width: CORNER, height: CORNER },
+    cornerBR: { position: 'absolute', bottom: -20, right: -20, width: CORNER, height: CORNER },
 
     // --- Esquinas ---
     cornerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
     logo: { width: 176 },
     codeBox: { alignItems: 'flex-end' },
     codeLabel: { fontSize: 9, color: MUTED },
-    codeValue: { fontSize: 12, fontFamily: 'Bitter', fontWeight: 700, color: NAVY, marginTop: 2 },
+    codeValue: { fontSize: 12, fontWeight: 700, color: NAVY, marginTop: 2 },
 
     bottomRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
 
@@ -63,8 +66,9 @@ const styles = StyleSheet.create({
     // --- Centro ---
     main: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 },
 
-    title: { fontSize: 32, fontWeight: 900, color: NAVY, marginTop: 4 },
-    institution: { fontSize: 11, fontWeight: 600, color: CYAN, marginTop: 3, textAlign: 'center' },
+    title: { fontSize: 32, fontWeight: 800, color: NAVY, marginTop: 4 },
+    titleRule: { width: 54, height: 3, backgroundColor: CYAN, marginTop: 8 },
+    institution: { fontSize: 11, fontWeight: 600, color: BLUE, marginTop: 10, textAlign: 'center' },
 
     extiende: { fontSize: 10, fontStyle: 'italic', color: MUTED, marginTop: 20 },
     holderName: { fontSize: 25, fontWeight: 700, color: NAVY, marginTop: 4, textAlign: 'center' },
@@ -89,6 +93,43 @@ function formatIssueDate(date: Date): string {
 function formatVigenciaMonthYear(date: Date): string {
     const label = date.toLocaleDateString('es-CL', { month: 'long', year: 'numeric', timeZone: 'UTC' });
     return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+/** Esquina decorativa tipo cinta doblada en tres tonos, calcados del
+ * propio degradé del isotipo de Wylar (navy → azul medio → cian). */
+function DecorativeCorner({ corner }: { corner: 'tl' | 'tr' | 'bl' | 'br' }) {
+    const n = CORNER;
+    const step = 22;
+    const points: Record<typeof corner, { a: string; b: string; c: string }> = {
+        tl: {
+            a: `0,0 ${n},0 0,${n}`,
+            b: `0,0 ${n - step},0 0,${n - step}`,
+            c: `0,0 ${n - step * 2},0 0,${n - step * 2}`,
+        },
+        tr: {
+            a: `${n},0 0,0 ${n},${n}`,
+            b: `${n},0 ${step},0 ${n},${n - step}`,
+            c: `${n},0 ${step * 2},0 ${n},${n - step * 2}`,
+        },
+        bl: {
+            a: `0,${n} ${n},${n} 0,0`,
+            b: `0,${n} ${n - step},${n} 0,${step}`,
+            c: `0,${n} ${n - step * 2},${n} 0,${step * 2}`,
+        },
+        br: {
+            a: `${n},${n} 0,${n} ${n},0`,
+            b: `${n},${n} ${step},${n} ${n},${step}`,
+            c: `${n},${n} ${step * 2},${n} ${n},${step * 2}`,
+        },
+    };
+    const p = points[corner];
+    return (
+        <Svg viewBox={`0 0 ${n} ${n}`} width={n} height={n}>
+            <Polygon points={p.a} fill={NAVY} />
+            <Polygon points={p.b} fill={BLUE} />
+            <Polygon points={p.c} fill={CYAN} />
+        </Svg>
+    );
 }
 
 export interface CertificatePdfProps {
@@ -117,7 +158,6 @@ export function CertificatePdf({
     statusLabel: _statusLabel,
     qrDataUrl,
 }: CertificatePdfProps) {
-    const paperPath = path.join(process.cwd(), 'public', 'images', 'paper-texture.jpg');
     const logoPath = path.join(process.cwd(), 'public', 'images', 'logo.png');
     const stampPath = path.join(process.cwd(), 'public', 'images', 'timbre-wylar.png');
     const signaturePath = path.join(process.cwd(), 'public', 'images', 'firma-gustavo.png');
@@ -125,10 +165,19 @@ export function CertificatePdf({
     return (
         <Document title={`Certificado ${code}`}>
             <Page size="A4" orientation="landscape" style={styles.page}>
-                <Image src={paperPath} style={styles.paper} fixed />
-
                 <View style={styles.frame}>
-                    <View style={styles.frameInner} fixed />
+                    <View style={styles.cornerTL}>
+                        <DecorativeCorner corner="tl" />
+                    </View>
+                    <View style={styles.cornerTR}>
+                        <DecorativeCorner corner="tr" />
+                    </View>
+                    <View style={styles.cornerBL}>
+                        <DecorativeCorner corner="bl" />
+                    </View>
+                    <View style={styles.cornerBR}>
+                        <DecorativeCorner corner="br" />
+                    </View>
 
                     <View style={styles.cornerRow}>
                         <Image src={logoPath} style={styles.logo} />
@@ -140,6 +189,7 @@ export function CertificatePdf({
 
                     <View style={styles.main}>
                         <Text style={styles.title}>Certificado</Text>
+                        <View style={styles.titleRule} />
                         <Text style={styles.institution}>Certificadora de Competencias Laborales Wylar Ltda.</Text>
 
                         <Text style={styles.extiende}>Extiende el presente certificado a</Text>
