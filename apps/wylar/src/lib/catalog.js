@@ -1,9 +1,7 @@
 // Cliente del Módulo de Catálogo del CRM. Reemplaza a src/data/perfiles.js
-// (ahora eliminado) — el sitio es estático, así que este fetch corre en
-// BUILD TIME (frontmatter de páginas .astro), no en el navegador. Cada vez
-// que se edita el catálogo desde el CRM hay que volver a desplegar el
-// sitio para que el cambio se refleje (ver botón "Publicar cambios en
-// wylar.cl" en /catalogo del CRM, que dispara justamente ese redeploy).
+// (ahora eliminado) — al configurarse el sitio como híbrido, este fetch se ejecuta
+// en SSR (en páginas con prerender = false) y se sirve usando el caché de CDN.
+// Los cambios en el catálogo se reflejan al expirar el caché (1 a 5 minutos).
 const CRM_ORIGIN = import.meta.env.PUBLIC_CRM_ORIGIN || 'https://wylar-crm.vercel.app';
 
 // Último catálogo bueno en memoria: si el CRM tarda o falla, el sitio sigue

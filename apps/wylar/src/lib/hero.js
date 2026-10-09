@@ -1,6 +1,6 @@
-// Cliente del Módulo de Hero del CRM. Igual que catalog.js: el sitio es
-// estático, este fetch corre en build time. Ver botón "Publicar cambios en
-// wylar.cl" en /hero del CRM.
+// Cliente del Módulo de Hero del CRM.
+// Este fetch se ejecuta en SSR usando el caché configurado, por lo que los cambios
+// del CRM se reflejarán en el sitio tras expirar el caché (1 a 3 minutos).
 const CRM_ORIGIN = import.meta.env.PUBLIC_CRM_ORIGIN || 'https://wylar-crm.vercel.app';
 
 export async function getHeroSlides() {
