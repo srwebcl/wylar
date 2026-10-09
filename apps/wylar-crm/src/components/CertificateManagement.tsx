@@ -81,7 +81,11 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
     const [detailTemplate, setDetailTemplate] = useState<string>('ninguna');
     const [detailText, setDetailText] = useState('');
     const [completionText, setCompletionText] = useState('Ha completado satisfactoriamente el curso de');
-    const [categoryLabel, setCategoryLabel] = useState(DEFAULT_CATEGORY_LABEL);
+
+    const existingCategories = Array.from(new Set(certificates.map((c) => c.categoryLabel))).filter(Boolean);
+    const [categoryMode, setCategoryMode] = useState<'select' | 'new'>('select');
+    const [categorySelect, setCategorySelect] = useState<string>(existingCategories.includes(DEFAULT_CATEGORY_LABEL) ? DEFAULT_CATEGORY_LABEL : existingCategories[0] || DEFAULT_CATEGORY_LABEL);
+    const [categoryCustom, setCategoryCustom] = useState('');
 
     function handleDetailTemplateChange(value: string) {
         setDetailTemplate(value);
@@ -99,7 +103,9 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
         setDetailTemplate('ninguna');
         setDetailText('');
         setCompletionText('Ha completado satisfactoriamente el curso de');
-        setCategoryLabel(DEFAULT_CATEGORY_LABEL);
+        setCategoryMode('select');
+        setCategorySelect(existingCategories.includes(DEFAULT_CATEGORY_LABEL) ? DEFAULT_CATEGORY_LABEL : existingCategories[0] || DEFAULT_CATEGORY_LABEL);
+        setCategoryCustom('');
     }
 
     function handleSubmit(e: React.FormEvent) {
@@ -127,7 +133,7 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
                 holderRut,
                 profileId: null,
                 certificationTitle,
-                categoryLabel: categoryLabel.trim() || DEFAULT_CATEGORY_LABEL,
+                categoryLabel: (categoryMode === 'new' ? categoryCustom : categorySelect).trim() || DEFAULT_CATEGORY_LABEL,
                 issueDate: new Date(issueDate),
                 expiryDate: computedExpiryDate,
                 leadId: null,
@@ -210,19 +216,39 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
                         <input value={certificationTitle} onChange={(e) => setCertificationTitle(e.target.value)} className={inputClass} required />
                     </Field>
                     <Field label="Categoría de Certificación">
-                        <input
-                            list="categoriesList"
-                            value={categoryLabel}
-                            onChange={(e) => setCategoryLabel(e.target.value)}
-                            placeholder="Ej. Certificación Wylar"
-                            className={inputClass}
-                            required
-                        />
-                        <datalist id="categoriesList">
-                            {Array.from(new Set(certificates.map((c) => c.categoryLabel))).map((cat) => (
-                                <option key={cat} value={cat} />
-                            ))}
-                        </datalist>
+                        <div className="flex flex-col gap-2">
+                            <select
+                                value={categoryMode === 'new' ? 'NEW' : categorySelect}
+                                onChange={(e) => {
+                                    if (e.target.value === 'NEW') {
+                                        setCategoryMode('new');
+                                    } else {
+                                        setCategoryMode('select');
+                                        setCategorySelect(e.target.value);
+                                    }
+                                }}
+                                className={inputClass}
+                            >
+                                {existingCategories.map((cat) => (
+                                    <option key={cat} value={cat}>
+                                        {cat}
+                                    </option>
+                                ))}
+                                {!existingCategories.includes(DEFAULT_CATEGORY_LABEL) && (
+                                    <option value={DEFAULT_CATEGORY_LABEL}>{DEFAULT_CATEGORY_LABEL}</option>
+                                )}
+                                <option value="NEW">Otra (añadir nueva)...</option>
+                            </select>
+                            {categoryMode === 'new' && (
+                                <input
+                                    value={categoryCustom}
+                                    onChange={(e) => setCategoryCustom(e.target.value)}
+                                    placeholder="Nombre de la nueva categoría"
+                                    className={inputClass}
+                                    required
+                                />
+                            )}
+                        </div>
                     </Field>
                     <Field label="Fecha de emisión">
                         <input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className={inputClass} required />
