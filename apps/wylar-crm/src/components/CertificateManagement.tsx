@@ -224,12 +224,12 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
                             )}
                         </div>
                     </Field>
-                    <Field label="Texto de compleción">
+                    <Field label="Tipo de Certificado">
                         <select value={completionText} onChange={(e) => setCompletionText(e.target.value)} className={inputClass}>
-                            <option value="Ha completado satisfactoriamente el curso de">Ha completado satisfactoriamente el curso de</option>
-                            <option value="Ha completado satisfactoriamente la Certificación de">Ha completado satisfactoriamente la Certificación de</option>
-                            <option value="Ha completado satisfactoriamente la Calificación de">Ha completado satisfactoriamente la Calificación de</option>
-                            <option value="Ha completado satisfactoriamente la Inspección de">Ha completado satisfactoriamente la Inspección de</option>
+                            <option value="Ha completado satisfactoriamente el curso de">CURSO</option>
+                            <option value="Ha completado satisfactoriamente la Certificación de">CERTIFICACIÓN</option>
+                            <option value="Ha completado satisfactoriamente la Calificación de">CALIFICACIÓN</option>
+                            <option value="Ha completado satisfactoriamente la Inspección de">INSPECCIÓN</option>
                         </select>
                     </Field>
                 </div>
