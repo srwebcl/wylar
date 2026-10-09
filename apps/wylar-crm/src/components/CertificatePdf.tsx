@@ -117,6 +117,7 @@ export interface CertificatePdfProps {
     issueDate: Date;
     expiryDate: Date | null;
     statusLabel: string;
+    completionText: string;
     /** QR ya generado (data URL): el PDF no depende de ningún servicio externo. */
     qrDataUrl: string;
 }
@@ -131,6 +132,7 @@ export function CertificatePdf({
     issueDate,
     expiryDate,
     statusLabel: _statusLabel,
+    completionText,
     qrDataUrl,
 }: CertificatePdfProps) {
     const logoPath = path.join(process.cwd(), 'public', 'images', 'logo.png');
@@ -173,7 +175,7 @@ export function CertificatePdf({
 
                         <View style={styles.divider} />
 
-                        <Text style={styles.leadIn}>Ha completado satisfactoriamente el curso de</Text>
+                        <Text style={styles.leadIn}>{completionText}</Text>
                         <Text style={styles.courseTitle}>&ldquo;{certificationTitle}&rdquo;</Text>
 
                         {detailText ? <Text style={styles.detailText}>{detailText}</Text> : null}

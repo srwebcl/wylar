@@ -80,6 +80,7 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
     const [expiryDate, setExpiryDate] = useState('');
     const [detailTemplate, setDetailTemplate] = useState<string>('ninguna');
     const [detailText, setDetailText] = useState('');
+    const [completionText, setCompletionText] = useState('Ha completado satisfactoriamente el curso de');
 
     function handleDetailTemplateChange(value: string) {
         setDetailTemplate(value);
@@ -96,6 +97,7 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
         setExpiryDate('');
         setDetailTemplate('ninguna');
         setDetailText('');
+        setCompletionText('Ha completado satisfactoriamente el curso de');
     }
 
     function handleSubmit(e: React.FormEvent) {
@@ -128,6 +130,7 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
                 expiryDate: computedExpiryDate,
                 leadId: null,
                 detailText: detailText.trim() || null,
+                completionText: completionText.trim(),
             });
             if (result.error) {
                 setError(result.error);
@@ -220,6 +223,14 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
                                 <input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} className={inputClass} required />
                             )}
                         </div>
+                    </Field>
+                    <Field label="Texto de compleción">
+                        <select value={completionText} onChange={(e) => setCompletionText(e.target.value)} className={inputClass}>
+                            <option value="Ha completado satisfactoriamente el curso de">Ha completado satisfactoriamente el curso de</option>
+                            <option value="Ha completado satisfactoriamente la Certificación de">Ha completado satisfactoriamente la Certificación de</option>
+                            <option value="Ha completado satisfactoriamente la Calificación de">Ha completado satisfactoriamente la Calificación de</option>
+                            <option value="Ha completado satisfactoriamente la Inspección de">Ha completado satisfactoriamente la Inspección de</option>
+                        </select>
                     </Field>
                 </div>
 

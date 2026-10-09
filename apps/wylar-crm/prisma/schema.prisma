@@ -255,6 +255,8 @@ model Certificate {
   // duración del curso, fechas, nota obtenida, vigencia). Opcional, solo se
   // usa en el PDF — el validador público no lo muestra.
   detailText         String? @db.Text
+  
+  completionText     String  @default("Ha completado satisfactoriamente el curso de")
 
   issueDate  DateTime
   // Vigencia; null = no vence (ej. certificaciones ChileValora). El estado

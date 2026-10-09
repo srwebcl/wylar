@@ -44,6 +44,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ code
             certificationTitle: certificate.certificationTitle,
             categoryLabel: certificate.categoryLabel,
             detailText: certificate.detailText,
+            completionText: certificate.completionText,
             issueDate: certificate.issueDate,
             expiryDate: certificate.expiryDate,
             statusLabel: certificateStatusLabel(status),

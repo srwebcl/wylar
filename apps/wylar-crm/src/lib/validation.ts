@@ -162,6 +162,7 @@ export const certificateSchema = z.object({
     expiryDate: z.coerce.date().optional().nullable(),
     leadId: z.coerce.number().int().positive().optional().nullable(),
     detailText: z.string().trim().max(2000).optional().nullable(),
+    completionText: z.string().trim().min(1).max(200),
 });
 
 export type CertificateInput = z.infer<typeof certificateSchema>;
