@@ -81,6 +81,7 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
     const [detailTemplate, setDetailTemplate] = useState<string>('ninguna');
     const [detailText, setDetailText] = useState('');
     const [completionText, setCompletionText] = useState('Ha completado satisfactoriamente el curso de');
+    const [categoryLabel, setCategoryLabel] = useState(DEFAULT_CATEGORY_LABEL);
 
     function handleDetailTemplateChange(value: string) {
         setDetailTemplate(value);
@@ -98,6 +99,7 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
         setDetailTemplate('ninguna');
         setDetailText('');
         setCompletionText('Ha completado satisfactoriamente el curso de');
+        setCategoryLabel(DEFAULT_CATEGORY_LABEL);
     }
 
     function handleSubmit(e: React.FormEvent) {
@@ -125,7 +127,7 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
                 holderRut,
                 profileId: null,
                 certificationTitle,
-                categoryLabel: DEFAULT_CATEGORY_LABEL,
+                categoryLabel: categoryLabel.trim() || DEFAULT_CATEGORY_LABEL,
                 issueDate: new Date(issueDate),
                 expiryDate: computedExpiryDate,
                 leadId: null,
@@ -206,6 +208,21 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
                     </Field>
                     <Field label="Nombre de la certificación">
                         <input value={certificationTitle} onChange={(e) => setCertificationTitle(e.target.value)} className={inputClass} required />
+                    </Field>
+                    <Field label="Categoría de Certificación">
+                        <input
+                            list="categoriesList"
+                            value={categoryLabel}
+                            onChange={(e) => setCategoryLabel(e.target.value)}
+                            placeholder="Ej. Certificación Wylar"
+                            className={inputClass}
+                            required
+                        />
+                        <datalist id="categoriesList">
+                            {Array.from(new Set(certificates.map((c) => c.categoryLabel))).map((cat) => (
+                                <option key={cat} value={cat} />
+                            ))}
+                        </datalist>
                     </Field>
                     <Field label="Fecha de emisión">
                         <input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className={inputClass} required />
