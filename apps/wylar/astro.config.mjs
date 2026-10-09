@@ -4,7 +4,6 @@ import react from '@astrojs/react';
 import vercel from '@astrojs/vercel';
 
 export default defineConfig({
-  output: 'hybrid',
   integrations: [react()],
   adapter: vercel(),
   security: {
