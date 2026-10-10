@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { LeadDetail } from '@/components/LeadDetail';
+import { checkDoNotContact } from '@/lib/doNotContact';
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -17,5 +18,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
 
     if (!lead) notFound();
 
-    return <LeadDetail lead={lead} users={users} />;
+    const dnc = await checkDoNotContact(lead.email, lead.phone);
+
+    return <LeadDetail lead={lead} users={users} dncReason={dnc?.reason ?? null} />;
 }

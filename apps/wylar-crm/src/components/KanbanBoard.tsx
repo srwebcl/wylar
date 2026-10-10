@@ -16,6 +16,7 @@ const COLUMN_STYLES: Record<string, { header: string; dot: string }> = {
     EN_ATENCION: { header: 'text-amber-700 bg-amber-50 border-amber-200', dot: 'bg-amber-500' },
     SEGUIMIENTO: { header: 'text-indigo-700 bg-indigo-50 border-indigo-200', dot: 'bg-indigo-500' },
     CERRADO: { header: 'text-emerald-700 bg-emerald-50 border-emerald-200', dot: 'bg-emerald-500' },
+    DESISTIDO: { header: 'text-rose-700 bg-rose-50 border-rose-200', dot: 'bg-rose-500' },
 };
 
 export function KanbanBoard({ leads }: { leads: LeadWithAssignee[] }) {
@@ -37,17 +38,25 @@ export function KanbanBoard({ leads }: { leads: LeadWithAssignee[] }) {
         const leadId = dragId;
         setDragId(null);
 
+        // Desistido exige un motivo — se pide antes de mover la tarjeta
+        // (no hay dónde escribirlo en un simple drag & drop).
+        let lostReason: string | null = null;
+        if (status === 'DESISTIDO') {
+            lostReason = window.prompt('Motivo del desistimiento:')?.trim() || null;
+            if (!lostReason) return;
+        }
+
         const before = items;
         setItems((prev) => prev.map((l) => (l.id === leadId ? { ...l, status } : l)));
         startTransition(async () => {
             // Si el servidor rechaza el cambio o falla, se vuelve a mostrar el estado real.
-            const saved = await changeLeadStatus(leadId, status).then((r) => r.ok).catch(() => false);
+            const saved = await changeLeadStatus(leadId, status, lostReason).then((r) => r.ok).catch(() => false);
             if (!saved) setItems(before);
         });
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
             {STATUSES.map((col) => {
                 const style = COLUMN_STYLES[col.value];
                 const leadsInColumn = columns.get(col.value) ?? [];

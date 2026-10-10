@@ -4,6 +4,7 @@
 
 export const LEAD_TYPES = [
     { value: 'PERSONA', label: 'Persona' },
+    { value: 'ALUMNO_BECADO', label: 'Alumno Becado' },
     { value: 'EMPRESA', label: 'Empresa' },
     { value: 'INSTITUCION', label: 'Institución de Educación' },
     { value: 'OTEC', label: 'OTEC' },
@@ -11,11 +12,19 @@ export const LEAD_TYPES = [
 
 export type LeadType = (typeof LEAD_TYPES)[number]['value'];
 
+// Tipos que representan una persona natural (a diferencia de una empresa/
+// institución/OTEC) — se usa para la regla de duplicados: una misma persona
+// no puede tener dos prospectos abiertos por el mismo interés de
+// certificación, pero una empresa sí puede (cada negocio es su propio
+// prospecto, ver constants.ts#buildLeadsWhere / lib/leadDuplicates.ts).
+export const PERSON_LEAD_TYPES: readonly string[] = ['PERSONA', 'ALUMNO_BECADO'];
+
 export const SOURCES = [
     { value: 'WEB', label: 'Web (directo)' },
     { value: 'FACEBOOK', label: 'Facebook' },
     { value: 'INSTAGRAM', label: 'Instagram' },
     { value: 'WHATSAPP', label: 'WhatsApp' },
+    { value: 'MANUAL', label: 'Ingreso manual' },
     { value: 'OTRO', label: 'Otro' },
 ] as const;
 
@@ -27,7 +36,11 @@ export const STATUSES = [
     { value: 'EN_ATENCION', label: 'En atención' },
     { value: 'SEGUIMIENTO', label: 'Seguimiento' },
     { value: 'CERRADO', label: 'Cerrado' },
+    { value: 'DESISTIDO', label: 'Desistido' },
 ] as const;
+
+// Estados que cierran el embudo (no cuentan como "abierto" para la regla de duplicados).
+export const TERMINAL_STATUS_VALUES: readonly string[] = ['CERRADO', 'DESISTIDO'];
 
 export type LeadStatus = (typeof STATUSES)[number]['value'];
 

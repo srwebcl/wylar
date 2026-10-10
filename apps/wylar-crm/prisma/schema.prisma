@@ -52,8 +52,10 @@ model Lead {
   // Detalle crudo usado para detectar el origen (referrer, utm_source/medium/campaign) — trazabilidad.
   sourceDetail String? @db.Text
 
-  // Estado del embudo de ventas: NUEVO | EN_ATENCION | SEGUIMIENTO | CERRADO
+  // Estado del embudo de ventas: NUEVO | EN_ATENCION | SEGUIMIENTO | CERRADO | DESISTIDO
   status String @default("NUEVO")
+  // Motivo del desistimiento — obligatorio cuando status = DESISTIDO (ver changeLeadStatus en actions/leads.ts).
+  lostReason String? @db.Text
 
   assignedToId Int?
   assignedTo   User? @relation("AssignedLeads", fields: [assignedToId], references: [id])
@@ -71,6 +73,25 @@ model Lead {
   @@index([assignedToId])
   @@index([source])
   @@map("leads")
+}
+
+// Bandera de "no contactar" a nivel de persona (no de prospecto puntual):
+// se guarda por correo/teléfono, así que si en el futuro se crea OTRO
+// prospecto con el mismo contacto, el sistema lo detecta igual aunque sea
+// un Lead distinto. No es FK de Lead a propósito — un contacto puede
+// quedar marcado sin que exista ningún prospecto activo con él todavía.
+model DoNotContactEntry {
+  id    Int     @id @default(autoincrement())
+  email String?
+  phone String?
+  reason        String @db.Text
+  createdByName String
+
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([phone])
+  @@map("do_not_contact_entries")
 }
 
 model LeadActivity {

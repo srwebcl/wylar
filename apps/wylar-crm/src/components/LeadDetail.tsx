@@ -1,11 +1,12 @@
 'use client';
 
 import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
-import { Send, User as UserIcon, Calendar, Phone, Mail, Building2, GraduationCap, Tag, Clock, TimerReset, AlarmClock } from 'lucide-react';
+import { Send, User as UserIcon, Calendar, Phone, Mail, Building2, GraduationCap, Tag, Clock, TimerReset, AlarmClock, FileSpreadsheet, Flag, ShieldOff } from 'lucide-react';
 import clsx from 'clsx';
 import type { Lead, LeadActivity } from '@prisma/client';
 import type { SafeUser as User } from '@/lib/safeUser';
 import { addLeadActivity, assignLead, changeLeadStatusForm, type LeadFormState } from '@/actions/leads';
+import { markDoNotContact, unmarkDoNotContact, type DoNotContactState } from '@/actions/doNotContact';
 import { ACTIVITY_TYPES, STATUSES, SOURCES, leadTypeLabel, sourceLabel, activityTypeLabel, formatDuration } from '@/lib/constants';
 
 type LeadWithRelations = Lead & { assignedTo: User | null; activities: LeadActivity[] };
@@ -16,13 +17,15 @@ function statusStyle(s: string) {
         case 'EN_ATENCION': return 'bg-amber-100 text-amber-700 border-amber-200';
         case 'SEGUIMIENTO': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
         case 'CERRADO': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+        case 'DESISTIDO': return 'bg-rose-100 text-rose-700 border-rose-200';
         default: return 'bg-slate-100 text-slate-700 border-slate-200';
     }
 }
 
 const initialState: LeadFormState = {};
+const initialDncState: DoNotContactState = {};
 
-export function LeadDetail({ lead, users }: { lead: LeadWithRelations; users: User[] }) {
+export function LeadDetail({ lead, users, dncReason }: { lead: LeadWithRelations; users: User[]; dncReason: string | null }) {
     const chatEndRef = useRef<HTMLDivElement>(null);
     const noteFormRef = useRef<HTMLFormElement>(null);
 
@@ -30,6 +33,10 @@ export function LeadDetail({ lead, users }: { lead: LeadWithRelations; users: Us
     const [activityState, activityAction, activityPending] = useActionState(addLeadActivity.bind(null, lead.id), initialState);
     const [statusState, statusAction, statusPending] = useActionState(changeLeadStatusForm.bind(null, lead.id), initialState);
     const [, startAssignTransition] = useTransition();
+    const [showDncForm, setShowDncForm] = useState(false);
+    const [dncReasonInput, setDncReasonInput] = useState('');
+    const [dncState, dncAction, dncPending] = useActionState(markDoNotContact.bind(null, lead.email, lead.phone), initialDncState);
+    const [, startUnmarkTransition] = useTransition();
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -38,6 +45,13 @@ export function LeadDetail({ lead, users }: { lead: LeadWithRelations; users: Us
     useEffect(() => {
         if (activityState.success) noteFormRef.current?.reset();
     }, [activityState.success]);
+
+    useEffect(() => {
+        if (dncState.success) {
+            setShowDncForm(false);
+            setDncReasonInput('');
+        }
+    }, [dncState.success]);
 
     const responseMs = lead.firstAttendedAt ? lead.firstAttendedAt.getTime() - lead.createdAt.getTime() : null;
     const waitingMs = lead.firstAttendedAt ? null : Date.now() - lead.createdAt.getTime();
@@ -60,24 +74,60 @@ export function LeadDetail({ lead, users }: { lead: LeadWithRelations; users: Us
                     </p>
                 </div>
 
-                <form action={statusAction} className="flex flex-col items-end gap-2 bg-white p-3 rounded-xl shadow-sm border border-slate-200">
-                    <div className="flex items-center space-x-3">
-                        <label className="text-sm font-bold text-slate-700">Estado:</label>
-                        <select
-                            name="status"
-                            value={pendingStatus}
-                            onChange={(e) => setPendingStatus(e.target.value)}
-                            className="bg-slate-50 border-slate-200 rounded-lg text-sm font-semibold p-2 focus:ring-2 focus:ring-[#0B1E40] outline-none cursor-pointer"
-                        >
-                            {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                        </select>
-                        <button type="submit" disabled={statusPending} className="px-3 py-2 bg-[#0B1E40] text-white text-sm font-bold rounded-lg hover:bg-[#122b59] disabled:opacity-60 transition-colors">
-                            Guardar
-                        </button>
-                    </div>
-                    {statusState.error && <p className="text-xs text-red-600 font-medium">{statusState.error}</p>}
-                </form>
+                <div className="flex items-start gap-2">
+                    <a
+                        href={`/api/leads/${lead.id}/export`}
+                        className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-3.5 py-2.5 rounded-xl transition-colors shadow-sm text-sm shrink-0"
+                        title="Descargar informe de gestiones (Excel)"
+                    >
+                        <FileSpreadsheet size={16} /> Exportar
+                    </a>
+
+                    <form action={statusAction} className="flex flex-col items-end gap-2 bg-white p-3 rounded-xl shadow-sm border border-slate-200">
+                        <div className="flex items-center space-x-3">
+                            <label className="text-sm font-bold text-slate-700">Estado:</label>
+                            <select
+                                name="status"
+                                value={pendingStatus}
+                                onChange={(e) => setPendingStatus(e.target.value)}
+                                className="bg-slate-50 border-slate-200 rounded-lg text-sm font-semibold p-2 focus:ring-2 focus:ring-[#0B1E40] outline-none cursor-pointer"
+                            >
+                                {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                            </select>
+                            <button type="submit" disabled={statusPending} className="px-3 py-2 bg-[#0B1E40] text-white text-sm font-bold rounded-lg hover:bg-[#122b59] disabled:opacity-60 transition-colors">
+                                Guardar
+                            </button>
+                        </div>
+                        {pendingStatus === 'DESISTIDO' && (
+                            <input
+                                name="lostReason"
+                                required
+                                defaultValue={lead.status === 'DESISTIDO' ? (lead.lostReason ?? '') : ''}
+                                placeholder="Motivo del desistimiento"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm p-2 focus:ring-2 focus:ring-[#0B1E40] outline-none"
+                            />
+                        )}
+                        {statusState.error && <p className="text-xs text-red-600 font-medium">{statusState.error}</p>}
+                    </form>
+                </div>
             </div>
+
+            {lead.status === 'DESISTIDO' && lead.lostReason && (
+                <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 flex items-start gap-3">
+                    <Flag size={18} className="text-rose-600 shrink-0 mt-0.5" />
+                    <p className="text-sm text-rose-800"><span className="font-bold">Motivo del desistimiento:</span> {lead.lostReason}</p>
+                </div>
+            )}
+
+            {dncReason && (
+                <div className="rounded-xl border border-red-300 bg-red-50 p-4 flex items-start gap-3">
+                    <ShieldOff size={20} className="text-red-600 shrink-0 mt-0.5" />
+                    <div>
+                        <p className="text-sm font-extrabold text-red-800">⚠ No contactar</p>
+                        <p className="text-sm text-red-700">{dncReason}</p>
+                    </div>
+                </div>
+            )}
 
             {/* Auditoría de Tiempos de Respuesta */}
             <div className={clsx('rounded-xl border p-4 flex items-center gap-3', responseMs != null ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200')}>
@@ -117,6 +167,42 @@ export function LeadDetail({ lead, users }: { lead: LeadWithRelations; users: Us
                             <div className="flex items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                                 <Phone size={16} className="text-slate-400 mr-3 shrink-0" />
                                 <a href={`tel:${lead.phone}`} className="text-sm text-slate-700 font-medium hover:underline">{lead.phone}</a>
+                            </div>
+
+                            <div className="pt-2 border-t border-slate-100">
+                                {dncReason ? (
+                                    <button
+                                        onClick={() => startUnmarkTransition(async () => { await unmarkDoNotContact(lead.email, lead.phone); })}
+                                        className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
+                                    >
+                                        <ShieldOff size={13} /> Quitar marca de no contactar
+                                    </button>
+                                ) : showDncForm ? (
+                                    <form action={dncAction} className="space-y-2">
+                                        <input
+                                            name="reason"
+                                            value={dncReasonInput}
+                                            onChange={(e) => setDncReasonInput(e.target.value)}
+                                            placeholder="Motivo (ej. pidió no ser contactado)"
+                                            required
+                                            autoFocus
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs p-2 focus:ring-2 focus:ring-red-400 outline-none"
+                                        />
+                                        <div className="flex gap-2">
+                                            <button type="submit" disabled={dncPending} className="text-xs font-bold text-red-600 hover:text-red-700 transition-colors disabled:opacity-50">
+                                                {dncPending ? 'Guardando…' : 'Confirmar'}
+                                            </button>
+                                            <button type="button" onClick={() => setShowDncForm(false)} className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors">
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                        {dncState.error && <p className="text-xs text-red-600">{dncState.error}</p>}
+                                    </form>
+                                ) : (
+                                    <button onClick={() => setShowDncForm(true)} className="flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-red-600 transition-colors">
+                                        <Flag size={13} /> Marcar no contactar
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

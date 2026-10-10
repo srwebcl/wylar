@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { Trash2, Loader2 } from 'lucide-react';
+import { Trash2, Loader2, ShieldOff } from 'lucide-react';
 import { leadTypeLabel, sourceLabel, statusLabel } from '@/lib/constants';
 import { deleteLead } from '@/actions/leads';
 import type { Lead } from '@prisma/client';
@@ -15,9 +15,10 @@ const STATUS_BADGE: Record<string, string> = {
     EN_ATENCION: 'bg-amber-50 text-amber-700 border-amber-200',
     SEGUIMIENTO: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     CERRADO: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    DESISTIDO: 'bg-rose-50 text-rose-700 border-rose-200',
 };
 
-export function LeadsTable({ leads, isAdmin = false }: { leads: LeadWithAssignee[]; isAdmin?: boolean }) {
+export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { leads: LeadWithAssignee[]; isAdmin?: boolean; dncMap?: Map<string, string> }) {
     const [isPending, startTransition] = useTransition();
     const [pendingId, setPendingId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -70,7 +71,14 @@ export function LeadsTable({ leads, isAdmin = false }: { leads: LeadWithAssignee
                                     </Link>
                                 </td>
                                 <td className="px-4 py-3 font-medium text-slate-800 whitespace-nowrap">
-                                    {lead.name}
+                                    <span className="inline-flex items-center gap-1.5">
+                                        {dncMap.has(`${lead.email}|${lead.phone}`) && (
+                                            <span title={`No contactar: ${dncMap.get(`${lead.email}|${lead.phone}`)}`} className="shrink-0">
+                                                <ShieldOff size={13} className="text-red-500" />
+                                            </span>
+                                        )}
+                                        {lead.name}
+                                    </span>
                                     {lead.company && <span className="block text-xs font-normal text-slate-400">{lead.company}</span>}
                                 </td>
                                 <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">

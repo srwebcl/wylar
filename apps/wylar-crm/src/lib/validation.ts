@@ -27,6 +27,20 @@ export const publicLeadSchema = z.object({
     website: z.string().max(200).optional(),
 });
 
+// Alta manual de un prospecto desde el propio CRM (ver /leads, botón "Nuevo
+// prospecto"). A diferencia del formulario público, el source lo fija el
+// servidor ('MANUAL'), no hay honeypot (hay sesión autenticada de por medio),
+// y el mensaje se usa como nota inicial en vez de "mensaje del formulario".
+export const manualLeadSchema = z.object({
+    type: z.enum(LEAD_TYPE_VALUES),
+    name: z.string().trim().min(2, 'Ingresa el nombre completo.').max(120),
+    email: z.string().trim().email('Correo inválido.').max(254),
+    phone: z.string().trim().min(6, 'Ingresa un teléfono de contacto.').max(30),
+    company: z.string().trim().max(200).optional().nullable(),
+    certificationInterest: z.string().trim().max(200).optional().nullable(),
+    message: z.string().trim().max(2000).optional().nullable(),
+});
+
 export const activityEntrySchema = z.object({
     type: z.enum(ACTIVITY_TYPE_VALUES),
     text: z.string().trim().min(1, 'Escribe una nota o descripción de la gestión.'),
@@ -34,11 +48,23 @@ export const activityEntrySchema = z.object({
 
 export const statusChangeSchema = z.object({
     status: z.enum(STATUS_VALUES),
+    // Obligatorio solo cuando status = DESISTIDO (se valida en la acción,
+    // no acá, porque depende del valor de otro campo).
+    lostReason: z.string().trim().max(500).optional().nullable(),
 });
 
 export const assignSchema = z.object({
     assignedToId: z.coerce.number().int().positive().nullable().optional(),
 });
+
+// Bandera de "no contactar": exige correo o teléfono (al menos uno) + motivo.
+export const doNotContactSchema = z
+    .object({
+        email: z.string().trim().email('Correo inválido.').max(254).optional().or(z.literal('')),
+        phone: z.string().trim().max(30).optional().or(z.literal('')),
+        reason: z.string().trim().min(3, 'Ingresa el motivo.').max(500),
+    })
+    .refine((d) => d.email || d.phone, { message: 'Ingresa al menos un correo o teléfono.', path: ['email'] });
 
 export const userSchema = z.object({
     name: z.string().trim().min(2, 'Ingresa el nombre completo.'),
