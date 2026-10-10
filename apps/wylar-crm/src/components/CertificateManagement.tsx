@@ -217,36 +217,51 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
                     </Field>
                     <Field label="Categoría de Certificación">
                         <div className="flex flex-col gap-2">
-                            <select
-                                value={categoryMode === 'new' ? 'NEW' : categorySelect}
-                                onChange={(e) => {
-                                    if (e.target.value === 'NEW') {
-                                        setCategoryMode('new');
-                                    } else {
-                                        setCategoryMode('select');
-                                        setCategorySelect(e.target.value);
-                                    }
-                                }}
-                                className={inputClass}
-                            >
-                                {existingCategories.map((cat) => (
-                                    <option key={cat} value={cat}>
-                                        {cat}
-                                    </option>
-                                ))}
-                                {!existingCategories.includes(DEFAULT_CATEGORY_LABEL) && (
-                                    <option value={DEFAULT_CATEGORY_LABEL}>{DEFAULT_CATEGORY_LABEL}</option>
-                                )}
-                                <option value="NEW">Otra (añadir nueva)...</option>
-                            </select>
-                            {categoryMode === 'new' && (
-                                <input
-                                    value={categoryCustom}
-                                    onChange={(e) => setCategoryCustom(e.target.value)}
-                                    placeholder="Nombre de la nueva categoría"
-                                    className={inputClass}
-                                    required
-                                />
+                            {categoryMode === 'select' ? (
+                                <>
+                                    <select
+                                        value={categorySelect}
+                                        onChange={(e) => setCategorySelect(e.target.value)}
+                                        className={inputClass}
+                                    >
+                                        {existingCategories.map((cat) => (
+                                            <option key={cat} value={cat}>
+                                                {cat}
+                                            </option>
+                                        ))}
+                                        {!existingCategories.includes(DEFAULT_CATEGORY_LABEL) && (
+                                            <option value={DEFAULT_CATEGORY_LABEL}>{DEFAULT_CATEGORY_LABEL}</option>
+                                        )}
+                                    </select>
+                                    <button
+                                        type="button"
+                                        onClick={() => setCategoryMode('new')}
+                                        className="text-sm text-amber-600 hover:text-amber-700 font-bold self-start flex items-center gap-1"
+                                    >
+                                        <Plus size={14} /> Agregar categoría
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <input
+                                        value={categoryCustom}
+                                        onChange={(e) => setCategoryCustom(e.target.value)}
+                                        placeholder="Nombre de la nueva categoría"
+                                        className={inputClass}
+                                        required
+                                        autoFocus
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setCategoryMode('select');
+                                            setCategoryCustom('');
+                                        }}
+                                        className="text-sm text-slate-500 hover:text-slate-700 font-bold self-start flex items-center gap-1"
+                                    >
+                                        <X size={14} /> Cancelar
+                                    </button>
+                                </>
                             )}
                         </div>
                     </Field>
