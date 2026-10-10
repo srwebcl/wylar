@@ -4,13 +4,17 @@ import type { Prisma } from '@prisma/client';
 export interface CertificatesFilterParams {
     q?: string;
     status?: string;
+    // Valor de completionText del tipo elegido (ver CertificateType) — el
+    // tipo no es una columna propia de Certificate, es texto copiado al
+    // emitir, así que se filtra por igualdad exacta de esa frase.
+    type?: string;
 }
 
 /** Arma el `where` de Prisma según los filtros del listado de certificados.
  * El estado (Vigente/Vencido/Revocado/Sin vencimiento) no es una columna —
  * se deriva de expiryDate/revokedAt (ver certificateStatus en constants.ts),
  * así que el filtro traduce cada opción a la condición equivalente. */
-export function buildCertificatesWhere({ q, status }: CertificatesFilterParams): Prisma.CertificateWhereInput {
+export function buildCertificatesWhere({ q, status, type }: CertificatesFilterParams): Prisma.CertificateWhereInput {
     const now = new Date();
     let statusWhere: Prisma.CertificateWhereInput = {};
     if (status === 'REVOCADO') statusWhere = { revokedAt: { not: null } };
@@ -20,6 +24,7 @@ export function buildCertificatesWhere({ q, status }: CertificatesFilterParams):
 
     return {
         ...statusWhere,
+        ...(type ? { completionText: type } : {}),
         ...(q
             ? {
                   OR: [

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
-import { createCertificationTitle, deleteCertificationTitle } from '@/actions/certificateMeta';
+import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { createCertificationTitle, deleteCertificationTitle, updateCertificationTitle } from '@/actions/certificateMeta';
 
 interface TitleRow {
     id: number;
@@ -16,6 +16,8 @@ export function CertificationTitlesManagement({ titles, isAdmin }: { titles: Tit
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [name, setName] = useState('');
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editValue, setEditValue] = useState('');
 
     function handleCreate(e: React.FormEvent) {
         e.preventDefault();
@@ -26,6 +28,28 @@ export function CertificationTitlesManagement({ titles, isAdmin }: { titles: Tit
             const result = await createCertificationTitle({}, formData);
             if (result.error) setError(result.error);
             else setName('');
+        });
+    }
+
+    function startEdit(row: TitleRow) {
+        setError(null);
+        setEditingId(row.id);
+        setEditValue(row.name);
+    }
+
+    function cancelEdit() {
+        setEditingId(null);
+        setEditValue('');
+    }
+
+    function handleSaveEdit(id: number) {
+        setError(null);
+        const formData = new FormData();
+        formData.set('name', editValue);
+        startTransition(async () => {
+            const result = await updateCertificationTitle(id, {}, formData);
+            if (result.error) setError(result.error);
+            else cancelEdit();
         });
     }
 
@@ -56,16 +80,42 @@ export function CertificationTitlesManagement({ titles, isAdmin }: { titles: Tit
                 {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
 
                 <ul className="divide-y divide-slate-100">
-                    {titles.map((t) => (
-                        <li key={t.id} className="flex items-center justify-between py-2.5">
-                            <span className="text-sm text-slate-700">{t.name}</span>
-                            {isAdmin && (
-                                <button onClick={() => handleDelete(t.id, t.name)} disabled={isPending} className="p-1.5 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50" title="Eliminar">
-                                    <Trash2 size={15} />
+                    {titles.map((t) =>
+                        editingId === t.id ? (
+                            <li key={t.id} className="flex items-center gap-2 py-2.5">
+                                <input
+                                    value={editValue}
+                                    onChange={(e) => setEditValue(e.target.value)}
+                                    className={inputClass}
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') handleSaveEdit(t.id);
+                                        if (e.key === 'Escape') cancelEdit();
+                                    }}
+                                />
+                                <button onClick={() => handleSaveEdit(t.id)} disabled={isPending} className="shrink-0 p-1.5 text-emerald-600 hover:text-emerald-700 transition-colors disabled:opacity-50" title="Guardar">
+                                    <Check size={16} />
                                 </button>
-                            )}
-                        </li>
-                    ))}
+                                <button onClick={cancelEdit} className="shrink-0 p-1.5 text-slate-400 hover:text-slate-600 transition-colors" title="Cancelar">
+                                    <X size={16} />
+                                </button>
+                            </li>
+                        ) : (
+                            <li key={t.id} className="flex items-center justify-between py-2.5 group">
+                                <span className="text-sm text-slate-700">{t.name}</span>
+                                {isAdmin && (
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => startEdit(t)} className="p-1.5 text-slate-400 hover:text-[#0B1E40] transition-colors" title="Editar">
+                                            <Pencil size={14} />
+                                        </button>
+                                        <button onClick={() => handleDelete(t.id, t.name)} disabled={isPending} className="p-1.5 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50" title="Eliminar">
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                )}
+                            </li>
+                        ),
+                    )}
                     {titles.length === 0 && <li className="py-4 text-sm text-slate-400 text-center">Sin certificaciones todavía.</li>}
                 </ul>
             </div>

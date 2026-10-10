@@ -12,7 +12,7 @@ const STATUS_OPTIONS = [
     { value: 'REVOCADO', label: 'Revocado' },
 ];
 
-export function CertificatesSearchBar() {
+export function CertificatesSearchBar({ types }: { types: { id: number; label: string; completionText: string }[] }) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -48,6 +48,18 @@ export function CertificatesSearchBar() {
                 {STATUS_OPTIONS.map((s) => (
                     <option key={s.value} value={s.value}>
                         {s.label}
+                    </option>
+                ))}
+            </select>
+            <select
+                defaultValue={searchParams.get('type') ?? ''}
+                onChange={(e) => updateParam('type', e.target.value)}
+                className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 outline-none focus:ring-2 focus:ring-[#0B1E40]/15 focus:border-[#0B1E40]"
+            >
+                <option value="">Todos los tipos</option>
+                {types.map((t) => (
+                    <option key={t.id} value={t.completionText}>
+                        {t.label}
                     </option>
                 ))}
             </select>

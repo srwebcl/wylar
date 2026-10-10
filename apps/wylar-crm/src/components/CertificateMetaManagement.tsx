@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
 import {
     createCertificateCategory,
     deleteCertificateCategory,
+    updateCertificateCategory,
     createCertificateType,
     deleteCertificateType,
+    updateCertificateType,
 } from '@/actions/certificateMeta';
 
 interface CategoryRow {
@@ -43,6 +45,8 @@ function CategoriesPanel({ categories, isAdmin }: { categories: CategoryRow[]; i
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [name, setName] = useState('');
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editValue, setEditValue] = useState('');
 
     function handleCreate(e: React.FormEvent) {
         e.preventDefault();
@@ -53,6 +57,28 @@ function CategoriesPanel({ categories, isAdmin }: { categories: CategoryRow[]; i
             const result = await createCertificateCategory({}, formData);
             if (result.error) setError(result.error);
             else setName('');
+        });
+    }
+
+    function startEdit(row: CategoryRow) {
+        setError(null);
+        setEditingId(row.id);
+        setEditValue(row.name);
+    }
+
+    function cancelEdit() {
+        setEditingId(null);
+        setEditValue('');
+    }
+
+    function handleSaveEdit(id: number) {
+        setError(null);
+        const formData = new FormData();
+        formData.set('name', editValue);
+        startTransition(async () => {
+            const result = await updateCertificateCategory(id, {}, formData);
+            if (result.error) setError(result.error);
+            else cancelEdit();
         });
     }
 
@@ -79,16 +105,42 @@ function CategoriesPanel({ categories, isAdmin }: { categories: CategoryRow[]; i
             {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
 
             <ul className="divide-y divide-slate-100">
-                {categories.map((c) => (
-                    <li key={c.id} className="flex items-center justify-between py-2.5">
-                        <span className="text-sm text-slate-700">{c.name}</span>
-                        {isAdmin && (
-                            <button onClick={() => handleDelete(c.id, c.name)} disabled={isPending} className="p-1.5 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50" title="Eliminar">
-                                <Trash2 size={15} />
+                {categories.map((c) =>
+                    editingId === c.id ? (
+                        <li key={c.id} className="flex items-center gap-2 py-2.5">
+                            <input
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                className={inputClass}
+                                autoFocus
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleSaveEdit(c.id);
+                                    if (e.key === 'Escape') cancelEdit();
+                                }}
+                            />
+                            <button onClick={() => handleSaveEdit(c.id)} disabled={isPending} className="shrink-0 p-1.5 text-emerald-600 hover:text-emerald-700 transition-colors disabled:opacity-50" title="Guardar">
+                                <Check size={16} />
                             </button>
-                        )}
-                    </li>
-                ))}
+                            <button onClick={cancelEdit} className="shrink-0 p-1.5 text-slate-400 hover:text-slate-600 transition-colors" title="Cancelar">
+                                <X size={16} />
+                            </button>
+                        </li>
+                    ) : (
+                        <li key={c.id} className="flex items-center justify-between py-2.5 group">
+                            <span className="text-sm text-slate-700">{c.name}</span>
+                            {isAdmin && (
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => startEdit(c)} className="p-1.5 text-slate-400 hover:text-[#0B1E40] transition-colors" title="Editar">
+                                        <Pencil size={14} />
+                                    </button>
+                                    <button onClick={() => handleDelete(c.id, c.name)} disabled={isPending} className="p-1.5 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50" title="Eliminar">
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                            )}
+                        </li>
+                    ),
+                )}
                 {categories.length === 0 && <li className="py-4 text-sm text-slate-400 text-center">Sin categorías todavía.</li>}
             </ul>
         </div>
@@ -100,6 +152,9 @@ function TypesPanel({ types, isAdmin }: { types: TypeRow[]; isAdmin: boolean }) 
     const [error, setError] = useState<string | null>(null);
     const [label, setLabel] = useState('');
     const [completionText, setCompletionText] = useState('');
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editLabel, setEditLabel] = useState('');
+    const [editCompletionText, setEditCompletionText] = useState('');
 
     function handleCreate(e: React.FormEvent) {
         e.preventDefault();
@@ -114,6 +169,31 @@ function TypesPanel({ types, isAdmin }: { types: TypeRow[]; isAdmin: boolean }) 
                 setLabel('');
                 setCompletionText('');
             }
+        });
+    }
+
+    function startEdit(row: TypeRow) {
+        setError(null);
+        setEditingId(row.id);
+        setEditLabel(row.label);
+        setEditCompletionText(row.completionText);
+    }
+
+    function cancelEdit() {
+        setEditingId(null);
+        setEditLabel('');
+        setEditCompletionText('');
+    }
+
+    function handleSaveEdit(id: number) {
+        setError(null);
+        const formData = new FormData();
+        formData.set('label', editLabel);
+        formData.set('completionText', editCompletionText);
+        startTransition(async () => {
+            const result = await updateCertificateType(id, {}, formData);
+            if (result.error) setError(result.error);
+            else cancelEdit();
         });
     }
 
@@ -148,19 +228,39 @@ function TypesPanel({ types, isAdmin }: { types: TypeRow[]; isAdmin: boolean }) 
             {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
 
             <ul className="divide-y divide-slate-100">
-                {types.map((t) => (
-                    <li key={t.id} className="flex items-center justify-between py-2.5 gap-3">
-                        <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-800">{t.label}</p>
-                            <p className="text-xs text-slate-400 truncate">{t.completionText}</p>
-                        </div>
-                        {isAdmin && (
-                            <button onClick={() => handleDelete(t.id, t.label)} disabled={isPending} className="shrink-0 p-1.5 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50" title="Eliminar">
-                                <Trash2 size={15} />
-                            </button>
-                        )}
-                    </li>
-                ))}
+                {types.map((t) =>
+                    editingId === t.id ? (
+                        <li key={t.id} className="py-2.5 space-y-2">
+                            <input value={editLabel} onChange={(e) => setEditLabel(e.target.value)} className={inputClass} autoFocus placeholder="Nombre corto" />
+                            <input value={editCompletionText} onChange={(e) => setEditCompletionText(e.target.value)} className={inputClass} placeholder="Frase completa" />
+                            <div className="flex justify-end gap-1">
+                                <button onClick={() => handleSaveEdit(t.id)} disabled={isPending} className="flex items-center gap-1 px-3 py-1.5 text-sm text-emerald-600 hover:text-emerald-700 transition-colors disabled:opacity-50">
+                                    <Check size={15} /> Guardar
+                                </button>
+                                <button onClick={cancelEdit} className="flex items-center gap-1 px-3 py-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors">
+                                    <X size={15} /> Cancelar
+                                </button>
+                            </div>
+                        </li>
+                    ) : (
+                        <li key={t.id} className="flex items-center justify-between py-2.5 gap-3 group">
+                            <div className="min-w-0">
+                                <p className="text-sm font-bold text-slate-800">{t.label}</p>
+                                <p className="text-xs text-slate-400 truncate">{t.completionText}</p>
+                            </div>
+                            {isAdmin && (
+                                <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => startEdit(t)} className="p-1.5 text-slate-400 hover:text-[#0B1E40] transition-colors" title="Editar">
+                                        <Pencil size={14} />
+                                    </button>
+                                    <button onClick={() => handleDelete(t.id, t.label)} disabled={isPending} className="p-1.5 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50" title="Eliminar">
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                            )}
+                        </li>
+                    ),
+                )}
                 {types.length === 0 && <li className="py-4 text-sm text-slate-400 text-center">Sin tipos todavía.</li>}
             </ul>
         </div>

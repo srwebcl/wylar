@@ -15,6 +15,7 @@ interface CertificateRow {
     holderRut: string;
     certificationTitle: string;
     categoryLabel: string;
+    completionText: string;
     issueDate: string;
     expiryDate: string | null;
     status: 'VIGENTE' | 'VENCIDO' | 'SIN_VENCIMIENTO' | 'REVOCADO';
@@ -36,6 +37,14 @@ const STATUS_TONE: Record<CertificateRow['status'], string> = {
 };
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
+
+function formatShortDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function typeLabelFor(completionText: string, types: CertificateTypeOption[]): string {
+    return types.find((t) => t.completionText === completionText)?.label ?? '—';
+}
 
 // Plantillas predeterminadas para el párrafo que va bajo el nombre de la
 // certificación en el PDF. Son solo un punto de partida: quedan en el
@@ -231,7 +240,7 @@ export function CertificateManagement({
                 </div>
             </div>
 
-            <CertificatesSearchBar />
+            <CertificatesSearchBar types={types} />
 
             {!showForm && error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
             {!showForm && success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
@@ -353,7 +362,11 @@ export function CertificateManagement({
                                     <th className="px-5 py-3">Titular</th>
                                     <th className="px-5 py-3">RUT</th>
                                     <th className="px-5 py-3">Certificación</th>
+                                    <th className="px-5 py-3">Categoría</th>
+                                    <th className="px-5 py-3">Tipo</th>
                                     <th className="px-5 py-3">Código</th>
+                                    <th className="px-5 py-3">Emisión</th>
+                                    <th className="px-5 py-3">Vigencia</th>
                                     <th className="px-5 py-3">Estado</th>
                                     <th className="px-5 py-3">Emitido por</th>
                                     <th className="px-5 py-3 text-right">Acciones</th>
@@ -364,8 +377,12 @@ export function CertificateManagement({
                                     <tr key={c.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
                                         <td className="px-5 py-3.5 font-bold text-slate-900 whitespace-nowrap">{c.holderName}</td>
                                         <td className="px-5 py-3.5 text-slate-400 text-xs whitespace-nowrap">{c.holderRut}</td>
-                                        <td className="px-5 py-3.5 text-slate-700 max-w-[260px] truncate">{c.certificationTitle}</td>
+                                        <td className="px-5 py-3.5 text-slate-700 max-w-[220px] truncate">{c.certificationTitle}</td>
+                                        <td className="px-5 py-3.5 text-slate-500 text-xs max-w-[160px] truncate">{c.categoryLabel}</td>
+                                        <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">{typeLabelFor(c.completionText, types)}</td>
                                         <td className="px-5 py-3.5 font-mono text-xs text-slate-600 whitespace-nowrap">{c.code}</td>
+                                        <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">{formatShortDate(c.issueDate)}</td>
+                                        <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">{c.expiryDate ? formatShortDate(c.expiryDate) : 'Sin vencimiento'}</td>
                                         <td className="px-5 py-3.5 whitespace-nowrap">
                                             <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full ${STATUS_TONE[c.status]}`}>{c.statusLabel}</span>
                                         </td>
