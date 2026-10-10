@@ -13,7 +13,7 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
     const page = Math.max(1, Number.parseInt(params.page ?? '1', 10) || 1);
     const where = buildCertificatesWhere(params);
 
-    const [certificates, total] = await Promise.all([
+    const [certificates, total, certificationTitleRows, categoryRows, typeRows] = await Promise.all([
         prisma.certificate.findMany({
             where,
             orderBy: { createdAt: 'desc' },
@@ -22,6 +22,9 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
             skip: (page - 1) * PAGE_SIZE,
         }),
         prisma.certificate.count({ where }),
+        prisma.certificate.findMany({ select: { certificationTitle: true }, distinct: ['certificationTitle'], orderBy: { certificationTitle: 'asc' } }),
+        prisma.certificateCategory.findMany({ orderBy: { name: 'asc' } }),
+        prisma.certificateType.findMany({ orderBy: { label: 'asc' } }),
     ]);
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -36,6 +39,9 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
             <CertificateManagement
                 isAdmin={currentUser.role === 'ADMIN'}
                 total={total}
+                certificationTitles={certificationTitleRows.map((r) => r.certificationTitle)}
+                categories={categoryRows.map((c) => c.name)}
+                types={typeRows}
                 certificates={certificates.map((c) => {
                     const status = certificateStatus(c.expiryDate, c.revokedAt);
                     return {

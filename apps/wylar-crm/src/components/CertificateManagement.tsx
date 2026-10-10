@@ -1,14 +1,12 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
-import { Ban, Download, Plus, ShieldCheck, X } from 'lucide-react';
+import { Ban, Download, Plus, Settings, ShieldCheck, X } from 'lucide-react';
+import Link from 'next/link';
 import { issueCertificate, revokeCertificate } from '@/actions/certificates';
+import { createCertificateCategory } from '@/actions/certificateMeta';
 import { CertificatesSearchBar } from '@/components/CertificatesSearchBar';
-
-// Etiqueta interna fija: ya no se pide en el formulario (no aparece en el
-// PDF del diploma desde el rediseño), pero el registro la sigue guardando
-// como metadato para la tabla de administración.
-const DEFAULT_CATEGORY_LABEL = 'Certificación Wylar';
+import { SearchableCreatableSelect } from '@/components/SearchableCreatableSelect';
 
 interface CertificateRow {
     id: number;
@@ -22,6 +20,12 @@ interface CertificateRow {
     status: 'VIGENTE' | 'VENCIDO' | 'SIN_VENCIMIENTO' | 'REVOCADO';
     statusLabel: string;
     issuedByName: string | null;
+}
+
+interface CertificateTypeOption {
+    id: number;
+    label: string;
+    completionText: string;
 }
 
 const STATUS_TONE: Record<CertificateRow['status'], string> = {
@@ -57,11 +61,30 @@ const DETAIL_TEMPLATES: { value: string; label: string; text: string }[] = [
     { value: 'personalizada', label: 'Personalizado...', text: '' },
 ];
 
-export function CertificateManagement({ certificates, isAdmin, total }: { certificates: CertificateRow[]; isAdmin: boolean; total: number }) {
+export function CertificateManagement({
+    certificates,
+    isAdmin,
+    total,
+    certificationTitles,
+    categories,
+    types,
+}: {
+    certificates: CertificateRow[];
+    isAdmin: boolean;
+    total: number;
+    certificationTitles: string[];
+    categories: string[];
+    types: CertificateTypeOption[];
+}) {
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
+    const [localCategories, setLocalCategories] = useState(categories);
+
+    useEffect(() => {
+        setLocalCategories(categories);
+    }, [categories]);
 
     useEffect(() => {
         if (!showForm) return;
@@ -75,17 +98,13 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
     const [holderName, setHolderName] = useState('');
     const [holderRut, setHolderRut] = useState('');
     const [certificationTitle, setCertificationTitle] = useState('');
+    const [categoryLabel, setCategoryLabel] = useState(localCategories[0] ?? '');
     const [issueDate, setIssueDate] = useState(todayIso());
     const [expiryMode, setExpiryMode] = useState<string>('indefinida');
     const [expiryDate, setExpiryDate] = useState('');
     const [detailTemplate, setDetailTemplate] = useState<string>('ninguna');
     const [detailText, setDetailText] = useState('');
-    const [completionText, setCompletionText] = useState('Ha completado satisfactoriamente el curso de');
-
-    const existingCategories = Array.from(new Set(certificates.map((c) => c.categoryLabel))).filter(Boolean);
-    const [categoryMode, setCategoryMode] = useState<'select' | 'new'>('select');
-    const [categorySelect, setCategorySelect] = useState<string>(existingCategories.includes(DEFAULT_CATEGORY_LABEL) ? DEFAULT_CATEGORY_LABEL : existingCategories[0] || DEFAULT_CATEGORY_LABEL);
-    const [categoryCustom, setCategoryCustom] = useState('');
+    const [completionText, setCompletionText] = useState(types[0]?.completionText ?? 'Ha completado satisfactoriamente el curso de');
 
     function handleDetailTemplateChange(value: string) {
         setDetailTemplate(value);
@@ -93,19 +112,29 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
         if (template && template.value !== 'personalizada') setDetailText(template.text);
     }
 
+    async function handleCreateCategory(name: string) {
+        const formData = new FormData();
+        formData.set('name', name);
+        const result = await createCertificateCategory({}, formData);
+        if (result.error) {
+            // Puede fallar porque ya existe (otro usuario la creó mientras tanto) — igual queda disponible para elegir.
+            setLocalCategories((prev) => (prev.includes(name) ? prev : [...prev, name]));
+            return;
+        }
+        setLocalCategories((prev) => (prev.includes(name) ? prev : [...prev, name]));
+    }
+
     function resetForm() {
         setHolderName('');
         setHolderRut('');
         setCertificationTitle('');
+        setCategoryLabel(localCategories[0] ?? '');
         setIssueDate(todayIso());
         setExpiryMode('indefinida');
         setExpiryDate('');
         setDetailTemplate('ninguna');
         setDetailText('');
-        setCompletionText('Ha completado satisfactoriamente el curso de');
-        setCategoryMode('select');
-        setCategorySelect(existingCategories.includes(DEFAULT_CATEGORY_LABEL) ? DEFAULT_CATEGORY_LABEL : existingCategories[0] || DEFAULT_CATEGORY_LABEL);
-        setCategoryCustom('');
+        setCompletionText(types[0]?.completionText ?? 'Ha completado satisfactoriamente el curso de');
     }
 
     function handleSubmit(e: React.FormEvent) {
@@ -127,13 +156,13 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
                 computedExpiryDate = new Date(issueDate);
                 computedExpiryDate.setFullYear(computedExpiryDate.getFullYear() + 3);
             }
-            
+
             const result = await issueCertificate({
                 holderName,
                 holderRut,
                 profileId: null,
                 certificationTitle,
-                categoryLabel: (categoryMode === 'new' ? categoryCustom : categorySelect).trim() || DEFAULT_CATEGORY_LABEL,
+                categoryLabel: categoryLabel.trim() || 'Certificación Wylar',
                 issueDate: new Date(issueDate),
                 expiryDate: computedExpiryDate,
                 leadId: null,
@@ -168,16 +197,25 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
                     <h1 className="text-2xl font-extrabold text-slate-900">Certificados</h1>
                     <p className="text-slate-500 text-sm mt-1">Emisión y validación de certificados — se consultan desde wylar.cl/validador. {total} en total.</p>
                 </div>
-                <button
-                    onClick={() => {
-                        setError(null);
-                        setSuccess(null);
-                        setShowForm(true);
-                    }}
-                    className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm shrink-0"
-                >
-                    <Plus size={18} /> Emitir certificado
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                        href="/certificados/configuracion"
+                        title="Tipos y categorías de certificado"
+                        className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-4 py-2.5 rounded-xl transition-colors"
+                    >
+                        <Settings size={16} /> Tipos y categorías
+                    </Link>
+                    <button
+                        onClick={() => {
+                            setError(null);
+                            setSuccess(null);
+                            setShowForm(true);
+                        }}
+                        className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+                    >
+                        <Plus size={18} /> Emitir certificado
+                    </button>
+                </div>
             </div>
 
             <CertificatesSearchBar />
@@ -186,10 +224,7 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
             {!showForm && success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
 
             {showForm && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
-                    onClick={() => setShowForm(false)}
-                >
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" onClick={() => setShowForm(false)}>
                     <form
                         onSubmit={handleSubmit}
                         onClick={(e) => e.stopPropagation()}
@@ -206,122 +241,89 @@ export function CertificateManagement({ certificates, isAdmin, total }: { certif
                         {success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Field label="Nombre completo del titular">
-                        <input value={holderName} onChange={(e) => setHolderName(e.target.value)} className={inputClass} required />
-                    </Field>
-                    <Field label="RUT del titular">
-                        <input value={holderRut} onChange={(e) => setHolderRut(e.target.value)} placeholder="12.345.678-9" className={inputClass} required />
-                    </Field>
-                    <Field label="Nombre de la certificación">
-                        <input value={certificationTitle} onChange={(e) => setCertificationTitle(e.target.value)} className={inputClass} required />
-                    </Field>
-                    <Field label="Categoría de Certificación">
-                        <div className="flex flex-col gap-2">
-                            {categoryMode === 'select' ? (
-                                <>
-                                    <select
-                                        value={categorySelect}
-                                        onChange={(e) => setCategorySelect(e.target.value)}
-                                        className={inputClass}
-                                    >
-                                        {existingCategories.map((cat) => (
-                                            <option key={cat} value={cat}>
-                                                {cat}
-                                            </option>
-                                        ))}
-                                        {!existingCategories.includes(DEFAULT_CATEGORY_LABEL) && (
-                                            <option value={DEFAULT_CATEGORY_LABEL}>{DEFAULT_CATEGORY_LABEL}</option>
-                                        )}
+                            <Field label="Nombre completo del titular">
+                                <input value={holderName} onChange={(e) => setHolderName(e.target.value)} className={inputClass} required />
+                            </Field>
+                            <Field label="RUT del titular">
+                                <input value={holderRut} onChange={(e) => setHolderRut(e.target.value)} placeholder="12.345.678-9" className={inputClass} required />
+                            </Field>
+                            <Field label="Nombre de la certificación">
+                                <SearchableCreatableSelect
+                                    value={certificationTitle}
+                                    onChange={setCertificationTitle}
+                                    options={certificationTitles}
+                                    placeholder="Busca o escribe un nombre nuevo…"
+                                    createLabel="Usar"
+                                />
+                            </Field>
+                            <Field label="Categoría de certificación">
+                                <SearchableCreatableSelect
+                                    value={categoryLabel}
+                                    onChange={setCategoryLabel}
+                                    options={localCategories}
+                                    onCreate={handleCreateCategory}
+                                    placeholder="Busca o crea una categoría…"
+                                    createLabel="Crear categoría"
+                                />
+                            </Field>
+                            <Field label="Fecha de emisión">
+                                <input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className={inputClass} required />
+                            </Field>
+                            <Field label="Vigencia">
+                                <div className="flex flex-col gap-2">
+                                    <select value={expiryMode} onChange={(e) => setExpiryMode(e.target.value)} className={inputClass}>
+                                        <option value="indefinida">Indefinida (Sin vencimiento)</option>
+                                        <option value="1">1 Año</option>
+                                        <option value="2">2 Años</option>
+                                        <option value="3">3 Años</option>
+                                        <option value="personalizada">Personalizada...</option>
                                     </select>
-                                    <button
-                                        type="button"
-                                        onClick={() => setCategoryMode('new')}
-                                        className="text-sm text-amber-600 hover:text-amber-700 font-bold self-start flex items-center gap-1"
-                                    >
-                                        <Plus size={14} /> Agregar categoría
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <input
-                                        value={categoryCustom}
-                                        onChange={(e) => setCategoryCustom(e.target.value)}
-                                        placeholder="Nombre de la nueva categoría"
+                                    {expiryMode === 'personalizada' && (
+                                        <input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} className={inputClass} required />
+                                    )}
+                                </div>
+                            </Field>
+                            <Field label="Tipo de certificado">
+                                <select value={completionText} onChange={(e) => setCompletionText(e.target.value)} className={inputClass}>
+                                    {types.map((t) => (
+                                        <option key={t.id} value={t.completionText}>
+                                            {t.label.toUpperCase()}
+                                        </option>
+                                    ))}
+                                </select>
+                            </Field>
+                        </div>
+
+                        <Field label="Texto bajo la certificación (opcional, va en el PDF)">
+                            <div className="flex flex-col gap-2">
+                                <select value={detailTemplate} onChange={(e) => handleDetailTemplateChange(e.target.value)} className={inputClass}>
+                                    {DETAIL_TEMPLATES.map((t) => (
+                                        <option key={t.value} value={t.value}>
+                                            {t.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                {detailTemplate !== 'ninguna' && (
+                                    <textarea
+                                        value={detailText}
+                                        onChange={(e) => setDetailText(e.target.value)}
+                                        rows={4}
+                                        placeholder="Describe duración, fechas, nota obtenida, vigencia, etc."
                                         className={inputClass}
-                                        required
-                                        autoFocus
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setCategoryMode('select');
-                                            setCategoryCustom('');
-                                        }}
-                                        className="text-sm text-slate-500 hover:text-slate-700 font-bold self-start flex items-center gap-1"
-                                    >
-                                        <X size={14} /> Cancelar
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    </Field>
-                    <Field label="Fecha de emisión">
-                        <input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className={inputClass} required />
-                    </Field>
-                    <Field label="Vigencia">
-                        <div className="flex flex-col gap-2">
-                            <select value={expiryMode} onChange={(e) => setExpiryMode(e.target.value)} className={inputClass}>
-                                <option value="indefinida">Indefinida (Sin vencimiento)</option>
-                                <option value="1">1 Año</option>
-                                <option value="2">2 Años</option>
-                                <option value="3">3 Años</option>
-                                <option value="personalizada">Personalizada...</option>
-                            </select>
-                            {expiryMode === 'personalizada' && (
-                                <input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} className={inputClass} required />
-                            )}
-                        </div>
-                    </Field>
-                    <Field label="Tipo de Certificado">
-                        <select value={completionText} onChange={(e) => setCompletionText(e.target.value)} className={inputClass}>
-                            <option value="Ha completado satisfactoriamente el curso de">CURSO</option>
-                            <option value="Ha completado satisfactoriamente la Certificación de">CERTIFICACIÓN</option>
-                            <option value="Ha completado satisfactoriamente la Calificación de">CALIFICACIÓN</option>
-                            <option value="Ha completado satisfactoriamente la Inspección de">INSPECCIÓN</option>
-                        </select>
-                    </Field>
-                </div>
+                                )}
+                            </div>
+                        </Field>
 
-                <Field label="Texto bajo la certificación (opcional, va en el PDF)">
-                    <div className="flex flex-col gap-2">
-                        <select value={detailTemplate} onChange={(e) => handleDetailTemplateChange(e.target.value)} className={inputClass}>
-                            {DETAIL_TEMPLATES.map((t) => (
-                                <option key={t.value} value={t.value}>
-                                    {t.label}
-                                </option>
-                            ))}
-                        </select>
-                        {detailTemplate !== 'ninguna' && (
-                            <textarea
-                                value={detailText}
-                                onChange={(e) => setDetailText(e.target.value)}
-                                rows={4}
-                                placeholder="Describe duración, fechas, nota obtenida, vigencia, etc."
-                                className={inputClass}
-                            />
-                        )}
-                    </div>
-                </Field>
-
-                <div className="flex justify-end">
-                    <button
-                        type="submit"
-                        disabled={isPending}
-                        className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-6 py-2.5 rounded-xl transition-colors disabled:opacity-60"
-                    >
-                        <ShieldCheck size={16} /> {isPending ? 'Emitiendo…' : 'Emitir certificado'}
-                    </button>
-                </div>
+                        <div className="flex justify-end">
+                            <button
+                                type="submit"
+                                disabled={isPending}
+                                className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-6 py-2.5 rounded-xl transition-colors disabled:opacity-60"
+                            >
+                                <ShieldCheck size={16} /> {isPending ? 'Emitiendo…' : 'Emitir certificado'}
+                            </button>
+                        </div>
                     </form>
                 </div>
             )}

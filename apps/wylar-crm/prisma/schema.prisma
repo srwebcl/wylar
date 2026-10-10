@@ -282,6 +282,33 @@ model Certificate {
   @@map("certificates")
 }
 
+// Listas administrables desde /certificados/configuracion. Son solo el
+// origen de las opciones del formulario de emisión (autocompletar + crear
+// al vuelo) — no son FK de Certificate: category/completionText quedan
+// copiados como texto plano en cada certificado al emitirse (mismo criterio
+// que certificationTitle/categoryLabel arriba), así que borrar o renombrar
+// una entrada acá nunca altera certificados ya emitidos.
+model CertificateCategory {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("certificate_categories")
+}
+
+model CertificateType {
+  id    Int    @id @default(autoincrement())
+  // Nombre corto que se ve en el selector, ej. "Curso", "Certificación".
+  label String @unique
+  // Frase exacta que antecede al nombre de la certificación en el PDF, ej.
+  // "Ha completado satisfactoriamente el curso de".
+  completionText String
+
+  createdAt DateTime @default(now())
+
+  @@map("certificate_types")
+}
+
 // --- Módulo de Hero (Home de wylar.cl) ---
 //
 // Slides personalizados del hero de wylar.cl (GET /api/public/hero-slides).

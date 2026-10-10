@@ -152,6 +152,15 @@ export type ProfileInput = z.infer<typeof profileSchema>;
 
 // --- Módulo de Certificados ---
 
+export const certificateCategorySchema = z.object({
+    name: z.string().trim().min(2, 'Ingresa un nombre de categoría.').max(120),
+});
+
+export const certificateTypeSchema = z.object({
+    label: z.string().trim().min(2, 'Ingresa un nombre para el tipo.').max(60),
+    completionText: z.string().trim().min(2, 'Ingresa la frase que antecede al nombre de la certificación.').max(200),
+});
+
 export const certificateSchema = z.object({
     holderName: z.string().trim().min(2, 'Ingresa el nombre completo del titular.').max(200),
     holderRut: z.string().trim().min(3, 'Ingresa el RUT del titular.').max(20),
