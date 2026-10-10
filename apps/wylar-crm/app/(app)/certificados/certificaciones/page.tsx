@@ -7,5 +7,10 @@ export default async function CertificacionesPage() {
 
     const titles = await prisma.certificationTitle.findMany({ orderBy: { name: 'asc' } });
 
-    return <CertificationTitlesManagement titles={titles} isAdmin={currentUser.role === 'ADMIN'} />;
+    return (
+        <CertificationTitlesManagement
+            titles={titles.map((t) => ({ id: t.id, name: t.name, createdAt: t.createdAt.toISOString() }))}
+            isAdmin={currentUser.role === 'ADMIN'}
+        />
+    );
 }
