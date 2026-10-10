@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { KanbanSquare, ListChecks, Users, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal, ScrollText, Settings } from 'lucide-react';
+import { KanbanSquare, ListChecks, Users, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal, ScrollText, Settings, FileBadge } from 'lucide-react';
 import clsx from 'clsx';
 import { Logo } from '@/components/Logo';
 import type { SafeUser as User } from '@/lib/safeUser';
@@ -22,7 +22,10 @@ const WEB_NAV_ITEMS = [
         icon: ShieldCheck,
         match: (p: string) => p === '/certificados',
         adminOnly: false,
-        children: [{ href: '/certificados/configuracion', label: 'Tipos y categorías', icon: Settings, match: (p: string) => p.startsWith('/certificados/configuracion') }],
+        children: [
+            { href: '/certificados/certificaciones', label: 'Certificaciones', icon: FileBadge, match: (p: string) => p.startsWith('/certificados/certificaciones') },
+            { href: '/certificados/configuracion', label: 'Tipos y categorías', icon: Settings, match: (p: string) => p.startsWith('/certificados/configuracion') },
+        ],
     },
     { href: '/equipo', label: 'Equipo', icon: Users, match: (p: string) => p === '/equipo', adminOnly: true },
     { href: '/auditoria', label: 'Auditoría', icon: ScrollText, match: (p: string) => p === '/auditoria', adminOnly: true },

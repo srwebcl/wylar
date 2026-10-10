@@ -161,6 +161,10 @@ export const certificateTypeSchema = z.object({
     completionText: z.string().trim().min(2, 'Ingresa la frase que antecede al nombre de la certificación.').max(200),
 });
 
+export const certificationTitleSchema = z.object({
+    name: z.string().trim().min(2, 'Ingresa el nombre de la certificación.').max(300),
+});
+
 export const certificateSchema = z.object({
     holderName: z.string().trim().min(2, 'Ingresa el nombre completo del titular.').max(200),
     holderRut: z.string().trim().min(3, 'Ingresa el RUT del titular.').max(20),

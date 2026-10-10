@@ -309,6 +309,14 @@ model CertificateType {
   @@map("certificate_types")
 }
 
+model CertificationTitle {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("certification_titles")
+}
+
 // --- Módulo de Hero (Home de wylar.cl) ---
 //
 // Slides personalizados del hero de wylar.cl (GET /api/public/hero-slides).

@@ -22,7 +22,7 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
             skip: (page - 1) * PAGE_SIZE,
         }),
         prisma.certificate.count({ where }),
-        prisma.certificate.findMany({ select: { certificationTitle: true }, distinct: ['certificationTitle'], orderBy: { certificationTitle: 'asc' } }),
+        prisma.certificationTitle.findMany({ orderBy: { name: 'asc' } }),
         prisma.certificateCategory.findMany({ orderBy: { name: 'asc' } }),
         prisma.certificateType.findMany({ orderBy: { label: 'asc' } }),
     ]);
@@ -39,7 +39,7 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
             <CertificateManagement
                 isAdmin={currentUser.role === 'ADMIN'}
                 total={total}
-                certificationTitles={certificationTitleRows.map((r) => r.certificationTitle)}
+                certificationTitles={certificationTitleRows.map((r) => r.name)}
                 categories={categoryRows.map((c) => c.name)}
                 types={typeRows}
                 certificates={certificates.map((c) => {

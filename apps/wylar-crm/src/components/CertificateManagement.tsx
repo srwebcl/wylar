@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { Ban, Download, Plus, Settings, ShieldCheck, X } from 'lucide-react';
 import Link from 'next/link';
 import { issueCertificate, revokeCertificate } from '@/actions/certificates';
-import { createCertificateCategory } from '@/actions/certificateMeta';
+import { createCertificateCategory, createCertificationTitle } from '@/actions/certificateMeta';
 import { CertificatesSearchBar } from '@/components/CertificatesSearchBar';
 import { SearchableCreatableSelect } from '@/components/SearchableCreatableSelect';
 
@@ -81,10 +81,15 @@ export function CertificateManagement({
     const [success, setSuccess] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [localCategories, setLocalCategories] = useState(categories);
+    const [localCertificationTitles, setLocalCertificationTitles] = useState(certificationTitles);
 
     useEffect(() => {
         setLocalCategories(categories);
     }, [categories]);
+
+    useEffect(() => {
+        setLocalCertificationTitles(certificationTitles);
+    }, [certificationTitles]);
 
     useEffect(() => {
         if (!showForm) return;
@@ -122,6 +127,14 @@ export function CertificateManagement({
             return;
         }
         setLocalCategories((prev) => (prev.includes(name) ? prev : [...prev, name]));
+    }
+
+    async function handleCreateCertificationTitle(name: string) {
+        const formData = new FormData();
+        formData.set('name', name);
+        // Si falla es porque ya existe (otro usuario la creó mientras tanto) — igual queda disponible para elegir.
+        await createCertificationTitle({}, formData);
+        setLocalCertificationTitles((prev) => (prev.includes(name) ? prev : [...prev, name]));
     }
 
     function resetForm() {
@@ -251,9 +264,10 @@ export function CertificateManagement({
                                 <SearchableCreatableSelect
                                     value={certificationTitle}
                                     onChange={setCertificationTitle}
-                                    options={certificationTitles}
-                                    placeholder="Busca o escribe un nombre nuevo…"
-                                    createLabel="Usar"
+                                    options={localCertificationTitles}
+                                    onCreate={handleCreateCertificationTitle}
+                                    placeholder="Busca o crea una certificación…"
+                                    createLabel="Crear certificación"
                                 />
                             </Field>
                             <Field label="Categoría de certificación">

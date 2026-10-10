@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin, requireUser } from '@/lib/auth';
-import { certificateCategorySchema, certificateTypeSchema } from '@/lib/validation';
+import { certificateCategorySchema, certificateTypeSchema, certificationTitleSchema } from '@/lib/validation';
 import { audit } from '@/lib/audit';
 
 export interface CertificateMetaState {
@@ -74,4 +74,31 @@ export async function deleteCertificateType(id: number): Promise<CertificateMeta
     revalidatePath('/certificados');
     revalidatePath('/certificados/configuracion');
     return { success: 'Tipo eliminado.' };
+}
+
+export async function createCertificationTitle(_prevState: CertificateMetaState, formData: FormData): Promise<CertificateMetaState> {
+    const user = await requireUser();
+    const parsed = certificationTitleSchema.safeParse({ name: formData.get('name') });
+    if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Datos inválidos.' };
+
+    const existing = await prisma.certificationTitle.findUnique({ where: { name: parsed.data.name } });
+    if (existing) return { error: 'Ya existe esa certificación.' };
+
+    await prisma.certificationTitle.create({ data: { name: parsed.data.name } });
+    await audit(user, 'CERTIFICACION_CREADA', 'certification_title', parsed.data.name);
+    revalidatePath('/certificados');
+    revalidatePath('/certificados/certificaciones');
+    return { success: 'Certificación creada.' };
+}
+
+export async function deleteCertificationTitle(id: number): Promise<CertificateMetaState> {
+    const admin = await requireAdmin();
+    const title = await prisma.certificationTitle.findUnique({ where: { id } });
+    if (!title) return { error: 'La certificación no existe.' };
+
+    await prisma.certificationTitle.delete({ where: { id } });
+    await audit(admin, 'CERTIFICACION_ELIMINADA', 'certification_title', title.name);
+    revalidatePath('/certificados');
+    revalidatePath('/certificados/certificaciones');
+    return { success: 'Certificación eliminada.' };
 }
