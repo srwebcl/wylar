@@ -70,6 +70,61 @@ export async function issueCertificate(input: CertificateInput): Promise<Certifi
 }
 
 /**
+ * Edita un certificado ya emitido (solo ADMIN) — corrige datos sin cambiar
+ * su código de validación. No toca profileId/leadId: el formulario no los
+ * expone, así que se preservan tal cual quedaron al emitirlo.
+ */
+export async function updateCertificate(certificateId: number, input: CertificateInput): Promise<CertificateFormState> {
+    const admin = await requireAdmin();
+
+    const parsed = certificateSchema.safeParse(input);
+    if (!parsed.success) {
+        return { error: parsed.error.issues[0]?.message ?? 'Revisa los datos del certificado.' };
+    }
+    const data = parsed.data;
+
+    const existing = await prisma.certificate.findUnique({ where: { id: certificateId } });
+    if (!existing) return { error: 'El certificado no existe.' };
+
+    await prisma.certificate.update({
+        where: { id: certificateId },
+        data: {
+            holderName: data.holderName,
+            holderRut: data.holderRut,
+            holderRutNorm: normalizeRut(data.holderRut),
+            certificationTitle: data.certificationTitle,
+            categoryLabel: data.categoryLabel,
+            detailText: data.detailText || null,
+            completionText: data.completionText,
+            issueDate: data.issueDate,
+            expiryDate: data.expiryDate || null,
+        },
+    });
+
+    await audit(admin, 'CERTIFICADO_EDITADO', 'certificado', existing.code, `${data.holderName} · ${data.certificationTitle}`);
+    revalidatePath('/certificados');
+    return { success: `Certificado ${existing.code} actualizado.` };
+}
+
+/**
+ * Elimina definitivamente un certificado (solo ADMIN, ej. registros de
+ * prueba o emitidos por error). A diferencia de revocar, esto borra el
+ * registro: deja de existir en el validador. Queda registrado en la
+ * auditoría quién lo eliminó, cuándo y los datos del certificado borrado.
+ */
+export async function deleteCertificate(certificateId: number): Promise<CertificateFormState> {
+    const admin = await requireAdmin();
+
+    const certificate = await prisma.certificate.findUnique({ where: { id: certificateId } });
+    if (!certificate) return { error: 'El certificado no existe.' };
+
+    await prisma.certificate.delete({ where: { id: certificateId } });
+    await audit(admin, 'CERTIFICADO_ELIMINADO', 'certificado', certificate.code, `${certificate.holderName} · ${certificate.certificationTitle}`);
+    revalidatePath('/certificados');
+    return { success: `Certificado ${certificate.code} eliminado.` };
+}
+
+/**
  * Revoca un certificado (solo ADMIN). No se borra: queda marcado como revocado,
  * el validador público lo muestra como "Revocado" y su PDF deja de estar disponible.
  */

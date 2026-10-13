@@ -52,6 +52,7 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
                         certificationTitle: c.certificationTitle,
                         categoryLabel: c.categoryLabel,
                         completionText: c.completionText,
+                        detailText: c.detailText,
                         issueDate: c.issueDate.toISOString(),
                         expiryDate: c.expiryDate ? c.expiryDate.toISOString() : null,
                         status,

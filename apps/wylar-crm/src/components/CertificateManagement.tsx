@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
-import { Ban, Download, Plus, Settings, ShieldCheck, X } from 'lucide-react';
+import { Ban, Download, Pencil, Plus, Settings, ShieldCheck, Trash2, X } from 'lucide-react';
 import Link from 'next/link';
-import { issueCertificate, revokeCertificate } from '@/actions/certificates';
+import { issueCertificate, revokeCertificate, updateCertificate, deleteCertificate } from '@/actions/certificates';
 import { createCertificateCategory, createCertificationTitle } from '@/actions/certificateMeta';
 import { CertificatesSearchBar } from '@/components/CertificatesSearchBar';
 import { SearchableCreatableSelect } from '@/components/SearchableCreatableSelect';
@@ -17,6 +17,7 @@ interface CertificateRow {
     certificationTitle: string;
     categoryLabel: string;
     completionText: string;
+    detailText: string | null;
     issueDate: string;
     expiryDate: string | null;
     status: 'VIGENTE' | 'VENCIDO' | 'SIN_VENCIMIENTO' | 'REVOCADO';
@@ -90,6 +91,7 @@ export function CertificateManagement({
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
     const [localCategories, setLocalCategories] = useState(categories);
     const [localCertificationTitles, setLocalCertificationTitles] = useState(certificationTitles);
 
@@ -160,6 +162,36 @@ export function CertificateManagement({
         setCompletionText(types[0]?.completionText ?? 'Ha completado satisfactoriamente el curso de');
     }
 
+    function openCreateForm() {
+        setError(null);
+        setSuccess(null);
+        setEditingId(null);
+        resetForm();
+        setShowForm(true);
+    }
+
+    function openEditForm(c: CertificateRow) {
+        setError(null);
+        setSuccess(null);
+        setEditingId(c.id);
+        setHolderName(c.holderName);
+        setHolderRut(c.holderRut);
+        setCertificationTitle(c.certificationTitle);
+        setCategoryLabel(c.categoryLabel);
+        setIssueDate(c.issueDate.slice(0, 10));
+        if (c.expiryDate) {
+            setExpiryMode('personalizada');
+            setExpiryDate(c.expiryDate.slice(0, 10));
+        } else {
+            setExpiryMode('indefinida');
+            setExpiryDate('');
+        }
+        setDetailTemplate(c.detailText ? 'personalizada' : 'ninguna');
+        setDetailText(c.detailText ?? '');
+        setCompletionText(c.completionText);
+        setShowForm(true);
+    }
+
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError(null);
@@ -186,7 +218,7 @@ export function CertificateManagement({
                 computedExpiryDate.setFullYear(computedExpiryDate.getFullYear() + 3);
             }
 
-            const result = await issueCertificate({
+            const payload = {
                 holderName,
                 holderRut: canonicalRut,
                 profileId: null,
@@ -197,13 +229,16 @@ export function CertificateManagement({
                 leadId: null,
                 detailText: detailText.trim() || null,
                 completionText: completionText.trim(),
-            });
+            };
+
+            const result = editingId != null ? await updateCertificate(editingId, payload) : await issueCertificate(payload);
             if (result.error) {
                 setError(result.error);
                 return;
             }
-            setSuccess(result.success ?? 'Certificado emitido.');
+            setSuccess(result.success ?? (editingId != null ? 'Certificado actualizado.' : 'Certificado emitido.'));
             resetForm();
+            setEditingId(null);
             setShowForm(false);
         });
     }
@@ -216,6 +251,17 @@ export function CertificateManagement({
             const result = await revokeCertificate(id);
             if (result.error) setError(result.error);
             else setSuccess(result.success ?? 'Certificado revocado.');
+        });
+    }
+
+    function handleDelete(id: number, code: string) {
+        if (!confirm(`¿Eliminar definitivamente el certificado ${code}? Esta acción no se puede deshacer: el certificado dejará de existir en el validador. Queda registrado en la auditoría.`)) return;
+        setError(null);
+        setSuccess(null);
+        startTransition(async () => {
+            const result = await deleteCertificate(id);
+            if (result.error) setError(result.error);
+            else setSuccess(result.success ?? 'Certificado eliminado.');
         });
     }
 
@@ -235,11 +281,7 @@ export function CertificateManagement({
                         <Settings size={16} /> Tipos y categorías
                     </Link>
                     <button
-                        onClick={() => {
-                            setError(null);
-                            setSuccess(null);
-                            setShowForm(true);
-                        }}
+                        onClick={openCreateForm}
                         className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
                     >
                         <Plus size={18} /> Emitir certificado
@@ -260,7 +302,7 @@ export function CertificateManagement({
                         className="glass-card bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4"
                     >
                         <div className="flex items-center justify-between">
-                            <h2 className="font-bold text-slate-900">Emitir certificado</h2>
+                            <h2 className="font-bold text-slate-900">{editingId != null ? 'Editar certificado' : 'Emitir certificado'}</h2>
                             <button type="button" onClick={() => setShowForm(false)} className="p-1 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Cerrar">
                                 <X size={20} />
                             </button>
@@ -358,7 +400,8 @@ export function CertificateManagement({
                                 disabled={isPending}
                                 className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-6 py-2.5 rounded-xl transition-colors disabled:opacity-60"
                             >
-                                <ShieldCheck size={16} /> {isPending ? 'Emitiendo…' : 'Emitir certificado'}
+                                <ShieldCheck size={16} />
+                                {editingId != null ? (isPending ? 'Guardando…' : 'Guardar cambios') : isPending ? 'Emitiendo…' : 'Emitir certificado'}
                             </button>
                         </div>
                     </form>
@@ -422,6 +465,26 @@ export function CertificateManagement({
                                                         title="Revocar certificado"
                                                     >
                                                         <Ban size={16} />
+                                                    </button>
+                                                )}
+                                                {isAdmin && (
+                                                    <button
+                                                        onClick={() => openEditForm(c)}
+                                                        disabled={isPending}
+                                                        className="p-2 text-slate-400 hover:text-amber-600 transition-colors disabled:opacity-50"
+                                                        title="Editar certificado"
+                                                    >
+                                                        <Pencil size={16} />
+                                                    </button>
+                                                )}
+                                                {isAdmin && (
+                                                    <button
+                                                        onClick={() => handleDelete(c.id, c.code)}
+                                                        disabled={isPending}
+                                                        className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                                                        title="Eliminar certificado"
+                                                    >
+                                                        <Trash2 size={16} />
                                                     </button>
                                                 )}
                                             </div>
