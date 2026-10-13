@@ -48,7 +48,7 @@ export function detectLeadSource() {
 }
 
 /**
- * Envía un lead al CRM. `payload` acepta: type, name, email, phone,
+ * Envía un lead al CRM. `payload` acepta: type, name, rut, email, phone,
  * company, certificationInterest, message, website (honeypot, dejar vacío).
  * Lanza un Error con un mensaje legible si falla.
  */

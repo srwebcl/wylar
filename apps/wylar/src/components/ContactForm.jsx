@@ -1,20 +1,55 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRight, CheckCircle2, Loader2, Mail, AlertCircle } from 'lucide-react';
 import { submitLead } from '../lib/crm.js';
+import { getCatalogList } from '../lib/catalog.js';
+import { isValidRut, formatRut } from '../lib/rut.js';
+import { isValidChileanMobile, formatChileanMobile } from '../lib/phone.js';
 
-// Motivo de contacto -> tipo de lead + certificación de interés para el CRM.
-const MOTIVO_META = {
-    personas: { type: 'PERSONA', certificationInterest: 'Evaluación para personas' },
-    empresas: { type: 'EMPRESA', certificationInterest: 'Cotización para empresas' },
-    otec: { type: 'OTEC', certificationInterest: 'Alianza con OTEC / Organismo de Capacitación' },
-    instituciones: { type: 'INSTITUCION', certificationInterest: 'Alianza para instituciones de educación' },
-    otro: { type: 'PERSONA', certificationInterest: null },
+// Motivo de contacto -> tipo de lead para el CRM. La certificación de
+// interés ya no se infiere del motivo: la indica el propio prospecto (ver
+// campo "Certificación de interés" más abajo).
+const MOTIVO_TYPE = {
+    personas: 'PERSONA',
+    empresas: 'EMPRESA',
+    otec: 'OTEC',
+    instituciones: 'INSTITUCION',
 };
 
 export default function ContactForm({ title = '', subtitle = '', preselectedContext = '', hideHeader = false }) {
     const [status, setStatus] = useState('idle'); // idle | sending | success | error
     const [errorMessage, setErrorMessage] = useState('');
     const [selectedMotivo, setSelectedMotivo] = useState(preselectedContext);
+    const [rut, setRut] = useState('');
+    const [phone, setPhone] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [certificationOptions, setCertificationOptions] = useState([]);
+
+    useEffect(() => {
+        getCatalogList()
+            .then((profiles) => setCertificationOptions(profiles.map((p) => p.title).filter(Boolean)))
+            .catch(() => {});
+    }, []);
+
+    function handleRutBlur() {
+        if (!rut.trim()) return;
+        if (isValidRut(rut)) {
+            setRut(formatRut(rut));
+            setFieldErrors((errs) => ({ ...errs, rut: undefined }));
+        } else {
+            setFieldErrors((errs) => ({ ...errs, rut: 'RUT inválido. Revisa el número y el dígito verificador.' }));
+        }
+    }
+
+    function handlePhoneBlur() {
+        if (!phone.trim()) return;
+        const formatted = isValidChileanMobile(phone) ? phone : formatChileanMobile(phone);
+        if (formatted) {
+            setPhone(formatted);
+            setFieldErrors((errs) => ({ ...errs, phone: undefined }));
+        } else {
+            setFieldErrors((errs) => ({ ...errs, phone: 'Teléfono inválido. Debe ser un celular chileno, ej: +56 9 1234 5678.' }));
+        }
+    }
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -23,23 +58,39 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
 
         if (data.get('website')) return; // honeypot: no delatar el filtro
 
+        const rutOk = isValidRut(rut);
+        const phoneCanonical = isValidChileanMobile(phone) ? phone : formatChileanMobile(phone);
+        const errors = {};
+        if (!rutOk) errors.rut = 'RUT inválido. Revisa el número y el dígito verificador.';
+        if (!phoneCanonical) errors.phone = 'Teléfono inválido. Debe ser un celular chileno, ej: +56 9 1234 5678.';
+        setFieldErrors(errors);
+        if (errors.rut || errors.phone) return;
+
+        const canonicalRut = formatRut(rut);
+        setRut(canonicalRut);
+        setPhone(phoneCanonical);
+
         const motivo = String(data.get('motivo') || '');
-        const meta = MOTIVO_META[motivo] || MOTIVO_META.otro;
+        const type = MOTIVO_TYPE[motivo] || 'PERSONA';
 
         setStatus('sending');
         setErrorMessage('');
         try {
             await submitLead({
-                type: meta.type,
+                type,
                 name: data.get('name'),
+                rut: canonicalRut,
                 email: data.get('email'),
-                phone: data.get('phone'),
+                phone: phoneCanonical,
                 company: data.get('company') || null,
-                certificationInterest: meta.certificationInterest,
+                certificationInterest: data.get('certificationInterest') || null,
                 message: data.get('message') || null,
             });
             setStatus('success');
             form.reset();
+            setRut('');
+            setPhone('');
+            setFieldErrors({});
         } catch (err) {
             setStatus('error');
             setErrorMessage(err.message);
@@ -103,14 +154,40 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
                                         <input name="name" type="text" className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all" placeholder="Su nombre" required />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Teléfono</label>
-                                        <input name="phone" type="tel" className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all" placeholder="+56 9 XXXXXXXX" required />
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">RUT</label>
+                                        <input
+                                            name="rut"
+                                            type="text"
+                                            value={rut}
+                                            onChange={(e) => setRut(e.target.value)}
+                                            onBlur={handleRutBlur}
+                                            className={`w-full px-4 py-3 bg-slate-50 rounded-lg border outline-none transition-all ${fieldErrors.rut ? 'border-red-300 ring-2 ring-red-200' : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600'}`}
+                                            placeholder="12.345.678-9"
+                                            required
+                                        />
+                                        {fieldErrors.rut && <p className="text-xs text-red-600 font-medium mt-1.5">{fieldErrors.rut}</p>}
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Correo corporativo / personal</label>
-                                    <input name="email" type="email" className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all" placeholder="correo@ejemplo.com" required />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Teléfono</label>
+                                        <input
+                                            name="phone"
+                                            type="tel"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            onBlur={handlePhoneBlur}
+                                            className={`w-full px-4 py-3 bg-slate-50 rounded-lg border outline-none transition-all ${fieldErrors.phone ? 'border-red-300 ring-2 ring-red-200' : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600'}`}
+                                            placeholder="+56 9 XXXXXXXX"
+                                            required
+                                        />
+                                        {fieldErrors.phone && <p className="text-xs text-red-600 font-medium mt-1.5">{fieldErrors.phone}</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Correo corporativo / personal</label>
+                                        <input name="email" type="email" className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all" placeholder="correo@ejemplo.com" required />
+                                    </div>
                                 </div>
 
                                 <div>
@@ -132,8 +209,24 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
                                 )}
 
                                 <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Certificación de interés</label>
+                                    <input
+                                        name="certificationInterest"
+                                        type="text"
+                                        list="certification-options"
+                                        className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all"
+                                        placeholder="Ej: Rigger, Soldador Calificado, Instalador Eléctrico..."
+                                    />
+                                    <datalist id="certification-options">
+                                        {certificationOptions.map((title) => (
+                                            <option key={title} value={title} />
+                                        ))}
+                                    </datalist>
+                                </div>
+
+                                <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">Mensaje</label>
-                                    <textarea name="message" rows="3" className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all resize-none" placeholder="Indique cantidad de trabajadores, ubicación, etc."></textarea>
+                                    <textarea name="message" rows="3" className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all resize-none" placeholder="¿Buscas más de una certificación o algo distinto? Cuéntanos aquí, o indique cantidad de trabajadores, ubicación, etc."></textarea>
                                 </div>
 
                                 {status === 'error' && (

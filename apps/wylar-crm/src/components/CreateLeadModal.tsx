@@ -5,26 +5,71 @@ import Link from 'next/link';
 import { Plus, X } from 'lucide-react';
 import { createLeadManual, type LeadFormState } from '@/actions/leads';
 import { LEAD_TYPES, PERSON_LEAD_TYPES } from '@/lib/constants';
+import { isValidRut, formatRut } from '@/lib/rut';
+import { isValidChileanMobile, formatChileanMobile } from '@/lib/phone';
 
 const initialState: LeadFormState = {};
 const inputClass =
     'w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B1E40]/20 focus:border-[#0B1E40] focus:bg-white transition-all text-sm text-slate-900';
+const errorInputClass = 'ring-2 ring-red-300 border-red-300';
 
-const initialFields = { type: 'PERSONA', name: '', email: '', phone: '', company: '', certificationInterest: '', message: '' };
+const initialFields = { type: 'PERSONA', name: '', rut: '', email: '', phone: '', company: '', certificationInterest: '', message: '' };
 
 export function CreateLeadModal({ certificationSuggestions }: { certificationSuggestions: string[] }) {
     const [open, setOpen] = useState(false);
     const [fields, setFields] = useState(initialFields);
+    const [fieldErrors, setFieldErrors] = useState<{ rut?: string; phone?: string }>({});
     const [state, formAction, pending] = useActionState(createLeadManual, initialState);
 
     function setField(key: keyof typeof initialFields) {
         return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setFields((f) => ({ ...f, [key]: e.target.value }));
     }
 
+    function handleRutBlur() {
+        if (!fields.rut.trim()) return;
+        if (isValidRut(fields.rut)) {
+            setFields((f) => ({ ...f, rut: formatRut(f.rut) }));
+            setFieldErrors((errs) => ({ ...errs, rut: undefined }));
+        } else {
+            setFieldErrors((errs) => ({ ...errs, rut: 'RUT inválido. Revisa el número y el dígito verificador.' }));
+        }
+    }
+
+    function handlePhoneBlur() {
+        if (!fields.phone.trim()) return;
+        const formatted = isValidChileanMobile(fields.phone) ? fields.phone : formatChileanMobile(fields.phone);
+        if (formatted) {
+            setFields((f) => ({ ...f, phone: formatted }));
+            setFieldErrors((errs) => ({ ...errs, phone: undefined }));
+        } else {
+            setFieldErrors((errs) => ({ ...errs, phone: 'Teléfono inválido. Debe ser un celular chileno, ej: +56 9 1234 5678.' }));
+        }
+    }
+
+    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        const rutOk = isValidRut(fields.rut);
+        const phoneCanonical = isValidChileanMobile(fields.phone) ? fields.phone : formatChileanMobile(fields.phone);
+        const errors: { rut?: string; phone?: string } = {};
+        if (!rutOk) errors.rut = 'RUT inválido. Revisa el número y el dígito verificador.';
+        if (!phoneCanonical) errors.phone = 'Teléfono inválido. Debe ser un celular chileno, ej: +56 9 1234 5678.';
+        setFieldErrors(errors);
+        if (errors.rut || errors.phone) return;
+
+        const canonicalRut = formatRut(fields.rut);
+        setFields((f) => ({ ...f, rut: canonicalRut, phone: phoneCanonical! }));
+
+        const fd = new FormData(e.currentTarget);
+        fd.set('rut', canonicalRut);
+        fd.set('phone', phoneCanonical!);
+        formAction(fd);
+    }
+
     useEffect(() => {
         if (state.success) {
             setOpen(false);
             setFields(initialFields);
+            setFieldErrors({});
         }
     }, [state.success]);
 
@@ -51,7 +96,7 @@ export function CreateLeadModal({ certificationSuggestions }: { certificationSug
             {open && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" onClick={() => setOpen(false)}>
                     <form
-                        action={formAction}
+                        onSubmit={handleSubmit}
                         onClick={(e) => e.stopPropagation()}
                         className="glass-card bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4"
                     >
@@ -89,12 +134,34 @@ export function CreateLeadModal({ certificationSuggestions }: { certificationSug
                                 <input name="name" required value={fields.name} onChange={setField('name')} className={inputClass} />
                             </label>
                             <label className="block">
+                                <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">RUT</span>
+                                <input
+                                    name="rut"
+                                    required
+                                    placeholder="12.345.678-9"
+                                    value={fields.rut}
+                                    onChange={setField('rut')}
+                                    onBlur={handleRutBlur}
+                                    className={`${inputClass} ${fieldErrors.rut ? errorInputClass : ''}`}
+                                />
+                                {fieldErrors.rut && <p className="text-xs text-red-600 font-medium mt-1">{fieldErrors.rut}</p>}
+                            </label>
+                            <label className="block">
                                 <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Correo</span>
                                 <input name="email" type="email" required value={fields.email} onChange={setField('email')} className={inputClass} />
                             </label>
                             <label className="block">
                                 <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Teléfono</span>
-                                <input name="phone" required placeholder="+56 9 1234 5678" value={fields.phone} onChange={setField('phone')} className={inputClass} />
+                                <input
+                                    name="phone"
+                                    required
+                                    placeholder="+56 9 1234 5678"
+                                    value={fields.phone}
+                                    onChange={setField('phone')}
+                                    onBlur={handlePhoneBlur}
+                                    className={`${inputClass} ${fieldErrors.phone ? errorInputClass : ''}`}
+                                />
+                                {fieldErrors.phone && <p className="text-xs text-red-600 font-medium mt-1">{fieldErrors.phone}</p>}
                             </label>
                             {!isPerson && (
                                 <label className="block">

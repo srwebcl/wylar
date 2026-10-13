@@ -107,7 +107,7 @@ export default function Validador() {
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 className="w-full pl-11 pr-4 py-4 bg-transparent outline-none text-base sm:text-lg font-medium text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
-                                placeholder="Ej: 11.817.652-9 o WYL-2026-K3F9A2"
+                                placeholder="Ej: 12.345.678-9 o WYL-2026-XXXXXX"
                                 required
                             />
                         </div>

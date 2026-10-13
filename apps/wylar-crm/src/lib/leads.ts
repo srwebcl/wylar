@@ -6,6 +6,7 @@ import { publicLeadSchema } from '@/lib/validation';
 import { SYSTEM_ACTIVITY_TYPES } from '@/lib/constants';
 import { resolveSource } from '@/lib/leadSource';
 import { sendLeadNotificationEmail, sendLeadConfirmationEmail } from '@/lib/email';
+import { normalizeRut } from '@/lib/rut';
 
 /**
  * Módulo de Captura de Oportunidades: crea un lead a partir del formulario
@@ -32,6 +33,8 @@ export async function createLeadFromPublicForm(input: unknown, refererHeader: st
             code: `TEMP-${randomUUID()}`,
             type: data.type,
             name: data.name,
+            rut: data.rut,
+            rutNorm: normalizeRut(data.rut),
             email: data.email,
             phone: data.phone,
             company: data.company || null,

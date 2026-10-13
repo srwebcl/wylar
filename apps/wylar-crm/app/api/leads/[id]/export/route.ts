@@ -29,6 +29,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         ['Código', lead.code],
         ['Tipo', leadTypeLabel(lead.type)],
         ['Nombre', lead.name],
+        ['RUT', lead.rut ?? ''],
         ['Empresa', lead.company ?? ''],
         ['Correo', lead.email],
         ['Teléfono', lead.phone],

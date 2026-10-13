@@ -51,6 +51,7 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
                         <tr className="bg-slate-50 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">
                             <th className="px-4 py-3">Código</th>
                             <th className="px-4 py-3">Nombre</th>
+                            <th className="px-4 py-3">RUT</th>
                             <th className="px-4 py-3">Correo</th>
                             <th className="px-4 py-3">Teléfono</th>
                             <th className="px-4 py-3">Tipo</th>
@@ -80,6 +81,9 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
                                         {lead.name}
                                     </span>
                                     {lead.company && <span className="block text-xs font-normal text-slate-400">{lead.company}</span>}
+                                </td>
+                                <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
+                                    {lead.rut || '—'}
                                 </td>
                                 <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
                                     {lead.email}

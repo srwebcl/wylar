@@ -37,6 +37,12 @@ model Lead {
   type String
 
   name    String
+  // RUT del titular/contacto, con formato (ej. "12.345.678-5"). Nullable
+  // solo por compatibilidad con leads creados antes de exigirlo — todo
+  // formulario nuevo (público o manual) lo valida y lo exige (ver
+  // src/lib/rut.ts e isValidRut en validation.ts).
+  rut     String?
+  rutNorm String? @default("")
   email   String
   phone   String
   // Nombre de la empresa/institución (solo aplica si type != PERSONA).
@@ -72,6 +78,7 @@ model Lead {
   @@index([status])
   @@index([assignedToId])
   @@index([source])
+  @@index([rutNorm])
   @@map("leads")
 }
 

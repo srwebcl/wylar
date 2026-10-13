@@ -17,11 +17,13 @@ export async function findDuplicateOpenLead({
     type,
     email,
     phone,
+    rut,
     certificationInterest,
 }: {
     type: string;
     email: string;
     phone: string;
+    rut?: string | null;
     certificationInterest?: string | null;
 }) {
     if (!PERSON_LEAD_TYPES.includes(type)) return null;
@@ -31,7 +33,7 @@ export async function findDuplicateOpenLead({
         where: {
             status: { notIn: [...TERMINAL_STATUS_VALUES] },
             certificationInterest,
-            OR: [{ email }, { phone }],
+            OR: [{ email }, { phone }, ...(rut ? [{ rut }] : [])],
         },
         orderBy: { createdAt: 'desc' },
     });

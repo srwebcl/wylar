@@ -38,8 +38,8 @@ export function LeadsSearchBar({ users }: { users: User[] }) {
                         type="text"
                         value={q}
                         onChange={(e) => setQ(e.target.value)}
-                        placeholder="Buscar por nombre, correo, teléfono o código..."
-                        className="pl-10 pr-4 py-2.5 w-80 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#0B1E40]/20 focus:border-[#0B1E40] outline-none text-sm transition-all shadow-sm"
+                        placeholder="Buscar por nombre, RUT, correo, teléfono, certificación, tipo o código..."
+                        className="pl-10 pr-4 py-2.5 w-96 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#0B1E40]/20 focus:border-[#0B1E40] outline-none text-sm transition-all shadow-sm"
                     />
                 </form>
                 <button

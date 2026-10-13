@@ -7,6 +7,7 @@ import { issueCertificate, revokeCertificate } from '@/actions/certificates';
 import { createCertificateCategory, createCertificationTitle } from '@/actions/certificateMeta';
 import { CertificatesSearchBar } from '@/components/CertificatesSearchBar';
 import { SearchableCreatableSelect } from '@/components/SearchableCreatableSelect';
+import { isValidRut, formatRut } from '@/lib/rut';
 
 interface CertificateRow {
     id: number;
@@ -164,6 +165,12 @@ export function CertificateManagement({
         setError(null);
         setSuccess(null);
 
+        if (!isValidRut(holderRut)) {
+            setError('RUT inválido. Revisa el número y el dígito verificador.');
+            return;
+        }
+        const canonicalRut = formatRut(holderRut);
+
         startTransition(async () => {
             let computedExpiryDate = null;
             if (expiryMode === 'personalizada') {
@@ -181,7 +188,7 @@ export function CertificateManagement({
 
             const result = await issueCertificate({
                 holderName,
-                holderRut,
+                holderRut: canonicalRut,
                 profileId: null,
                 certificationTitle,
                 categoryLabel: categoryLabel.trim() || 'Certificación Wylar',
@@ -267,7 +274,14 @@ export function CertificateManagement({
                                 <input value={holderName} onChange={(e) => setHolderName(e.target.value)} className={inputClass} required />
                             </Field>
                             <Field label="RUT del titular">
-                                <input value={holderRut} onChange={(e) => setHolderRut(e.target.value)} placeholder="12.345.678-9" className={inputClass} required />
+                                <input
+                                    value={holderRut}
+                                    onChange={(e) => setHolderRut(e.target.value)}
+                                    onBlur={() => { if (isValidRut(holderRut)) setHolderRut(formatRut(holderRut)); }}
+                                    placeholder="12.345.678-9"
+                                    className={inputClass}
+                                    required
+                                />
                             </Field>
                             <Field label="Nombre de la certificación">
                                 <SearchableCreatableSelect

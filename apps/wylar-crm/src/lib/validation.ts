@@ -2,8 +2,32 @@ import { z } from 'zod';
 import { isSafeUrl } from './safeUrl';
 import { ACTIVITY_TYPE_VALUES, LEAD_TYPE_VALUES, ROLES, STATUS_VALUES } from './constants';
 import { PROFILE_TEMPLATE_TYPE_VALUES, TARGET_AUDIENCE_VALUES } from './catalogSpec';
+import { isValidRut, formatRut } from './rut';
+import { isValidChileanMobile, formatChileanMobile } from './phone';
 
 const ROLE_VALUES = ROLES.map((r) => r.value) as [string, ...string[]];
+
+/** RUT: exige dígito verificador válido y normaliza al formato canónico ("12.345.678-5"). */
+const rutField = z
+    .string()
+    .trim()
+    .min(1, 'Ingresa el RUT.')
+    .refine(isValidRut, 'RUT inválido. Revisa el número y el dígito verificador.')
+    .transform(formatRut);
+
+/** Teléfono: exige que sea (o se pueda interpretar como) un celular chileno
+ * y lo normaliza siempre al formato "+56 9 XXXX XXXX". */
+const chileanPhoneField = z
+    .string()
+    .trim()
+    .transform((value, ctx) => {
+        const formatted = isValidChileanMobile(value) ? value : formatChileanMobile(value);
+        if (!formatted) {
+            ctx.addIssue({ code: 'custom', message: 'Teléfono inválido. Debe ser un celular chileno, ej: +56 9 1234 5678.' });
+            return z.NEVER;
+        }
+        return formatted;
+    });
 
 
 /**
@@ -15,8 +39,9 @@ const ROLE_VALUES = ROLES.map((r) => r.value) as [string, ...string[]];
 export const publicLeadSchema = z.object({
     type: z.enum(LEAD_TYPE_VALUES),
     name: z.string().trim().min(2, 'Ingresa el nombre completo.').max(120),
+    rut: rutField,
     email: z.string().trim().email('Correo inválido.').max(254),
-    phone: z.string().trim().min(6, 'Ingresa un teléfono de contacto.').max(30),
+    phone: chileanPhoneField,
     company: z.string().trim().max(200).optional().nullable(),
     certificationInterest: z.string().trim().max(200).optional().nullable(),
     message: z.string().trim().max(2000).optional().nullable(),
@@ -34,8 +59,9 @@ export const publicLeadSchema = z.object({
 export const manualLeadSchema = z.object({
     type: z.enum(LEAD_TYPE_VALUES),
     name: z.string().trim().min(2, 'Ingresa el nombre completo.').max(120),
+    rut: rutField,
     email: z.string().trim().email('Correo inválido.').max(254),
-    phone: z.string().trim().min(6, 'Ingresa un teléfono de contacto.').max(30),
+    phone: chileanPhoneField,
     company: z.string().trim().max(200).optional().nullable(),
     certificationInterest: z.string().trim().max(200).optional().nullable(),
     message: z.string().trim().max(2000).optional().nullable(),
@@ -193,7 +219,7 @@ export const certificationTitleSchema = z.object({
 
 export const certificateSchema = z.object({
     holderName: z.string().trim().min(2, 'Ingresa el nombre completo del titular.').max(200),
-    holderRut: z.string().trim().min(3, 'Ingresa el RUT del titular.').max(20),
+    holderRut: rutField,
     profileId: z.coerce.number().int().positive().optional().nullable(),
     certificationTitle: z.string().trim().min(2, 'Falta el nombre de la certificación.').max(300),
     categoryLabel: z.string().trim().min(2, 'Falta la categoría del certificado.').max(120),

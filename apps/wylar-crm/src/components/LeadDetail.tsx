@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
-import { Send, User as UserIcon, Calendar, Phone, Mail, Building2, GraduationCap, Tag, Clock, TimerReset, AlarmClock, FileSpreadsheet, Flag, ShieldOff } from 'lucide-react';
+import { Send, User as UserIcon, Calendar, Phone, Mail, Building2, GraduationCap, Tag, Clock, TimerReset, AlarmClock, FileSpreadsheet, Flag, ShieldOff, IdCard } from 'lucide-react';
 import clsx from 'clsx';
 import type { Lead, LeadActivity } from '@prisma/client';
 import type { SafeUser as User } from '@/lib/safeUser';
@@ -158,6 +158,12 @@ export function LeadDetail({ lead, users, dncReason }: { lead: LeadWithRelations
                                 <div className="flex items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                                     <Building2 size={16} className="text-slate-400 mr-3 shrink-0" />
                                     <span className="text-sm text-slate-700 font-medium">{lead.company}</span>
+                                </div>
+                            )}
+                            {lead.rut && (
+                                <div className="flex items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                    <IdCard size={16} className="text-slate-400 mr-3 shrink-0" />
+                                    <span className="text-sm text-slate-700 font-medium">{lead.rut}</span>
                                 </div>
                             )}
                             <div className="flex items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100">

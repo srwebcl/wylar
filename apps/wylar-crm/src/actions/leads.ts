@@ -8,6 +8,7 @@ import { activityEntrySchema, assignSchema, manualLeadSchema, statusChangeSchema
 import { SYSTEM_ACTIVITY_TYPES, statusLabel } from '@/lib/constants';
 import { audit } from '@/lib/audit';
 import { findDuplicateOpenLead } from '@/lib/leadDuplicates';
+import { normalizeRut } from '@/lib/rut';
 
 export interface LeadFormState {
     error?: string;
@@ -54,6 +55,7 @@ export async function createLeadManual(_prevState: LeadFormState, formData: Form
     const parsed = manualLeadSchema.safeParse({
         type: formData.get('type'),
         name: formData.get('name'),
+        rut: formData.get('rut'),
         email: formData.get('email'),
         phone: formData.get('phone'),
         company: formData.get('company') || null,
@@ -67,6 +69,7 @@ export async function createLeadManual(_prevState: LeadFormState, formData: Form
         type: data.type,
         email: data.email,
         phone: data.phone,
+        rut: data.rut,
         certificationInterest: data.certificationInterest,
     });
     if (duplicate) {
@@ -82,6 +85,8 @@ export async function createLeadManual(_prevState: LeadFormState, formData: Form
             code: `TEMP-${randomUUID()}`,
             type: data.type,
             name: data.name,
+            rut: data.rut,
+            rutNorm: normalizeRut(data.rut),
             email: data.email,
             phone: data.phone,
             company: data.company || null,
