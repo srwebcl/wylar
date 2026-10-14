@@ -6,14 +6,24 @@ import { Search, Filter, X } from 'lucide-react';
 import { SOURCES, STATUSES } from '@/lib/constants';
 import type { SafeUser as User } from '@/lib/safeUser';
 
-export function LeadsSearchBar({ users }: { users: User[] }) {
+const FILTER_KEYS = ['status', 'source', 'assignedToId', 'categoryId', 'productId', 'comuna', 'from', 'to'];
+
+export function LeadsSearchBar({
+    users,
+    categories = [],
+    products = [],
+}: {
+    users: User[];
+    categories?: { id: number; name: string }[];
+    products?: { id: number; name: string; categoryId: number }[];
+}) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const [, startTransition] = useTransition();
 
     const [q, setQ] = useState(searchParams.get('q') ?? '');
-    const [showFilters, setShowFilters] = useState(Boolean(searchParams.get('status') || searchParams.get('source') || searchParams.get('assignedToId')));
+    const [showFilters, setShowFilters] = useState(FILTER_KEYS.some((k) => searchParams.get(k)));
 
     function updateParam(name: string, value: string) {
         const params = new URLSearchParams(searchParams.toString());
@@ -27,7 +37,9 @@ export function LeadsSearchBar({ users }: { users: User[] }) {
         startTransition(() => router.push(pathname));
     }
 
-    const hasFilters = Boolean(searchParams.get('q') || searchParams.get('status') || searchParams.get('source') || searchParams.get('assignedToId'));
+    const hasFilters = Boolean(searchParams.get('q')) || FILTER_KEYS.some((k) => searchParams.get(k));
+    const categoryId = searchParams.get('categoryId') ?? '';
+    const filteredProducts = categoryId ? products.filter((p) => String(p.categoryId) === categoryId) : products;
 
     return (
         <div className="space-y-3 mb-5">
@@ -79,6 +91,45 @@ export function LeadsSearchBar({ users }: { users: User[] }) {
                             <option value="sin-asignar">Sin asignar</option>
                             {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
                         </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-1">Categoría</label>
+                        <select
+                            defaultValue={categoryId}
+                            onChange={(e) => {
+                                updateParam('categoryId', e.target.value);
+                                updateParam('productId', '');
+                            }}
+                            className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none"
+                        >
+                            <option value="">Todas</option>
+                            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-1">Producto</label>
+                        <select defaultValue={searchParams.get('productId') ?? ''} onChange={(e) => updateParam('productId', e.target.value)} className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
+                            <option value="">Todos</option>
+                            {filteredProducts.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-1">Comuna</label>
+                        <input
+                            type="text"
+                            defaultValue={searchParams.get('comuna') ?? ''}
+                            onBlur={(e) => updateParam('comuna', e.target.value)}
+                            placeholder="Ej: Calama"
+                            className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none w-32"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-1">Desde</label>
+                        <input type="date" defaultValue={searchParams.get('from') ?? ''} onChange={(e) => updateParam('from', e.target.value)} className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-1">Hasta</label>
+                        <input type="date" defaultValue={searchParams.get('to') ?? ''} onChange={(e) => updateParam('to', e.target.value)} className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" />
                     </div>
                 </div>
             )}

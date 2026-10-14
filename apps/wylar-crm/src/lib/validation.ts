@@ -43,7 +43,8 @@ export const publicLeadSchema = z.object({
     email: z.string().trim().email('Correo inválido.').max(254),
     phone: chileanPhoneField,
     company: z.string().trim().max(200).optional().nullable(),
-    certificationInterest: z.string().trim().max(200).optional().nullable(),
+    productId: z.coerce.number().int().positive('Selecciona un producto o servicio.'),
+    comuna: z.string().trim().max(120).optional().nullable(),
     message: z.string().trim().max(2000).optional().nullable(),
     source: z.string().trim().min(1).max(50).optional(),
     sourceDetail: z.string().trim().max(2000).optional().nullable(),
@@ -52,10 +53,11 @@ export const publicLeadSchema = z.object({
     website: z.string().max(200).optional(),
 });
 
-// Alta manual de un prospecto desde el propio CRM (ver /leads, botón "Nuevo
-// prospecto"). A diferencia del formulario público, el source lo fija el
-// servidor ('MANUAL'), no hay honeypot (hay sesión autenticada de por medio),
-// y el mensaje se usa como nota inicial en vez de "mensaje del formulario".
+// Alta manual de una oportunidad desde el propio CRM (ver /leads, botón
+// "Nueva oportunidad"). A diferencia del formulario público, el source lo
+// fija el servidor ('MANUAL'), no hay honeypot (hay sesión autenticada de
+// por medio), y el mensaje se usa como nota inicial en vez de "mensaje del
+// formulario".
 export const manualLeadSchema = z.object({
     type: z.enum(LEAD_TYPE_VALUES),
     name: z.string().trim().min(2, 'Ingresa el nombre completo.').max(120),
@@ -63,8 +65,57 @@ export const manualLeadSchema = z.object({
     email: z.string().trim().email('Correo inválido.').max(254),
     phone: chileanPhoneField,
     company: z.string().trim().max(200).optional().nullable(),
-    certificationInterest: z.string().trim().max(200).optional().nullable(),
+    productId: z.coerce.number().int().positive('Selecciona un producto o servicio.'),
+    comuna: z.string().trim().max(120).optional().nullable(),
     message: z.string().trim().max(2000).optional().nullable(),
+});
+
+// --- Módulo de Clientes ---
+
+export const clientUpdateSchema = z.object({
+    name: z.string().trim().min(2, 'Ingresa el nombre completo.').max(120),
+    rut: rutField,
+    email: z.string().trim().email('Correo inválido.').max(254),
+    phone: chileanPhoneField,
+    company: z.string().trim().max(200).optional().nullable(),
+});
+
+export const clientContactSchema = z.object({
+    name: z.string().trim().min(2, 'Ingresa el nombre del contacto.').max(120),
+    role: z.string().trim().max(120).optional().nullable(),
+    email: z.string().trim().email('Correo inválido.').max(254).optional().or(z.literal('')),
+    phone: z.string().trim().max(30).optional().or(z.literal('')),
+});
+
+// --- Módulo de Productos ---
+
+export const productCategorySchema = z.object({
+    name: z.string().trim().min(2, 'Ingresa un nombre de categoría.').max(120),
+    attributeTemplate: z.string().trim().min(1).max(40),
+});
+
+export const productSchema = z.object({
+    categoryId: z.coerce.number().int().positive('Selecciona una categoría.'),
+    name: z.string().trim().min(2, 'Ingresa el nombre del producto.').max(200),
+    description: z.string().trim().max(2000).optional().nullable(),
+    price: z.coerce.number().nonnegative('El precio no puede ser negativo.').optional().nullable(),
+    profileId: z.coerce.number().int().positive().optional().nullable(),
+    attributes: z.record(z.string(), z.string()).optional().nullable(),
+});
+
+// --- Módulo de Cotizaciones ---
+
+export const quoteItemSchema = z.object({
+    productId: z.coerce.number().int().positive().optional().nullable(),
+    description: z.string().trim().min(1, 'Falta la descripción del ítem.').max(300),
+    quantity: z.coerce.number().int().positive('La cantidad debe ser mayor a cero.'),
+    unitPrice: z.coerce.number().nonnegative('El precio unitario no puede ser negativo.'),
+});
+
+export const quoteSchema = z.object({
+    opportunityId: z.coerce.number().int().positive(),
+    notes: z.string().trim().max(2000).optional().nullable(),
+    items: z.array(quoteItemSchema).min(1, 'Agrega al menos un ítem a la cotización.'),
 });
 
 export const activityEntrySchema = z.object({

@@ -17,8 +17,13 @@ fs.mkdirSync(dir, { recursive: true });
 
 const tables = {
     users: () => prisma.user.findMany(),
+    clients: () => prisma.client.findMany(),
+    client_contacts: () => prisma.clientContact.findMany(),
     leads: () => prisma.lead.findMany(),
     lead_activities: () => prisma.leadActivity.findMany(),
+    product_categories: () => prisma.productCategory.findMany(),
+    products: () => prisma.product.findMany(),
+    quotes: () => prisma.quote.findMany({ include: { items: true } }),
     profiles: () => prisma.profile.findMany({ include: { sections: { include: { items: true } }, faqs: true } }),
     certificates: () => prisma.certificate.findMany(),
     hero_slides: () => prisma.heroSlide.findMany(),

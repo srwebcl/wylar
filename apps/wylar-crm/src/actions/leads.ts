@@ -7,16 +7,22 @@ import { requireUser, requireAdmin } from '@/lib/auth';
 import { activityEntrySchema, assignSchema, manualLeadSchema, statusChangeSchema } from '@/lib/validation';
 import { SYSTEM_ACTIVITY_TYPES, statusLabel } from '@/lib/constants';
 import { audit } from '@/lib/audit';
-import { findDuplicateOpenLead } from '@/lib/leadDuplicates';
+import { findDuplicateOpenLead, findSimilarOpenOpportunity } from '@/lib/leadDuplicates';
 import { normalizeRut } from '@/lib/rut';
+import { findOrCreateClient } from '@/lib/clients';
 
 export interface LeadFormState {
     error?: string;
     success?: string;
-    // Cuando el bloqueo es por duplicado, se deja el código/id del prospecto
-    // existente para que el formulario pueda ofrecer un link directo.
+    // Cuando el bloqueo es por duplicado, se deja el código/id de la
+    // oportunidad existente para que el formulario pueda ofrecer un link directo.
     duplicateLeadId?: number;
     duplicateLeadCode?: string;
+    // Para empresas/OTEC/instituciones: no bloquea, solo informa que ya
+    // existe algo similar — el formulario debe reenviar con
+    // confirmSimilar=1 para crearla igual.
+    similarOpportunityId?: number;
+    similarOpportunityCode?: string;
 }
 
 /** Registra una gestión (nota, llamada, WhatsApp, email, reunión) en la bitácora del lead. */
@@ -41,13 +47,13 @@ export async function addLeadActivity(leadId: number, _prevState: LeadFormState,
 }
 
 /**
- * Alta manual de un prospecto desde el propio CRM (botón "Nuevo prospecto"
- * en /leads). Aplica la misma regla de duplicados que el resto del
- * sistema: para Persona/Alumno Becado, si ya existe un prospecto ABIERTO
- * con el mismo correo o teléfono y el mismo interés de certificación, se
- * bloquea la creación y se informa cuál es el prospecto existente — las
- * empresas/instituciones/OTEC no tienen esta restricción (cada negocio es
- * su propio prospecto, aunque repita certificación).
+ * Alta manual de una oportunidad desde el propio CRM (botón "Nueva
+ * oportunidad" en /leads). Aplica la misma regla de duplicados que el
+ * resto del sistema: para Persona/Alumno Becado, si ya existe una
+ * oportunidad ABIERTA con el mismo correo/teléfono/RUT y el mismo
+ * producto, se bloquea la creación y se informa cuál es la existente —
+ * las empresas/instituciones/OTEC no tienen esa restricción dura, solo se
+ * les advierte (no bloqueante, ver confirmSimilar).
  */
 export async function createLeadManual(_prevState: LeadFormState, formData: FormData): Promise<LeadFormState> {
     const currentUser = await requireUser();
@@ -59,26 +65,46 @@ export async function createLeadManual(_prevState: LeadFormState, formData: Form
         email: formData.get('email'),
         phone: formData.get('phone'),
         company: formData.get('company') || null,
-        certificationInterest: formData.get('certificationInterest') || null,
+        productId: formData.get('productId'),
+        comuna: formData.get('comuna') || null,
         message: formData.get('message') || null,
     });
     if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Revisa los datos ingresados.' };
     const data = parsed.data;
 
-    const duplicate = await findDuplicateOpenLead({
-        type: data.type,
-        email: data.email,
-        phone: data.phone,
-        rut: data.rut,
-        certificationInterest: data.certificationInterest,
-    });
+    const product = await prisma.product.findUnique({ where: { id: data.productId } });
+    if (!product) return { error: 'El producto seleccionado no existe.' };
+
+    const duplicate = await findDuplicateOpenLead({ type: data.type, email: data.email, phone: data.phone, rut: data.rut, productId: data.productId });
     if (duplicate) {
         return {
-            error: `Ya existe un prospecto abierto para ${duplicate.name} con el mismo interés (${duplicate.code}). Gestiónalo ahí en vez de crear uno nuevo.`,
+            error: `Ya existe una oportunidad abierta para ${duplicate.name} con el mismo producto (${duplicate.code}). Gestiónala ahí en vez de crear una nueva.`,
             duplicateLeadId: duplicate.id,
             duplicateLeadCode: duplicate.code,
         };
     }
+
+    const confirmSimilar = formData.get('confirmSimilar') === '1';
+    if (!confirmSimilar) {
+        const similar = await findSimilarOpenOpportunity({ type: data.type, email: data.email, phone: data.phone, rut: data.rut, productId: data.productId });
+        if (similar) {
+            return {
+                error: `Ya existe una oportunidad similar abierta (${similar.code}). Puedes crear esta igual si corresponde a un negocio distinto.`,
+                similarOpportunityId: similar.id,
+                similarOpportunityCode: similar.code,
+            };
+        }
+    }
+
+    const client = await findOrCreateClient({
+        type: data.type,
+        name: data.name,
+        rut: data.rut,
+        rutNorm: normalizeRut(data.rut),
+        email: data.email,
+        phone: data.phone,
+        company: data.company,
+    });
 
     const lead = await prisma.lead.create({
         data: {
@@ -90,7 +116,10 @@ export async function createLeadManual(_prevState: LeadFormState, formData: Form
             email: data.email,
             phone: data.phone,
             company: data.company || null,
-            certificationInterest: data.certificationInterest || null,
+            clientId: client.id,
+            productId: product.id,
+            certificationInterest: product.name,
+            comuna: data.comuna || null,
             message: data.message || null,
             source: 'MANUAL',
             sourceDetail: `Ingresado manualmente por ${currentUser.name}.`,
@@ -106,7 +135,7 @@ export async function createLeadManual(_prevState: LeadFormState, formData: Form
             userId: currentUser.id,
             authorName: currentUser.name,
             type: SYSTEM_ACTIVITY_TYPES.CREACION,
-            text: `Prospecto ingresado manualmente por ${currentUser.name}.`,
+            text: `Oportunidad ingresada manualmente por ${currentUser.name}.`,
         },
     });
 
@@ -114,7 +143,7 @@ export async function createLeadManual(_prevState: LeadFormState, formData: Form
 
     revalidatePath('/leads');
     revalidatePath('/');
-    return { success: `Prospecto ${code} creado.` };
+    return { success: `Oportunidad ${code} creada.` };
 }
 
 /**
@@ -211,14 +240,14 @@ export async function deleteLead(leadId: number): Promise<LeadFormState> {
     const admin = await requireAdmin();
 
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
-    if (!lead) return { error: 'El prospecto no existe.' };
+    if (!lead) return { error: 'La oportunidad no existe.' };
 
     await prisma.lead.delete({ where: { id: leadId } });
     await audit(admin, 'LEAD_ELIMINADO', 'lead', lead.code, `${lead.name} · ${lead.email}`);
 
     revalidatePath('/leads');
     revalidatePath('/');
-    return { success: `Prospecto ${lead.code} eliminado.` };
+    return { success: `Oportunidad ${lead.code} eliminada.` };
 }
 
 /** Auditoría de Tiempos de Respuesta: registra la fecha de la primera atención, una sola vez. */

@@ -9,13 +9,18 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     await requireUser();
     const { id } = await params;
     const leadId = Number(id);
-    if (!Number.isInteger(leadId)) return new Response('Prospecto inválido.', { status: 400 });
+    if (!Number.isInteger(leadId)) return new Response('Oportunidad inválida.', { status: 400 });
 
     const lead = await prisma.lead.findUnique({
         where: { id: leadId },
-        include: { assignedTo: { select: { name: true } }, activities: { orderBy: { createdAt: 'asc' } } },
+        include: {
+            assignedTo: { select: { name: true } },
+            activities: { orderBy: { createdAt: 'asc' } },
+            product: { include: { category: true } },
+            quotes: { include: { items: true }, orderBy: { version: 'asc' } },
+        },
     });
-    if (!lead) return new Response('Prospecto no encontrado.', { status: 404 });
+    if (!lead) return new Response('Oportunidad no encontrada.', { status: 404 });
 
     const workbook = new ExcelJS.Workbook();
 
@@ -33,7 +38,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         ['Empresa', lead.company ?? ''],
         ['Correo', lead.email],
         ['Teléfono', lead.phone],
-        ['Certificación de interés', lead.certificationInterest ?? ''],
+        ['Producto', lead.product?.name ?? lead.certificationInterest ?? ''],
+        ['Categoría', lead.product?.category.name ?? ''],
+        ['Comuna', lead.comuna ?? ''],
         ['Estado', statusLabel(lead.status)],
         ['Motivo desistimiento', lead.lostReason ?? ''],
         ['Origen', sourceLabel(lead.source)],
@@ -62,6 +69,35 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         });
     }
     activitiesSheet.getColumn('text').alignment = { wrapText: true, vertical: 'top' };
+
+    const quotesSheet = workbook.addWorksheet('Cotizaciones');
+    quotesSheet.columns = [
+        { header: 'Código', key: 'code', width: 14 },
+        { header: 'Versión', key: 'version', width: 10 },
+        { header: 'Estado', key: 'status', width: 16 },
+        { header: 'Ítem', key: 'item', width: 36 },
+        { header: 'Cantidad', key: 'quantity', width: 10 },
+        { header: 'Precio unitario', key: 'unitPrice', width: 16 },
+        { header: 'Subtotal', key: 'subtotal', width: 16 },
+        { header: 'Total cotización', key: 'total', width: 16 },
+        { header: 'Fecha', key: 'date', width: 18 },
+    ];
+    quotesSheet.getRow(1).font = { bold: true };
+    for (const q of lead.quotes) {
+        for (const item of q.items) {
+            quotesSheet.addRow({
+                code: q.code,
+                version: q.version,
+                status: q.status,
+                item: item.description,
+                quantity: item.quantity,
+                unitPrice: Number(item.unitPrice),
+                subtotal: Number(item.subtotal),
+                total: Number(q.total),
+                date: q.issueDate.toLocaleDateString('es-CL'),
+            });
+        }
+    }
 
     const buffer = await workbook.xlsx.writeBuffer();
     const filename = `${lead.code}-gestiones.xlsx`;

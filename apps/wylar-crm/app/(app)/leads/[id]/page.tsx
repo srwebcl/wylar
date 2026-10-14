@@ -11,7 +11,13 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     const [lead, users] = await Promise.all([
         prisma.lead.findUnique({
             where: { id: leadId },
-            include: { assignedTo: { omit: { passwordHash: true } }, activities: { orderBy: { createdAt: 'asc' } } },
+            include: {
+                assignedTo: { omit: { passwordHash: true } },
+                activities: { orderBy: { createdAt: 'asc' } },
+                client: true,
+                product: { include: { category: true } },
+                quotes: { include: { items: true }, orderBy: { version: 'desc' } },
+            },
         }),
         prisma.user.findMany({ where: { active: true }, orderBy: { name: 'asc' }, omit: { passwordHash: true } }),
     ]);
@@ -19,6 +25,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     if (!lead) notFound();
 
     const dnc = await checkDoNotContact(lead.email, lead.phone);
+    const products = await prisma.product.findMany({ where: { active: true }, orderBy: { name: 'asc' }, select: { id: true, name: true, price: true } });
 
-    return <LeadDetail lead={lead} users={users} dncReason={dnc?.reason ?? null} />;
+    return <LeadDetail lead={lead} users={users} dncReason={dnc?.reason ?? null} products={products} />;
 }

@@ -1,15 +1,23 @@
 'use client';
 
 import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
-import { Send, User as UserIcon, Calendar, Phone, Mail, Building2, GraduationCap, Tag, Clock, TimerReset, AlarmClock, FileSpreadsheet, Flag, ShieldOff, IdCard } from 'lucide-react';
+import Link from 'next/link';
+import { Send, User as UserIcon, Calendar, Phone, Mail, Building2, GraduationCap, Tag, Clock, TimerReset, AlarmClock, FileSpreadsheet, Flag, ShieldOff, IdCard, MapPin, Contact } from 'lucide-react';
 import clsx from 'clsx';
-import type { Lead, LeadActivity } from '@prisma/client';
+import type { Lead, LeadActivity, Client, Product, ProductCategory, Quote, QuoteItem } from '@prisma/client';
 import type { SafeUser as User } from '@/lib/safeUser';
 import { addLeadActivity, assignLead, changeLeadStatusForm, type LeadFormState } from '@/actions/leads';
 import { markDoNotContact, unmarkDoNotContact, type DoNotContactState } from '@/actions/doNotContact';
 import { ACTIVITY_TYPES, STATUSES, SOURCES, leadTypeLabel, sourceLabel, activityTypeLabel, formatDuration } from '@/lib/constants';
+import { QuotesPanel } from '@/components/QuotesPanel';
 
-type LeadWithRelations = Lead & { assignedTo: User | null; activities: LeadActivity[] };
+type LeadWithRelations = Lead & {
+    assignedTo: User | null;
+    activities: LeadActivity[];
+    client: Client;
+    product: (Product & { category: ProductCategory }) | null;
+    quotes: (Quote & { items: QuoteItem[] })[];
+};
 
 function statusStyle(s: string) {
     switch (s) {
@@ -25,7 +33,17 @@ function statusStyle(s: string) {
 const initialState: LeadFormState = {};
 const initialDncState: DoNotContactState = {};
 
-export function LeadDetail({ lead, users, dncReason }: { lead: LeadWithRelations; users: User[]; dncReason: string | null }) {
+export function LeadDetail({
+    lead,
+    users,
+    dncReason,
+    products,
+}: {
+    lead: LeadWithRelations;
+    users: User[];
+    dncReason: string | null;
+    products: { id: number; name: string; price: unknown }[];
+}) {
     const chatEndRef = useRef<HTMLDivElement>(null);
     const noteFormRef = useRef<HTMLFormElement>(null);
 
@@ -144,10 +162,13 @@ export function LeadDetail({ lead, users, dncReason }: { lead: LeadWithRelations
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="space-y-6">
                     <div className="glass-card overflow-hidden">
-                        <div className="bg-gradient-to-r from-[#0B1E40] to-[#122b59] p-4">
+                        <div className="bg-gradient-to-r from-[#0B1E40] to-[#122b59] p-4 flex items-center justify-between">
                             <h3 className="text-lg font-bold text-white flex items-center">
-                                <UserIcon size={18} className="mr-2 text-amber-400" /> Ficha del prospecto
+                                <UserIcon size={18} className="mr-2 text-amber-400" /> Ficha del cliente
                             </h3>
+                            <Link href={`/clientes/${lead.clientId}`} className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1">
+                                <Contact size={14} /> Ver cliente
+                            </Link>
                         </div>
                         <div className="p-5 space-y-4 bg-white">
                             <div>
@@ -223,10 +244,20 @@ export function LeadDetail({ lead, users, dncReason }: { lead: LeadWithRelations
                             <div className="flex items-start">
                                 <GraduationCap size={16} className="text-slate-400 mr-3 mt-0.5 shrink-0" />
                                 <div>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Certificación de interés</p>
-                                    <p className="font-bold text-slate-800">{lead.certificationInterest || 'No especificada'}</p>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Producto / servicio</p>
+                                    <p className="font-bold text-slate-800">{lead.product?.name ?? lead.certificationInterest ?? 'No especificado'}</p>
+                                    {lead.product && <p className="text-xs text-slate-500 mt-0.5">{lead.product.category.name}</p>}
                                 </div>
                             </div>
+                            {lead.comuna && (
+                                <div className="flex items-start">
+                                    <MapPin size={16} className="text-slate-400 mr-3 mt-0.5 shrink-0" />
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Comuna</p>
+                                        <p className="font-bold text-slate-800">{lead.comuna}</p>
+                                    </div>
+                                </div>
+                            )}
                             <div className="pt-4 border-t border-slate-100">
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Origen (rastreo)</p>
                                 <p className="font-bold text-slate-800">{SOURCES.find((s) => s.value === lead.source)?.label ?? lead.source}</p>
@@ -253,6 +284,8 @@ export function LeadDetail({ lead, users, dncReason }: { lead: LeadWithRelations
                             </div>
                         </div>
                     </div>
+
+                    <QuotesPanel opportunityId={lead.id} quotes={lead.quotes} products={products} />
                 </div>
 
                 <div className="lg:col-span-2 glass-card flex flex-col h-[750px] overflow-hidden">

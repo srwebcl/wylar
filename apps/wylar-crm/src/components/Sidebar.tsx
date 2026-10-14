@@ -2,15 +2,24 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { KanbanSquare, ListChecks, Users, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal, ScrollText, Settings, FileBadge } from 'lucide-react';
+import { KanbanSquare, ListChecks, Users, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal, ScrollText, Settings, FileBadge, Contact, Package, Tags } from 'lucide-react';
 import clsx from 'clsx';
 import { Logo } from '@/components/Logo';
 import type { SafeUser as User } from '@/lib/safeUser';
 
 const CRM_NAV_ITEMS = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: (p: string) => p === '/dashboard', adminOnly: false },
-    { href: '/', label: 'Tablero Leads', icon: KanbanSquare, match: (p: string) => p === '/', adminOnly: false },
-    { href: '/leads', label: 'Prospectos', icon: ListChecks, match: (p: string) => p.startsWith('/leads'), adminOnly: false },
+    { href: '/', label: 'Tablero Oportunidades', icon: KanbanSquare, match: (p: string) => p === '/', adminOnly: false },
+    { href: '/leads', label: 'Oportunidades', icon: ListChecks, match: (p: string) => p.startsWith('/leads'), adminOnly: false },
+    { href: '/clientes', label: 'Clientes', icon: Contact, match: (p: string) => p.startsWith('/clientes'), adminOnly: false },
+    {
+        href: '/productos',
+        label: 'Productos',
+        icon: Package,
+        match: (p: string) => p === '/productos',
+        adminOnly: false,
+        children: [{ href: '/productos/categorias', label: 'Categorías', icon: Tags, match: (p: string) => p.startsWith('/productos/categorias') }],
+    },
 ];
 
 const WEB_NAV_ITEMS = [

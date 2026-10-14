@@ -30,6 +30,12 @@ async function main() {
     }
     const [admin, camila, matias] = createdUsers;
 
+    const category = await prisma.productCategory.upsert({
+        where: { name: 'Certificaciones privadas' },
+        update: {},
+        create: { name: 'Certificaciones privadas', attributeTemplate: 'GENERICO' },
+    });
+
     const existingLeads = await prisma.lead.count();
     if (existingLeads === 0) {
         const seedLeads = [
@@ -60,6 +66,11 @@ async function main() {
             const firstAttendedAt = s.attended ? new Date(createdAt.getTime() + 45 * 60 * 1000) : null;
             const closedAt = s.closed ? new Date() : null;
 
+            const client = await prisma.client.create({
+                data: { type: s.type, name: s.name, email: s.email, phone: s.phone, company: s.company ?? null },
+            });
+            const product = await prisma.product.create({ data: { name: s.certificationInterest, categoryId: category.id } });
+
             const lead = await prisma.lead.create({
                 data: {
                     code: 'TEMP',
@@ -68,6 +79,8 @@ async function main() {
                     company: s.company ?? null,
                     email: s.email,
                     phone: s.phone,
+                    clientId: client.id,
+                    productId: product.id,
                     certificationInterest: s.certificationInterest,
                     message: s.message,
                     source: s.source,
@@ -82,7 +95,7 @@ async function main() {
             await prisma.lead.update({ where: { id: lead.id }, data: { code: `LEAD-${1000 + lead.id}` } });
 
             await prisma.leadActivity.create({
-                data: { leadId: lead.id, userId: null, authorName: 'Sistema', type: 'CREACION', text: `Prospecto ingresado automáticamente desde el sitio web (canal: ${s.source}).`, createdAt },
+                data: { leadId: lead.id, userId: null, authorName: 'Sistema', type: 'CREACION', text: `Oportunidad ingresada automáticamente desde el sitio web (canal: ${s.source}).`, createdAt },
             });
             if (s.attended && s.assignedToId) {
                 const author = createdUsers.find((u) => u.id === s.assignedToId)!;

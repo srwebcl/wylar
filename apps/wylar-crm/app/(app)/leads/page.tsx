@@ -16,17 +16,18 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
     const page = Math.max(1, Number.parseInt(params.page ?? '1', 10) || 1);
     const where = buildLeadsWhere(params);
 
-    const [leads, total, users, certificationRows] = await Promise.all([
+    const [leads, total, users, categories, products] = await Promise.all([
         prisma.lead.findMany({
             where,
-            include: { assignedTo: { omit: { passwordHash: true } } },
+            include: { assignedTo: { omit: { passwordHash: true } }, client: true, product: { include: { category: true } } },
             orderBy: { createdAt: 'desc' },
             take: PAGE_SIZE,
             skip: (page - 1) * PAGE_SIZE,
         }),
         prisma.lead.count({ where }),
         prisma.user.findMany({ where: { active: true }, orderBy: { name: 'asc' }, omit: { passwordHash: true } }),
-        prisma.lead.findMany({ select: { certificationInterest: true }, distinct: ['certificationInterest'], where: { certificationInterest: { not: null } } }),
+        prisma.productCategory.findMany({ where: { active: true }, orderBy: { name: 'asc' } }),
+        prisma.product.findMany({ where: { active: true }, orderBy: { name: 'asc' }, select: { id: true, name: true, categoryId: true } }),
     ]);
 
     const dncMap = await loadDoNotContactMap(leads.map((l) => ({ email: l.email, phone: l.phone })));
@@ -46,8 +47,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         <div>
             <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
                 <div>
-                    <h1 className="text-2xl font-extrabold text-slate-900">Prospectos</h1>
-                    <p className="text-slate-500 text-sm mt-1">Ficha única de cada cliente — busca, filtra y entra al detalle. {total} en total.</p>
+                    <h1 className="text-2xl font-extrabold text-slate-900">Oportunidades</h1>
+                    <p className="text-slate-500 text-sm mt-1">Cada venta potencial de un cliente — busca, filtra y entra al detalle. {total} en total.</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                     <Link
@@ -57,11 +58,11 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                     >
                         <FileSpreadsheet size={16} /> Exportar
                     </Link>
-                    <CreateLeadModal certificationSuggestions={certificationRows.map((c) => c.certificationInterest!).filter(Boolean)} />
+                    <CreateLeadModal categories={categories} products={products} />
                 </div>
             </div>
 
-            <LeadsSearchBar users={users} />
+            <LeadsSearchBar users={users} categories={categories} products={products} />
             <LeadsTable leads={leads} isAdmin={currentUser.role === 'ADMIN'} dncMap={dncMap} />
 
             {totalPages > 1 && (

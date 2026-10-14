@@ -2,13 +2,13 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { Trash2, Loader2, ShieldOff } from 'lucide-react';
+import { Trash2, Loader2, ShieldOff, Contact } from 'lucide-react';
 import { leadTypeLabel, sourceLabel, statusLabel } from '@/lib/constants';
 import { deleteLead } from '@/actions/leads';
-import type { Lead } from '@prisma/client';
+import type { Lead, Product, ProductCategory } from '@prisma/client';
 import type { SafeUser as User } from '@/lib/safeUser';
 
-type LeadWithAssignee = Lead & { assignedTo: User | null };
+type LeadWithAssignee = Lead & { assignedTo: User | null; product: (Product & { category: ProductCategory }) | null };
 
 const STATUS_BADGE: Record<string, string> = {
     NUEVO: 'bg-cyan-50 text-cyan-700 border-cyan-200',
@@ -24,7 +24,7 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
     const [error, setError] = useState<string | null>(null);
 
     function handleDelete(id: number, code: string, name: string) {
-        if (!confirm(`¿Eliminar el prospecto ${code} (${name})? Esta acción no se puede deshacer. Queda registrado en la auditoría.`)) return;
+        if (!confirm(`¿Eliminar la oportunidad ${code} (${name})? Esta acción no se puede deshacer. Queda registrado en la auditoría.`)) return;
         setError(null);
         setPendingId(id);
         startTransition(async () => {
@@ -37,7 +37,7 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
     if (leads.length === 0) {
         return (
             <div className="glass-card p-10 text-center text-slate-500">
-                No hay prospectos que coincidan con el filtro.
+                No hay oportunidades que coincidan con el filtro.
             </div>
         );
     }
@@ -55,7 +55,8 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
                             <th className="px-4 py-3">Correo</th>
                             <th className="px-4 py-3">Teléfono</th>
                             <th className="px-4 py-3">Tipo</th>
-                            <th className="px-4 py-3">Certificación</th>
+                            <th className="px-4 py-3">Producto</th>
+                            <th className="px-4 py-3">Categoría</th>
                             <th className="px-4 py-3">Origen</th>
                             <th className="px-4 py-3">Responsable</th>
                             <th className="px-4 py-3">Estado</th>
@@ -79,6 +80,9 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
                                             </span>
                                         )}
                                         {lead.name}
+                                        <Link href={`/clientes/${lead.clientId}`} title="Ver ficha del cliente" className="text-slate-300 hover:text-[#0B1E40] transition-colors">
+                                            <Contact size={13} />
+                                        </Link>
                                     </span>
                                     {lead.company && <span className="block text-xs font-normal text-slate-400">{lead.company}</span>}
                                 </td>
@@ -92,7 +96,8 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
                                     {lead.phone}
                                 </td>
                                 <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{leadTypeLabel(lead.type)}</td>
-                                <td className="px-4 py-3 text-slate-600 max-w-[200px] truncate">{lead.certificationInterest || '—'}</td>
+                                <td className="px-4 py-3 text-slate-600 max-w-[200px] truncate">{lead.product?.name ?? lead.certificationInterest ?? '—'}</td>
+                                <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">{lead.product?.category.name ?? '—'}</td>
                                 <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{sourceLabel(lead.source)}</td>
                                 <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{lead.assignedTo?.name ?? <span className="text-slate-400 italic">Sin asignar</span>}</td>
                                 <td className="px-4 py-3 whitespace-nowrap">
@@ -109,7 +114,7 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
                                             type="button"
                                             onClick={() => handleDelete(lead.id, lead.code, lead.name)}
                                             disabled={isPending && pendingId === lead.id}
-                                            title="Eliminar prospecto"
+                                            title="Eliminar oportunidad"
                                             className="text-slate-300 hover:text-red-600 disabled:opacity-50 transition-colors"
                                         >
                                             {isPending && pendingId === lead.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}

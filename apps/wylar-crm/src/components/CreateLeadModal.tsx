@@ -13,9 +13,19 @@ const inputClass =
     'w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B1E40]/20 focus:border-[#0B1E40] focus:bg-white transition-all text-sm text-slate-900';
 const errorInputClass = 'ring-2 ring-red-300 border-red-300';
 
-const initialFields = { type: 'PERSONA', name: '', rut: '', email: '', phone: '', company: '', certificationInterest: '', message: '' };
+const initialFields = { type: 'PERSONA', name: '', rut: '', email: '', phone: '', company: '', productId: '', comuna: '', message: '' };
 
-export function CreateLeadModal({ certificationSuggestions }: { certificationSuggestions: string[] }) {
+interface Category {
+    id: number;
+    name: string;
+}
+interface ProductOption {
+    id: number;
+    name: string;
+    categoryId: number;
+}
+
+export function CreateLeadModal({ categories, products }: { categories: Category[]; products: ProductOption[] }) {
     const [open, setOpen] = useState(false);
     const [fields, setFields] = useState(initialFields);
     const [fieldErrors, setFieldErrors] = useState<{ rut?: string; phone?: string }>({});
@@ -46,8 +56,7 @@ export function CreateLeadModal({ certificationSuggestions }: { certificationSug
         }
     }
 
-    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
+    function submitWith(form: HTMLFormElement, confirm: boolean) {
         const rutOk = isValidRut(fields.rut);
         const phoneCanonical = isValidChileanMobile(fields.phone) ? fields.phone : formatChileanMobile(fields.phone);
         const errors: { rut?: string; phone?: string } = {};
@@ -59,10 +68,22 @@ export function CreateLeadModal({ certificationSuggestions }: { certificationSug
         const canonicalRut = formatRut(fields.rut);
         setFields((f) => ({ ...f, rut: canonicalRut, phone: phoneCanonical! }));
 
-        const fd = new FormData(e.currentTarget);
+        const fd = new FormData(form);
         fd.set('rut', canonicalRut);
         fd.set('phone', phoneCanonical!);
+        if (confirm) fd.set('confirmSimilar', '1');
         formAction(fd);
+    }
+
+    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        submitWith(e.currentTarget, false);
+    }
+
+    function handleConfirmSimilar(e: React.MouseEvent<HTMLButtonElement>) {
+        const form = e.currentTarget.closest('form');
+        if (!form) return;
+        submitWith(form, true);
     }
 
     useEffect(() => {
@@ -83,14 +104,18 @@ export function CreateLeadModal({ certificationSuggestions }: { certificationSug
     }, [open]);
 
     const isPerson = PERSON_LEAD_TYPES.includes(fields.type);
+    const productsByCategory = categories.map((c) => ({ category: c, options: products.filter((p) => p.categoryId === c.id) }));
 
     return (
         <>
             <button
-                onClick={() => setOpen(true)}
+                onClick={() => {
+                    setFields(initialFields);
+                    setOpen(true);
+                }}
                 className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm shrink-0"
             >
-                <Plus size={18} /> Nuevo prospecto
+                <Plus size={18} /> Nueva oportunidad
             </button>
 
             {open && (
@@ -101,7 +126,7 @@ export function CreateLeadModal({ certificationSuggestions }: { certificationSug
                         className="glass-card bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4"
                     >
                         <div className="flex items-center justify-between">
-                            <h2 className="font-bold text-slate-900">Nuevo prospecto</h2>
+                            <h2 className="font-bold text-slate-900">Nueva oportunidad</h2>
                             <button type="button" onClick={() => setOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Cerrar">
                                 <X size={20} />
                             </button>
@@ -114,6 +139,16 @@ export function CreateLeadModal({ certificationSuggestions }: { certificationSug
                                     <Link href={`/leads/${state.duplicateLeadId}`} className="block mt-1 font-bold underline">
                                         Ir a {state.duplicateLeadCode} →
                                     </Link>
+                                )}
+                                {state.similarOpportunityId && (
+                                    <div className="mt-2 flex items-center gap-3">
+                                        <Link href={`/leads/${state.similarOpportunityId}`} className="font-bold underline">
+                                            Ver {state.similarOpportunityCode} →
+                                        </Link>
+                                        <button type="button" onClick={handleConfirmSimilar} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold rounded-lg text-xs">
+                                            Crear de todas formas
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         )}
@@ -170,13 +205,28 @@ export function CreateLeadModal({ certificationSuggestions }: { certificationSug
                                 </label>
                             )}
                             <label className="block">
-                                <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Certificación de interés</span>
-                                <input name="certificationInterest" list="certification-suggestions" value={fields.certificationInterest} onChange={setField('certificationInterest')} className={inputClass} />
-                                <datalist id="certification-suggestions">
-                                    {certificationSuggestions.map((c) => (
-                                        <option key={c} value={c} />
-                                    ))}
-                                </datalist>
+                                <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Producto / servicio</span>
+                                <select name="productId" required value={fields.productId} onChange={setField('productId')} className={inputClass}>
+                                    <option value="" disabled>
+                                        Selecciona un producto...
+                                    </option>
+                                    {productsByCategory.map(
+                                        ({ category, options }) =>
+                                            options.length > 0 && (
+                                                <optgroup key={category.id} label={category.name}>
+                                                    {options.map((p) => (
+                                                        <option key={p.id} value={p.id}>
+                                                            {p.name}
+                                                        </option>
+                                                    ))}
+                                                </optgroup>
+                                            ),
+                                    )}
+                                </select>
+                            </label>
+                            <label className="block">
+                                <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Comuna (opcional)</span>
+                                <input name="comuna" value={fields.comuna} onChange={setField('comuna')} className={inputClass} />
                             </label>
                         </div>
 
@@ -191,7 +241,7 @@ export function CreateLeadModal({ certificationSuggestions }: { certificationSug
                                 disabled={pending}
                                 className="flex items-center gap-2 bg-[#0B1E40] text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#122b59] transition-colors disabled:opacity-60"
                             >
-                                {pending ? 'Guardando…' : 'Crear prospecto'}
+                                {pending ? 'Guardando…' : 'Crear oportunidad'}
                             </button>
                         </div>
                     </form>

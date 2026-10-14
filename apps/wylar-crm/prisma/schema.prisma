@@ -24,6 +24,7 @@ model User {
   assignedLeads      Lead[]         @relation("AssignedLeads")
   activities         LeadActivity[]
   issuedCertificates Certificate[]
+  quotes             Quote[]
 
   @@map("users")
 }
@@ -48,8 +49,23 @@ model Lead {
   // Nombre de la empresa/institución (solo aplica si type != PERSONA).
   company String?
 
-  // Qué certificación/perfil busca (ej. "Instalador Eléctrico Clase D", "Rigger").
+  // Ficha de cliente (dedup por RUT/correo) a la que pertenece esta
+  // oportunidad. Toda oportunidad la exige (ver findOrCreateClient en
+  // actions/leads.ts) — las ~11 oportunidades previas a este campo ya
+  // quedaron migradas (ver backfill en el historial de migraciones).
+  clientId Int
+  client   Client @relation(fields: [clientId], references: [id])
+
+  // Producto/servicio del catálogo comercial que originó esta oportunidad
+  // — toda alta nueva (pública o manual) lo exige.
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  // Copia del nombre del producto al momento de crear la oportunidad (para
+  // que búsqueda/exports no dependan de un join ni cambien si el producto
+  // se renombra después — mismo patrón que Certificate.certificationTitle).
   certificationInterest String?
+  // Comuna de la solicitud, cuando corresponde (ej. sede del curso).
+  comuna String?
   // Mensaje/consulta libre que dejó el cliente en el formulario, si lo hubo.
   message               String? @db.Text
 
@@ -74,12 +90,61 @@ model Lead {
 
   activities   LeadActivity[]
   certificates Certificate[]
+  quotes       Quote[]
 
   @@index([status])
   @@index([assignedToId])
   @@index([source])
   @@index([rutNorm])
+  @@index([clientId])
+  @@index([productId])
   @@map("leads")
+}
+
+// Ficha única de cliente (persona, empresa, OTEC o institución) — existe una
+// sola vez aunque tenga varias oportunidades de venta. Se dedupe por RUT
+// (rutNorm) al crear una oportunidad nueva (ver findOrCreateClient en
+// src/actions/leads.ts); si no trae RUT se intenta por correo.
+model Client {
+  id Int @id @default(autoincrement())
+
+  // PERSONA | ALUMNO_BECADO | EMPRESA | INSTITUCION | OTEC (mismos valores que Lead.type).
+  type String
+
+  name    String
+  rut     String?
+  rutNorm String? @default("")
+  email   String
+  phone   String
+  // Razón social (si type no es PERSONA/ALUMNO_BECADO).
+  company String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contacts      ClientContact[]
+  opportunities Lead[]
+
+  @@index([rutNorm])
+  @@map("clients")
+}
+
+// Contacto comercial adicional de una organización (ej. "Jefe de Prevención
+// de Riesgos"), distinto del contacto principal guardado en Client.
+model ClientContact {
+  id       Int    @id @default(autoincrement())
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId Int
+
+  name  String
+  role  String?
+  email String?
+  phone String?
+
+  createdAt DateTime @default(now())
+
+  @@index([clientId])
+  @@map("client_contacts")
 }
 
 // Bandera de "no contactar" a nivel de persona (no de prospecto puntual):
@@ -186,10 +251,114 @@ model Profile {
   sections     ProfileSection[]
   faqs         ProfileFaq[]
   certificates Certificate[]
+  products     Product[]
 
   @@index([templateType])
   @@index([active])
   @@map("profiles")
+}
+
+// Catálogo comercial (distinto del catálogo de marketing de Profile):
+// productos/servicios vendibles, con precio y atributos propios según su
+// categoría. Las categorías son administrables desde el CRM sin tocar
+// código; solo agregar una FORMA de atributos nueva (ver productSpec.ts)
+// exige un cambio de código, igual que agregar un templateType a Profile.
+model ProductCategory {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  // Qué campos extra pide el formulario de producto para esta categoría —
+  // ver ATTRIBUTE_TEMPLATES en src/lib/productSpec.ts.
+  attributeTemplate String  @default("GENERICO")
+  active             Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  products Product[]
+
+  @@map("product_categories")
+}
+
+model Product {
+  id         Int             @id @default(autoincrement())
+  category   ProductCategory @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+  name        String
+  description String? @db.Text
+  price       Decimal? @db.Decimal(12, 0)
+  active      Boolean  @default(true)
+
+  // Atributos específicos de la categoría (técnica/posición de soldadura,
+  // perfil ChileValora, horas/fechas/lugar de un curso, etc.) — forma
+  // libre en JSON, la define category.attributeTemplate.
+  attributes Json?
+
+  // Vínculo opcional a la ficha de marketing de wylar.cl correspondiente,
+  // para que su formulario de contacto resuelva automáticamente qué
+  // producto le corresponde (mismo patrón que Certificate.profileId) —
+  // no es obligatorio, un producto puede no tener ficha pública.
+  profile   Profile? @relation(fields: [profileId], references: [id])
+  profileId Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  opportunities Lead[]
+  quoteItems    QuoteItem[]
+
+  @@index([categoryId])
+  @@index([profileId])
+  @@map("products")
+}
+
+// Cotización ligada a una oportunidad — pueden existir varias versiones
+// (inicial, corregida, contraoferta); las anteriores nunca se sobrescriben,
+// solo cambian de estado (ver markQuoteAccepted en actions/quotes.ts).
+model Quote {
+  id Int @id @default(autoincrement())
+
+  // Código de referencia visible, ej. COT-0001 (se completa tras el insert).
+  code String @unique
+
+  opportunity   Lead @relation(fields: [opportunityId], references: [id])
+  opportunityId Int
+
+  version Int @default(1)
+  // BORRADOR | ENVIADA | REEMPLAZADA | ACEPTADA | RECHAZADA
+  status  String @default("BORRADOR")
+
+  issueDate DateTime @default(now())
+  notes     String?  @db.Text
+  total     Decimal  @db.Decimal(12, 0)
+
+  createdById Int?
+  createdBy   User? @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+
+  items QuoteItem[]
+
+  @@index([opportunityId])
+  @@map("quotes")
+}
+
+model QuoteItem {
+  id      Int   @id @default(autoincrement())
+  quote   Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  quoteId Int
+
+  product   Product? @relation(fields: [productId], references: [id])
+  productId Int?
+  // Copia del nombre del producto al momento de cotizar (independiente de
+  // si el producto cambia de nombre o se desactiva después).
+  description String
+
+  quantity  Int     @default(1)
+  unitPrice Decimal @db.Decimal(12, 0)
+  subtotal  Decimal @db.Decimal(12, 0)
+
+  @@index([quoteId])
+  @@map("quote_items")
 }
 
 // Un bloque de contenido con nombre (ej. "queEs", "proceso", "normas",

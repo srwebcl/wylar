@@ -7,6 +7,7 @@ import { SYSTEM_ACTIVITY_TYPES } from '@/lib/constants';
 import { resolveSource } from '@/lib/leadSource';
 import { sendLeadNotificationEmail, sendLeadConfirmationEmail } from '@/lib/email';
 import { normalizeRut } from '@/lib/rut';
+import { findOrCreateClient } from '@/lib/clients';
 
 /**
  * Módulo de Captura de Oportunidades: crea un lead a partir del formulario
@@ -28,17 +29,36 @@ export async function createLeadFromPublicForm(input: unknown, refererHeader: st
     const { website: _website, ...data } = parsed.data;
     const source = resolveSource(data.source, refererHeader);
 
+    const product = await prisma.product.findUnique({ where: { id: data.productId } });
+    if (!product || !product.active) {
+        return { ok: false as const, error: 'El producto o servicio seleccionado no está disponible.' };
+    }
+
+    const rutNorm = normalizeRut(data.rut);
+    const client = await findOrCreateClient({
+        type: data.type,
+        name: data.name,
+        rut: data.rut,
+        rutNorm,
+        email: data.email,
+        phone: data.phone,
+        company: data.company,
+    });
+
     const lead = await prisma.lead.create({
         data: {
             code: `TEMP-${randomUUID()}`,
             type: data.type,
             name: data.name,
             rut: data.rut,
-            rutNorm: normalizeRut(data.rut),
+            rutNorm,
             email: data.email,
             phone: data.phone,
             company: data.company || null,
-            certificationInterest: data.certificationInterest || null,
+            clientId: client.id,
+            productId: product.id,
+            certificationInterest: product.name,
+            comuna: data.comuna || null,
             message: data.message || null,
             source,
             sourceDetail: data.sourceDetail || refererHeader || null,
@@ -57,7 +77,7 @@ export async function createLeadFromPublicForm(input: unknown, refererHeader: st
             userId: null,
             authorName: 'Sistema',
             type: SYSTEM_ACTIVITY_TYPES.CREACION,
-            text: `Prospecto ingresado automáticamente desde el sitio web (canal: ${source}).`,
+            text: `Oportunidad ingresada automáticamente desde el sitio web (canal: ${source}).`,
         },
     });
 

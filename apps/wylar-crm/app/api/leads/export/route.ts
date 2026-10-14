@@ -16,12 +16,12 @@ export async function GET(request: Request) {
 
     const leads = await prisma.lead.findMany({
         where,
-        include: { assignedTo: { select: { name: true } } },
+        include: { assignedTo: { select: { name: true } }, client: { select: { id: true } }, product: { include: { category: true } } },
         orderBy: { createdAt: 'desc' },
     });
 
     const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Prospectos');
+    const sheet = workbook.addWorksheet('Oportunidades');
     sheet.columns = [
         { header: 'Código', key: 'code', width: 14 },
         { header: 'Tipo', key: 'type', width: 18 },
@@ -30,7 +30,9 @@ export async function GET(request: Request) {
         { header: 'Empresa', key: 'company', width: 24 },
         { header: 'Correo', key: 'email', width: 28 },
         { header: 'Teléfono', key: 'phone', width: 16 },
-        { header: 'Certificación de interés', key: 'certificationInterest', width: 30 },
+        { header: 'Producto', key: 'product', width: 30 },
+        { header: 'Categoría', key: 'category', width: 24 },
+        { header: 'Comuna', key: 'comuna', width: 18 },
         { header: 'Estado', key: 'status', width: 16 },
         { header: 'Motivo desistimiento', key: 'lostReason', width: 30 },
         { header: 'Origen', key: 'source', width: 16 },
@@ -49,7 +51,9 @@ export async function GET(request: Request) {
             company: lead.company ?? '',
             email: lead.email,
             phone: lead.phone,
-            certificationInterest: lead.certificationInterest ?? '',
+            product: lead.product?.name ?? lead.certificationInterest ?? '',
+            category: lead.product?.category.name ?? '',
+            comuna: lead.comuna ?? '',
             status: statusLabel(lead.status),
             lostReason: lead.lostReason ?? '',
             source: sourceLabel(lead.source),
@@ -60,7 +64,7 @@ export async function GET(request: Request) {
     }
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const filename = `prospectos-${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const filename = `oportunidades-${new Date().toISOString().slice(0, 10)}.xlsx`;
 
     return new Response(new Uint8Array(buffer), {
         status: 200,
