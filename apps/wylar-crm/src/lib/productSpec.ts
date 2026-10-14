@@ -55,6 +55,7 @@ export const PRODUCT_ATTRIBUTE_SPECS: Record<AttributeTemplate, ProductAttribute
         { key: 'fechaTermino', label: 'Fecha de término', type: 'date' },
         { key: 'lugar', label: 'Lugar', type: 'text', placeholder: 'Ej: Sede Wylar Antofagasta' },
         { key: 'comuna', label: 'Comuna', type: 'text' },
+        { key: 'cuposMaximos', label: 'Cupos máximos', type: 'number', placeholder: 'Ej: 20' },
     ],
 };
 
