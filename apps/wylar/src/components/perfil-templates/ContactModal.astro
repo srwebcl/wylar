@@ -3,7 +3,7 @@
 // página, sin desplazar el scroll. Un solo modal por página, compartido por
 // todos los CTA (Hero, Cierre, barra móvil). Envía el lead directamente al
 // CRM de Wylar (Módulo de Captura de Oportunidades).
-const { title = 'Solicitar información', ctaLabel = 'Enviar solicitud', certificationInterest = '' } = Astro.props;
+const { title = 'Solicitar información', ctaLabel = 'Enviar solicitud', productId } = Astro.props;
 ---
 
 <div id="ficha-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4" aria-hidden="true">
@@ -28,7 +28,12 @@ const { title = 'Solicitar información', ctaLabel = 'Enviar solicitud', certifi
             <h3 id="ficha-modal-title" class="text-xl font-bold text-slate-900 mb-1.5">{title}</h3>
             <p class="text-slate-500 text-sm mb-6 font-medium">Déjanos tus datos y te enviaremos el temario y requisitos.</p>
 
-            <form id="ficha-modal-form" class="space-y-4" data-certification-interest={certificationInterest}>
+            {productId == null ? (
+                <p class="text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-lg p-4">
+                    Este formulario no está disponible por el momento. Escríbenos a través de la página de <a href="/contacto" class="font-bold text-blue-700 hover:underline">contacto</a>.
+                </p>
+            ) : (
+            <form id="ficha-modal-form" class="space-y-4" data-product-id={productId}>
                 <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden" />
 
                 <div>
@@ -69,6 +74,7 @@ const { title = 'Solicitar información', ctaLabel = 'Enviar solicitud', certifi
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </button>
             </form>
+            )}
         </div>
     </div>
 </div>
@@ -91,29 +97,7 @@ const { title = 'Solicitar información', ctaLabel = 'Enviar solicitud', certifi
     const phoneInput = document.querySelector<HTMLInputElement>('.ficha-modal-phone');
     const phoneError = document.querySelector<HTMLParagraphElement>('.ficha-modal-phone-error');
 
-    if (modal && backdrop && closeBtn && form && feedback && submitBtn && rutInput && rutError && phoneInput && phoneError) {
-        rutInput.addEventListener('blur', () => {
-            if (!rutInput.value.trim()) return;
-            if (isValidRut(rutInput.value)) {
-                rutInput.value = formatRut(rutInput.value);
-                rutError.classList.add('hidden');
-            } else {
-                rutError.textContent = 'RUT inválido. Revisa el número y el dígito verificador.';
-                rutError.classList.remove('hidden');
-            }
-        });
-
-        phoneInput.addEventListener('blur', () => {
-            if (!phoneInput.value.trim()) return;
-            const formatted = isValidChileanMobile(phoneInput.value) ? phoneInput.value : formatChileanMobile(phoneInput.value);
-            if (formatted) {
-                phoneInput.value = formatted;
-                phoneError.classList.add('hidden');
-            } else {
-                phoneError.textContent = 'Teléfono inválido. Debe ser un celular chileno, ej: +56 9 1234 5678.';
-                phoneError.classList.remove('hidden');
-            }
-        });
+    if (modal && backdrop && closeBtn) {
         function openModal() {
             modal!.classList.remove('hidden');
             modal!.classList.add('flex');
@@ -141,6 +125,38 @@ const { title = 'Solicitar información', ctaLabel = 'Enviar solicitud', certifi
         closeBtn.addEventListener('click', closeModal);
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && !modal!.classList.contains('hidden')) closeModal();
+        });
+    }
+
+    if (form && feedback && submitBtn && rutInput && rutError && phoneInput && phoneError) {
+        const closeModal = () => {
+            modal!.classList.add('hidden');
+            modal!.classList.remove('flex');
+            modal!.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        };
+
+        rutInput.addEventListener('blur', () => {
+            if (!rutInput.value.trim()) return;
+            if (isValidRut(rutInput.value)) {
+                rutInput.value = formatRut(rutInput.value);
+                rutError.classList.add('hidden');
+            } else {
+                rutError.textContent = 'RUT inválido. Revisa el número y el dígito verificador.';
+                rutError.classList.remove('hidden');
+            }
+        });
+
+        phoneInput.addEventListener('blur', () => {
+            if (!phoneInput.value.trim()) return;
+            const formatted = isValidChileanMobile(phoneInput.value) ? phoneInput.value : formatChileanMobile(phoneInput.value);
+            if (formatted) {
+                phoneInput.value = formatted;
+                phoneError.classList.add('hidden');
+            } else {
+                phoneError.textContent = 'Teléfono inválido. Debe ser un celular chileno, ej: +56 9 1234 5678.';
+                phoneError.classList.remove('hidden');
+            }
         });
 
         form.addEventListener('submit', async (e) => {
@@ -171,7 +187,7 @@ const { title = 'Solicitar información', ctaLabel = 'Enviar solicitud', certifi
                     rut: canonicalRut,
                     email: data.get('email'),
                     phone: phoneCanonical,
-                    certificationInterest: form.dataset.certificationInterest || null,
+                    productId: Number(form.dataset.productId),
                 });
                 feedback.textContent = '¡Listo! Te contactaremos a la brevedad.';
                 feedback.className = 'text-sm font-medium rounded-lg p-3 bg-emerald-50 text-emerald-700 border border-emerald-200';

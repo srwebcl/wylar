@@ -49,8 +49,9 @@ export function detectLeadSource() {
 
 /**
  * Envía un lead al CRM. `payload` acepta: type, name, rut, email, phone,
- * company, certificationInterest, message, website (honeypot, dejar vacío).
- * Lanza un Error con un mensaje legible si falla.
+ * company, productId (obligatorio — ver lib/products.js), comuna, message,
+ * website (honeypot, dejar vacío). Lanza un Error con un mensaje legible si
+ * falla.
  */
 export async function submitLead(payload) {
     const { source, sourceDetail } = detectLeadSource();

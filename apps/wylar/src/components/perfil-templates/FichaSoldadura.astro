@@ -7,8 +7,10 @@ import FaqAccordion from './FaqAccordion.astro';
 import ProcesoSteps from './ProcesoSteps.astro';
 import MobileCtaBar from './MobileCtaBar.astro';
 import ContactModal from './ContactModal.astro';
+import { getProductForProfile } from '../../lib/products.js';
 
 const { perfil } = Astro.props;
+const product = await getProductForProfile(perfil.id);
 const quienesIcons = [Users, Building2, GraduationCap];
 ---
 
@@ -171,7 +173,7 @@ const quienesIcons = [Users, Building2, GraduationCap];
 
             <div class="lg:col-span-1">
                 <div class="lg:sticky lg:top-28">
-                    <SidebarForm icon={Wrench} title="Solicitar Cotización" ctaLabel="Cotizar calificación" certificationInterest={perfil.title} />
+                    <SidebarForm icon={Wrench} title="Solicitar Cotización" ctaLabel="Cotizar calificación" productId={product?.id} />
                 </div>
             </div>
         </div>
@@ -204,6 +206,6 @@ const quienesIcons = [Users, Building2, GraduationCap];
     </section>
 
     <MobileCtaBar icon={Wrench} label="Solicitar cotización" />
-    <ContactModal title="Solicitar Cotización" ctaLabel="Enviar solicitud" certificationInterest={perfil.title} />
+    <ContactModal title="Solicitar Cotización" ctaLabel="Enviar solicitud" productId={product?.id} />
 
 </div>

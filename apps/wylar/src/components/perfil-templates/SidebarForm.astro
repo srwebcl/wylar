@@ -1,7 +1,11 @@
 ---
 // Formulario lateral de contacto, reutilizado por las 3 plantillas de ficha.
 // Envía el lead directamente al CRM de Wylar (Módulo de Captura de Oportunidades).
-const { icon: Icon, title = 'Solicitar Evaluación', ctaLabel = 'Cotizar este perfil', certificationInterest = '' } = Astro.props;
+// productId viene resuelto por la página (ver getProductForProfile en
+// lib/products.js) — si el perfil no tiene un producto vinculado en el
+// catálogo comercial del CRM, se muestra un aviso en vez de un formulario
+// que no podría enviarse (el producto es obligatorio).
+const { icon: Icon, title = 'Solicitar Evaluación', ctaLabel = 'Cotizar este perfil', productId } = Astro.props;
 ---
 
 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xl shadow-slate-200/50">
@@ -14,7 +18,12 @@ const { icon: Icon, title = 'Solicitar Evaluación', ctaLabel = 'Cotizar este pe
 
     <p class="text-slate-500 text-sm mb-5 font-medium">Déjanos tus datos y te enviaremos el temario y requisitos.</p>
 
-    <form class="sidebar-lead-form space-y-4" data-certification-interest={certificationInterest}>
+    {productId == null ? (
+        <p class="text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-lg p-4">
+            Este formulario no está disponible por el momento. Escríbenos a través de la página de <a href="/contacto" class="font-bold text-blue-700 hover:underline">contacto</a>.
+        </p>
+    ) : (
+    <form class="sidebar-lead-form space-y-4" data-product-id={productId}>
         <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden" />
 
         <div>
@@ -55,6 +64,7 @@ const { icon: Icon, title = 'Solicitar Evaluación', ctaLabel = 'Cotizar este pe
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </button>
     </form>
+    )}
 </div>
 
 <script>
@@ -124,7 +134,7 @@ const { icon: Icon, title = 'Solicitar Evaluación', ctaLabel = 'Cotizar este pe
                     rut: canonicalRut,
                     email: data.get('email'),
                     phone: phoneCanonical,
-                    certificationInterest: form.dataset.certificationInterest || null,
+                    productId: Number(form.dataset.productId),
                 });
                 feedback.textContent = '¡Listo! Te contactaremos a la brevedad.';
                 feedback.className = 'sidebar-lead-feedback text-sm font-medium rounded-lg p-3 bg-emerald-50 text-emerald-700 border border-emerald-200';

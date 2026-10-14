@@ -6,8 +6,10 @@ import SidebarForm from './SidebarForm.astro';
 import FaqAccordion from './FaqAccordion.astro';
 import MobileCtaBar from './MobileCtaBar.astro';
 import ContactModal from './ContactModal.astro';
+import { getProductForProfile } from '../../lib/products.js';
 
 const { perfil } = Astro.props;
+const product = await getProductForProfile(perfil.id);
 const HeroIcon = Star;
 const proseClasses = "prose prose-slate max-w-none prose-headings:font-extrabold prose-h3:text-2xl prose-h3:text-slate-900 prose-p:text-slate-700 prose-p:leading-relaxed prose-a:font-bold prose-a:text-blue-600 prose-li:text-slate-700 prose-ul:list-disc prose-ul:pl-5 prose-ol:list-decimal prose-ol:pl-5 prose-ul:my-3 prose-li:my-1.5 bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm";
 ---
@@ -97,14 +99,14 @@ const proseClasses = "prose prose-slate max-w-none prose-headings:font-extrabold
 
             <div class="lg:col-span-1">
                 <div class="lg:sticky lg:top-28">
-                    <SidebarForm icon={Handshake} title="Solicitar Evaluación" ctaLabel="Cotizar este perfil" certificationInterest={perfil.title} />
+                    <SidebarForm icon={Handshake} title="Solicitar Evaluación" ctaLabel="Cotizar este perfil" productId={product?.id} />
                 </div>
             </div>
         </div>
     </div>
 
     <MobileCtaBar icon={Handshake} label={perfil.heroCta || 'Cotizar'} />
-    <ContactModal title="Solicitar Evaluación" ctaLabel="Enviar solicitud" certificationInterest={perfil.title} />
+    <ContactModal title="Solicitar Evaluación" ctaLabel="Enviar solicitud" productId={product?.id} />
 
 </div>
 

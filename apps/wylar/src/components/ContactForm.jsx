@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowRight, CheckCircle2, Loader2, Mail, AlertCircle } from 'lucide-react';
 import { submitLead } from '../lib/crm.js';
-import { getCatalogList } from '../lib/catalog.js';
+import { getProductList } from '../lib/products.js';
 import { isValidRut, formatRut } from '../lib/rut.js';
 import { isValidChileanMobile, formatChileanMobile } from '../lib/phone.js';
 
@@ -22,11 +22,11 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
     const [rut, setRut] = useState('');
     const [phone, setPhone] = useState('');
     const [fieldErrors, setFieldErrors] = useState({});
-    const [certificationOptions, setCertificationOptions] = useState([]);
+    const [products, setProducts] = useState([]);
 
     useEffect(() => {
-        getCatalogList()
-            .then((profiles) => setCertificationOptions(profiles.map((p) => p.title).filter(Boolean)))
+        getProductList()
+            .then(setProducts)
             .catch(() => {});
     }, []);
 
@@ -83,7 +83,7 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
                 email: data.get('email'),
                 phone: phoneCanonical,
                 company: data.get('company') || null,
-                certificationInterest: data.get('certificationInterest') || null,
+                productId: Number(data.get('productId')),
                 message: data.get('message') || null,
             });
             setStatus('success');
@@ -209,19 +209,31 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
                                 )}
 
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Certificación de interés</label>
-                                    <input
-                                        name="certificationInterest"
-                                        type="text"
-                                        list="certification-options"
-                                        className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all"
-                                        placeholder="Ej: Rigger, Soldador Calificado, Instalador Eléctrico..."
-                                    />
-                                    <datalist id="certification-options">
-                                        {certificationOptions.map((title) => (
-                                            <option key={title} value={title} />
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Producto / servicio de interés</label>
+                                    <select
+                                        name="productId"
+                                        defaultValue=""
+                                        required
+                                        className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all cursor-pointer"
+                                    >
+                                        <option value="" disabled>
+                                            Seleccione un producto o servicio...
+                                        </option>
+                                        {Object.entries(
+                                            products.reduce((groups, p) => {
+                                                (groups[p.categoryName] ??= []).push(p);
+                                                return groups;
+                                            }, {}),
+                                        ).map(([categoryName, options]) => (
+                                            <optgroup key={categoryName} label={categoryName}>
+                                                {options.map((p) => (
+                                                    <option key={p.id} value={p.id}>
+                                                        {p.name}
+                                                    </option>
+                                                ))}
+                                            </optgroup>
                                         ))}
-                                    </datalist>
+                                    </select>
                                 </div>
 
                                 <div>

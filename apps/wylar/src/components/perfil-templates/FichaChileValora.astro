@@ -7,9 +7,11 @@ import FaqAccordion from './FaqAccordion.astro';
 import ProcesoSteps from './ProcesoSteps.astro';
 import MobileCtaBar from './MobileCtaBar.astro';
 import ContactModal from './ContactModal.astro';
+import { getProductForProfile } from '../../lib/products.js';
 
 const { perfil } = Astro.props;
 const HeroIcon = perfil.id === 'cuidador' ? Heart : Zap;
+const product = await getProductForProfile(perfil.id);
 ---
 
 <div class="bg-slate-50 min-h-screen pb-24 lg:pb-0">
@@ -135,7 +137,7 @@ const HeroIcon = perfil.id === 'cuidador' ? Heart : Zap;
 
             <div class="lg:col-span-1">
                 <div class="lg:sticky lg:top-28">
-                    <SidebarForm icon={HeroIcon} title="Solicitar Evaluación" ctaLabel="Cotizar este perfil" certificationInterest={perfil.title} />
+                    <SidebarForm icon={HeroIcon} title="Solicitar Evaluación" ctaLabel="Cotizar este perfil" productId={product?.id} />
                 </div>
             </div>
         </div>
@@ -164,6 +166,6 @@ const HeroIcon = perfil.id === 'cuidador' ? Heart : Zap;
     </section>
 
     <MobileCtaBar icon={HeroIcon} label={perfil.heroCta} />
-    <ContactModal title="Solicitar Evaluación" ctaLabel="Enviar solicitud" certificationInterest={perfil.title} />
+    <ContactModal title="Solicitar Evaluación" ctaLabel="Enviar solicitud" productId={product?.id} />
 
 </div>
