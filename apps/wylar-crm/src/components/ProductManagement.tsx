@@ -127,11 +127,11 @@ export function ProductManagement({ products, categories, profiles, isAdmin }: {
                     <h1 className="text-2xl font-extrabold text-slate-900">Productos</h1>
                     <p className="text-slate-500 text-sm mt-1">Catálogo comercial — lo que se puede vender en una oportunidad. {products.length} en total.</p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                    <Link href="/productos/categorias" className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-4 py-2.5 rounded-xl transition-colors">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <Link href="/productos/categorias" className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-4 py-2.5 rounded-xl transition-colors">
                         <Settings size={16} /> Categorías
                     </Link>
-                    <button onClick={openCreateForm} className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm">
+                    <button onClick={openCreateForm} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm">
                         <Plus size={18} /> Nuevo producto
                     </button>
                 </div>
@@ -215,8 +215,8 @@ export function ProductManagement({ products, categories, profiles, isAdmin }: {
                             </div>
                         )}
 
-                        <div className="flex justify-end">
-                            <button type="submit" disabled={isPending} className="bg-[#0B1E40] text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#122b59] transition-colors disabled:opacity-60">
+                        <div className="flex justify-end pt-2">
+                            <button type="submit" disabled={isPending} className="w-full sm:w-auto bg-[#0B1E40] text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#122b59] transition-colors disabled:opacity-60">
                                 {isPending ? 'Guardando…' : editingId != null ? 'Guardar cambios' : 'Crear producto'}
                             </button>
                         </div>
@@ -224,54 +224,100 @@ export function ProductManagement({ products, categories, profiles, isAdmin }: {
                 </div>
             )}
 
-            <div className="glass-card overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
-                                <th className="px-5 py-3">Nombre</th>
-                                <th className="px-5 py-3">Categoría</th>
-                                <th className="px-5 py-3">Precio</th>
-                                <th className="px-5 py-3">Estado</th>
-                                <th className="px-5 py-3 text-right">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {products.map((p) => (
-                                <tr key={p.id} className={`hover:bg-slate-50/80 transition-colors ${p.active ? '' : 'opacity-50'}`}>
-                                    <td className="px-5 py-3.5 font-bold text-slate-900">{p.name}</td>
-                                    <td className="px-5 py-3.5 text-slate-500 text-xs">{p.categoryName}</td>
-                                    <td className="px-5 py-3.5 text-slate-600">{money(p.price)}</td>
-                                    <td className="px-5 py-3.5">
-                                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${p.active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                                            {p.active ? 'Activo' : 'Inactivo'}
-                                        </span>
-                                    </td>
-                                    <td className="px-5 py-3.5">
-                                        <div className="flex items-center justify-end gap-1">
-                                            {isAdmin && (
-                                                <>
-                                                    <button onClick={() => openEditForm(p)} className="p-2 text-slate-400 hover:text-amber-600 transition-colors" title="Editar">
-                                                        <Pencil size={16} />
-                                                    </button>
-                                                    <button onClick={() => handleToggle(p.id)} disabled={isPending} className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50" title={p.active ? 'Desactivar' : 'Activar'}>
-                                                        <Power size={16} />
-                                                    </button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                            {products.length === 0 && (
-                                <tr>
-                                    <td colSpan={5} className="px-5 py-10 text-center text-slate-400">
-                                        Sin productos todavía.
-                                    </td>
-                                </tr>
+            <div className="space-y-3">
+                {/* Vista móvil: tarjetas interactivas */}
+                <div className="block sm:hidden space-y-3">
+                    {products.map((p) => (
+                        <div key={p.id} className={`glass-card bg-white p-4 space-y-3 ${p.active ? '' : 'opacity-60'}`}>
+                            <div className="flex items-start justify-between gap-2">
+                                <div>
+                                    <p className="font-bold text-slate-900 text-sm">{p.name}</p>
+                                    <p className="text-xs text-slate-500 mt-0.5">{p.categoryName}</p>
+                                </div>
+                                <div className="flex flex-col items-end gap-1 shrink-0">
+                                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${p.active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                        {p.active ? 'Activo' : 'Inactivo'}
+                                    </span>
+                                    <span className="text-xs font-extrabold text-slate-700">{money(p.price)}</span>
+                                </div>
+                            </div>
+
+                            {isAdmin && (
+                                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                                    <button
+                                        onClick={() => openEditForm(p)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#0B1E40] bg-amber-100/60 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors"
+                                    >
+                                        <Pencil size={13} /> Editar
+                                    </button>
+                                    <button
+                                        onClick={() => handleToggle(p.id)}
+                                        disabled={isPending}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors disabled:opacity-50"
+                                    >
+                                        <Power size={13} /> {p.active ? 'Desactivar' : 'Activar'}
+                                    </button>
+                                </div>
                             )}
-                        </tbody>
-                    </table>
+                        </div>
+                    ))}
+                    {products.length === 0 && (
+                        <div className="glass-card p-8 text-center text-slate-400 text-sm">
+                            Sin productos todavía.
+                        </div>
+                    )}
+                </div>
+
+                {/* Vista desktop: tabla */}
+                <div className="hidden sm:block glass-card overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
+                                    <th className="px-5 py-3">Nombre</th>
+                                    <th className="px-5 py-3">Categoría</th>
+                                    <th className="px-5 py-3">Precio</th>
+                                    <th className="px-5 py-3">Estado</th>
+                                    <th className="px-5 py-3 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {products.map((p) => (
+                                    <tr key={p.id} className={`hover:bg-slate-50/80 transition-colors ${p.active ? '' : 'opacity-50'}`}>
+                                        <td className="px-5 py-3.5 font-bold text-slate-900">{p.name}</td>
+                                        <td className="px-5 py-3.5 text-slate-500 text-xs">{p.categoryName}</td>
+                                        <td className="px-5 py-3.5 text-slate-600">{money(p.price)}</td>
+                                        <td className="px-5 py-3.5">
+                                            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${p.active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                {p.active ? 'Activo' : 'Inactivo'}
+                                            </span>
+                                        </td>
+                                        <td className="px-5 py-3.5">
+                                            <div className="flex items-center justify-end gap-1">
+                                                {isAdmin && (
+                                                    <>
+                                                        <button onClick={() => openEditForm(p)} className="p-2 text-slate-400 hover:text-amber-600 transition-colors" title="Editar">
+                                                            <Pencil size={16} />
+                                                        </button>
+                                                        <button onClick={() => handleToggle(p.id)} disabled={isPending} className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50" title={p.active ? 'Desactivar' : 'Activar'}>
+                                                            <Power size={16} />
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {products.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="px-5 py-10 text-center text-slate-400">
+                                            Sin productos todavía.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

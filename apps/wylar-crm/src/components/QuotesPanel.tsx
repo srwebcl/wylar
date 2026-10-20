@@ -107,44 +107,56 @@ export function QuotesPanel({ opportunityId, quotes, products }: { opportunityId
                 {showForm && (
                     <form onSubmit={handleSubmit} className="space-y-3 border border-slate-200 rounded-xl p-4 bg-slate-50/50">
                         {state.error && <p className="text-xs text-red-600 font-medium">{state.error}</p>}
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {items.map((item, i) => (
-                                <div key={i} className="flex items-center gap-2">
-                                    <select
-                                        value={item.productId}
-                                        onChange={(e) => handleProductChange(i, e.target.value)}
-                                        className="flex-1 p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none"
-                                    >
-                                        <option value="">Ítem libre...</option>
-                                        {products.map((p) => (
-                                            <option key={p.id} value={p.id}>
-                                                {p.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <input
-                                        value={item.description}
-                                        onChange={(e) => updateItem(i, { description: e.target.value })}
-                                        placeholder="Descripción"
-                                        className="flex-1 p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none"
-                                    />
-                                    <input
-                                        type="number"
-                                        min={1}
-                                        value={item.quantity}
-                                        onChange={(e) => updateItem(i, { quantity: Number(e.target.value) || 1 })}
-                                        className="w-16 p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none"
-                                    />
-                                    <input
-                                        type="number"
-                                        min={0}
-                                        value={item.unitPrice}
-                                        onChange={(e) => updateItem(i, { unitPrice: Number(e.target.value) || 0 })}
-                                        className="w-24 p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none"
-                                    />
-                                    <button type="button" onClick={() => removeItem(i)} className="text-slate-300 hover:text-red-600 shrink-0">
-                                        <Trash2 size={14} />
-                                    </button>
+                                <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 sm:p-0 bg-white sm:bg-transparent rounded-lg border sm:border-0 border-slate-200">
+                                    <div className="flex-1 flex flex-col sm:flex-row gap-2">
+                                        <select
+                                            value={item.productId}
+                                            onChange={(e) => handleProductChange(i, e.target.value)}
+                                            className="w-full sm:flex-1 p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none"
+                                        >
+                                            <option value="">Ítem libre...</option>
+                                            {products.map((p) => (
+                                                <option key={p.id} value={p.id}>
+                                                    {p.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <input
+                                            value={item.description}
+                                            onChange={(e) => updateItem(i, { description: e.target.value })}
+                                            placeholder="Descripción"
+                                            className="w-full sm:flex-1 p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2 justify-between sm:justify-start">
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[11px] text-slate-400 font-medium sm:hidden">Cant:</span>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                value={item.quantity}
+                                                onChange={(e) => updateItem(i, { quantity: Number(e.target.value) || 1 })}
+                                                className="w-16 p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none"
+                                                placeholder="Cant"
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[11px] text-slate-400 font-medium sm:hidden">Precio:</span>
+                                            <input
+                                                type="number"
+                                                min={0}
+                                                value={item.unitPrice}
+                                                onChange={(e) => updateItem(i, { unitPrice: Number(e.target.value) || 0 })}
+                                                className="w-24 p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none"
+                                                placeholder="Precio"
+                                            />
+                                        </div>
+                                        <button type="button" onClick={() => removeItem(i)} className="text-slate-300 hover:text-red-600 p-1 shrink-0 ml-auto sm:ml-0" title="Eliminar ítem">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -158,9 +170,9 @@ export function QuotesPanel({ opportunityId, quotes, products }: { opportunityId
                             rows={2}
                             className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none"
                         />
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-200">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-200">
                             <span className="text-sm font-bold text-slate-700">Total: {money(total)}</span>
-                            <button type="submit" disabled={pending} className="px-4 py-2 bg-[#0B1E40] text-white text-xs font-bold rounded-lg hover:bg-[#122b59] disabled:opacity-60">
+                            <button type="submit" disabled={pending} className="w-full sm:w-auto px-4 py-2 bg-[#0B1E40] text-white text-xs font-bold rounded-lg hover:bg-[#122b59] disabled:opacity-60 transition-colors">
                                 {pending ? 'Guardando…' : 'Crear cotización'}
                             </button>
                         </div>

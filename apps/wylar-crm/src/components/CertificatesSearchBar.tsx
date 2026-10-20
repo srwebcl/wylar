@@ -29,40 +29,42 @@ export function CertificatesSearchBar({ types }: { types: { id: number; label: s
     }
 
     return (
-        <div className="flex flex-wrap gap-2.5 mb-4">
-            <form className="relative group" onSubmit={(e) => { e.preventDefault(); updateParam('q', q); }}>
+        <div className="flex flex-col sm:flex-row gap-2.5 mb-4">
+            <form className="relative group flex-1 w-full" onSubmit={(e) => { e.preventDefault(); updateParam('q', q); }}>
                 <Search className="absolute left-3 top-2.5 text-slate-400 group-focus-within:text-[#0B1E40] transition-colors" size={15} />
                 <input
                     type="text"
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
                     placeholder="Buscar por nombre, RUT o código..."
-                    className="pl-9 pr-3 py-2 w-72 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40]/15 focus:border-[#0B1E40] outline-none text-sm transition-all"
+                    className="pl-9 pr-3 py-2 w-full bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40]/15 focus:border-[#0B1E40] outline-none text-sm transition-all"
                 />
             </form>
-            <select
-                defaultValue={searchParams.get('status') ?? ''}
-                onChange={(e) => updateParam('status', e.target.value)}
-                className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 outline-none focus:ring-2 focus:ring-[#0B1E40]/15 focus:border-[#0B1E40]"
-            >
-                {STATUS_OPTIONS.map((s) => (
-                    <option key={s.value} value={s.value}>
-                        {s.label}
-                    </option>
-                ))}
-            </select>
-            <select
-                defaultValue={searchParams.get('type') ?? ''}
-                onChange={(e) => updateParam('type', e.target.value)}
-                className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 outline-none focus:ring-2 focus:ring-[#0B1E40]/15 focus:border-[#0B1E40]"
-            >
-                <option value="">Todos los tipos</option>
-                {types.map((t) => (
-                    <option key={t.id} value={t.completionText}>
-                        {t.label}
-                    </option>
-                ))}
-            </select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:flex sm:items-center">
+                <select
+                    defaultValue={searchParams.get('status') ?? ''}
+                    onChange={(e) => updateParam('status', e.target.value)}
+                    className="w-full sm:w-auto px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 outline-none focus:ring-2 focus:ring-[#0B1E40]/15 focus:border-[#0B1E40]"
+                >
+                    {STATUS_OPTIONS.map((s) => (
+                        <option key={s.value} value={s.value}>
+                            {s.label}
+                        </option>
+                    ))}
+                </select>
+                <select
+                    defaultValue={searchParams.get('type') ?? ''}
+                    onChange={(e) => updateParam('type', e.target.value)}
+                    className="w-full sm:w-auto px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 outline-none focus:ring-2 focus:ring-[#0B1E40]/15 focus:border-[#0B1E40]"
+                >
+                    <option value="">Todos los tipos</option>
+                    {types.map((t) => (
+                        <option key={t.id} value={t.completionText}>
+                            {t.label}
+                        </option>
+                    ))}
+                </select>
+            </div>
         </div>
     );
 }

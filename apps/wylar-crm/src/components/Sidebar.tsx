@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { KanbanSquare, ListChecks, Users, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal, ScrollText, Settings, FileBadge, Contact, Package, Tags } from 'lucide-react';
+import { KanbanSquare, ListChecks, Users, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal, ScrollText, Settings, FileBadge, Contact, Package, Tags, X } from 'lucide-react';
 import clsx from 'clsx';
 import { Logo } from '@/components/Logo';
 import type { SafeUser as User } from '@/lib/safeUser';
@@ -40,7 +40,15 @@ const WEB_NAV_ITEMS = [
     { href: '/auditoria', label: 'Auditoría', icon: ScrollText, match: (p: string) => p === '/auditoria', adminOnly: true },
 ];
 
-export function Sidebar({ currentUser }: { currentUser: User }) {
+export function Sidebar({
+    currentUser,
+    isOpen = false,
+    onClose,
+}: {
+    currentUser: User;
+    isOpen?: boolean;
+    onClose?: () => void;
+}) {
     const pathname = usePathname();
 
     const renderNavItem = ({ href, label, icon: Icon, match, children }: any) => {
@@ -50,13 +58,14 @@ export function Sidebar({ currentUser }: { currentUser: User }) {
             <div key={href}>
                 <Link
                     href={href}
+                    onClick={onClose}
                     className={clsx(
-                        'w-full flex items-center px-4 py-3.5 rounded-xl transition-all duration-200 font-medium group',
-                        active ? 'bg-amber-500 text-[#0B1E40] shadow-lg shadow-amber-500/20' : 'text-slate-300 hover:bg-white/10 hover:text-white',
+                        'w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 font-medium group text-sm',
+                        active ? 'bg-amber-500 text-[#0B1E40] shadow-lg shadow-amber-500/20 font-bold' : 'text-slate-300 hover:bg-white/10 hover:text-white',
                     )}
                 >
-                    <Icon size={20} className={clsx('mr-3 transition-colors', active ? 'text-[#0B1E40]' : 'text-slate-400 group-hover:text-cyan-400')} />
-                    {label}
+                    <Icon size={19} className={clsx('mr-3 transition-colors shrink-0', active ? 'text-[#0B1E40]' : 'text-slate-400 group-hover:text-cyan-400')} />
+                    <span className="truncate">{label}</span>
                 </Link>
                 {children && (active || childActive) && (
                     <div className="mt-1 ml-6 pl-3 border-l border-white/10 space-y-1">
@@ -66,13 +75,14 @@ export function Sidebar({ currentUser }: { currentUser: User }) {
                                 <Link
                                     key={childHref}
                                     href={childHref}
+                                    onClick={onClose}
                                     className={clsx(
-                                        'w-full flex items-center px-3 py-2 rounded-lg transition-all duration-200 text-sm font-medium group',
-                                        isChildActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white',
+                                        'w-full flex items-center px-3 py-2 rounded-lg transition-all duration-200 text-xs font-medium group',
+                                        isChildActive ? 'bg-white/10 text-white font-semibold' : 'text-slate-400 hover:bg-white/5 hover:text-white',
                                     )}
                                 >
-                                    <ChildIcon size={15} className={clsx('mr-2.5 transition-colors', isChildActive ? 'text-cyan-400' : 'text-slate-500 group-hover:text-cyan-400')} />
-                                    {childLabel}
+                                    <ChildIcon size={14} className={clsx('mr-2.5 transition-colors shrink-0', isChildActive ? 'text-cyan-400' : 'text-slate-500 group-hover:text-cyan-400')} />
+                                    <span className="truncate">{childLabel}</span>
                                 </Link>
                             );
                         })}
@@ -83,26 +93,43 @@ export function Sidebar({ currentUser }: { currentUser: User }) {
     };
 
     return (
-        <div className="w-72 bg-[#0B1E40] text-white flex flex-col shadow-2xl z-20 shrink-0 sticky top-0 h-screen overflow-y-auto">
-            <div className="p-6 flex items-center justify-center border-b border-white/10 shrink-0">
-                <Logo width={150} />
+        <aside
+            className={clsx(
+                'w-72 bg-[#0B1E40] text-white flex flex-col shadow-2xl z-50 h-screen overflow-y-auto transition-transform duration-300 ease-in-out',
+                'fixed inset-y-0 left-0 lg:static lg:sticky lg:top-0 lg:translate-x-0 lg:z-20 lg:shrink-0',
+                isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+            )}
+            aria-label="Navegación principal"
+        >
+            <div className="p-5 flex items-center justify-between border-b border-white/10 shrink-0">
+                <div className="flex-1 flex justify-center lg:justify-center">
+                    <Logo width={140} />
+                </div>
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="lg:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors shrink-0"
+                    aria-label="Cerrar navegación"
+                >
+                    <X size={20} />
+                </button>
             </div>
 
-            <nav className="flex-1 px-4 py-6 space-y-6">
+            <nav className="flex-1 px-3 py-5 space-y-5">
                 <div>
-                    <p className="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">CRM</p>
+                    <p className="px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">CRM</p>
                     <div className="space-y-1">
                         {CRM_NAV_ITEMS.filter((item) => !item.adminOnly || currentUser.role === 'ADMIN').map(renderNavItem)}
                     </div>
                 </div>
 
                 <div>
-                    <p className="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">WEB</p>
+                    <p className="px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">WEB</p>
                     <div className="space-y-1">
                         {WEB_NAV_ITEMS.filter((item) => !item.adminOnly || currentUser.role === 'ADMIN').map(renderNavItem)}
                     </div>
                 </div>
             </nav>
-        </div>
+        </aside>
     );
 }

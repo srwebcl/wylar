@@ -78,7 +78,7 @@ export function HeroSlideForm({ initial, profiles = [] }: { initial?: HeroSlideF
                 <p className="text-xs text-slate-400 mt-2">Sube una imagen. Se guardará en la carpeta pública del CRM y se compartirá con la web.</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label className={LABEL_CLASS}>Etiqueta — texto</label>
                     <input value={eyebrowLead} onChange={(e) => setEyebrowLead(e.target.value)} required placeholder="Centro Acreditado" className={FIELD_CLASS} />
@@ -89,7 +89,7 @@ export function HeroSlideForm({ initial, profiles = [] }: { initial?: HeroSlideF
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label className={LABEL_CLASS}>Título</label>
                     <input value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Certificamos tus" className={FIELD_CLASS} />
@@ -105,7 +105,7 @@ export function HeroSlideForm({ initial, profiles = [] }: { initial?: HeroSlideF
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={3} className={FIELD_CLASS} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label className={LABEL_CLASS}>Texto del botón</label>
                     <input value={ctaLabel} onChange={(e) => setCtaLabel(e.target.value)} required placeholder="Quiero Certificarme" className={FIELD_CLASS} />
@@ -125,7 +125,7 @@ export function HeroSlideForm({ initial, profiles = [] }: { initial?: HeroSlideF
                         <option value="custom">URL Personalizada</option>
                     </select>
                 </div>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                     <label className={LABEL_CLASS}>Destino seleccionado</label>
                     {linkType === 'internal' && (
                         <select value={ctaHref} onChange={(e) => setCtaHref(e.target.value)} className={FIELD_CLASS} required>
@@ -151,11 +151,11 @@ export function HeroSlideForm({ initial, profiles = [] }: { initial?: HeroSlideF
 
             {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-medium rounded-xl p-3">{error}</div>}
 
-            <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
-                <button type="submit" disabled={isPending} className="flex items-center gap-2 bg-[#0B1E40] hover:bg-[#122b59] text-white font-bold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-60">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 border-t border-slate-100">
+                <button type="submit" disabled={isPending} className="flex items-center justify-center gap-2 bg-[#0B1E40] hover:bg-[#122b59] text-white font-bold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-60 w-full sm:w-auto">
                     <Save size={16} /> {isPending ? 'Guardando...' : 'Guardar slide'}
                 </button>
-                <button type="button" onClick={() => router.push('/hero')} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 font-medium px-4 py-2.5">
+                <button type="button" onClick={() => router.push('/hero')} className="flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800 font-medium px-4 py-2.5 w-full sm:w-auto">
                     <ArrowLeft size={16} /> Cancelar
                 </button>
             </div>

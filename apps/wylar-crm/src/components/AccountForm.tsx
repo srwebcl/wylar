@@ -37,7 +37,7 @@ export function AccountForm({ name, email }: { name: string; email: string }) {
                 {profileState.error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-medium rounded-xl p-3">{profileState.error}</div>}
                 {profileState.success && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium rounded-xl p-3">{profileState.success}</div>}
 
-                <button type="submit" disabled={profilePending} className="bg-[#0B1E40] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#122b59] transition-all disabled:opacity-70">
+                <button type="submit" disabled={profilePending} className="w-full sm:w-auto bg-[#0B1E40] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#122b59] transition-all disabled:opacity-70">
                     {profilePending ? 'Guardando…' : 'Guardar nombre'}
                 </button>
             </form>
@@ -64,7 +64,7 @@ export function AccountForm({ name, email }: { name: string; email: string }) {
                 {passwordState.error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-medium rounded-xl p-3">{passwordState.error}</div>}
                 {passwordState.success && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium rounded-xl p-3">{passwordState.success}</div>}
 
-                <button type="submit" disabled={passwordPending} className="bg-[#0B1E40] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#122b59] transition-all disabled:opacity-70">
+                <button type="submit" disabled={passwordPending} className="w-full sm:w-auto bg-[#0B1E40] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#122b59] transition-all disabled:opacity-70">
                     {passwordPending ? 'Guardando…' : 'Cambiar contraseña'}
                 </button>
             </form>

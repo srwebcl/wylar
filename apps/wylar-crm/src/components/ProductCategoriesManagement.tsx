@@ -88,7 +88,7 @@ export function ProductCategoriesManagement({ categories, isAdmin }: { categorie
                             </option>
                         ))}
                     </select>
-                    <button type="submit" disabled={isPending} className="shrink-0 flex items-center gap-1.5 bg-[#0B1E40] text-white font-bold px-4 py-2.5 rounded-lg hover:bg-[#122b59] transition-colors disabled:opacity-60">
+                    <button type="submit" disabled={isPending} className="shrink-0 flex items-center justify-center gap-1.5 bg-[#0B1E40] text-white font-bold px-4 py-2.5 rounded-lg hover:bg-[#122b59] transition-colors disabled:opacity-60">
                         <Plus size={16} /> Agregar
                     </button>
                 </form>
@@ -123,7 +123,7 @@ export function ProductCategoriesManagement({ categories, isAdmin }: { categorie
                                     <p className="text-xs text-slate-400">{attributeTemplateLabel(c.attributeTemplate)}{!c.active && ' · Inactiva'}</p>
                                 </div>
                                 {isAdmin && (
-                                    <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                         <button onClick={() => startEdit(c)} className="p-1.5 text-slate-400 hover:text-[#0B1E40] transition-colors" title="Editar">
                                             <Pencil size={14} />
                                         </button>

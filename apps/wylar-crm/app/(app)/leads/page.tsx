@@ -50,10 +50,10 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                     <h1 className="text-2xl font-extrabold text-slate-900">Oportunidades</h1>
                     <p className="text-slate-500 text-sm mt-1">Cada venta potencial de un cliente — busca, filtra y entra al detalle. {total} en total.</p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                     <Link
                         href={exportHref}
-                        className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-4 py-2.5 rounded-xl transition-colors"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-4 py-2.5 rounded-xl transition-colors"
                         title="Exportar el listado filtrado a Excel"
                     >
                         <FileSpreadsheet size={16} /> Exportar
@@ -66,16 +66,16 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
             <LeadsTable leads={leads} isAdmin={currentUser.role === 'ADMIN'} dncMap={dncMap} />
 
             {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4 text-sm text-slate-600">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 text-sm text-slate-600">
                     <span>Página {Math.min(page, totalPages)} de {totalPages}</span>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 w-full sm:w-auto justify-end">
                         {page > 1 && (
-                            <Link href={pageHref(page - 1)} className="px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-medium">
+                            <Link href={pageHref(page - 1)} className="flex-1 sm:flex-none text-center px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-medium">
                                 ← Anterior
                             </Link>
                         )}
                         {page < totalPages && (
-                            <Link href={pageHref(page + 1)} className="px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-medium">
+                            <Link href={pageHref(page + 1)} className="flex-1 sm:flex-none text-center px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-medium">
                                 Siguiente →
                             </Link>
                         )}

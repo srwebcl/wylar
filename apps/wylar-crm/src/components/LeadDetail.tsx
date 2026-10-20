@@ -92,27 +92,27 @@ export function LeadDetail({
                     </p>
                 </div>
 
-                <div className="flex items-start gap-2">
+                <div className="flex flex-wrap sm:flex-nowrap items-stretch sm:items-start gap-2 w-full sm:w-auto">
                     <a
                         href={`/api/leads/${lead.id}/export`}
-                        className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-3.5 py-2.5 rounded-xl transition-colors shadow-sm text-sm shrink-0"
+                        className="flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-3.5 py-2.5 rounded-xl transition-colors shadow-sm text-sm flex-1 sm:flex-none shrink-0"
                         title="Descargar informe de gestiones (Excel)"
                     >
                         <FileSpreadsheet size={16} /> Exportar
                     </a>
 
-                    <form action={statusAction} className="flex flex-col items-end gap-2 bg-white p-3 rounded-xl shadow-sm border border-slate-200">
-                        <div className="flex items-center space-x-3">
-                            <label className="text-sm font-bold text-slate-700">Estado:</label>
+                    <form action={statusAction} className="flex flex-col sm:items-end gap-2 bg-white p-3 rounded-xl shadow-sm border border-slate-200 w-full sm:w-auto">
+                        <div className="flex items-center justify-between sm:justify-start gap-2 sm:space-x-3 w-full">
+                            <label className="text-sm font-bold text-slate-700 shrink-0">Estado:</label>
                             <select
                                 name="status"
                                 value={pendingStatus}
                                 onChange={(e) => setPendingStatus(e.target.value)}
-                                className="bg-slate-50 border-slate-200 rounded-lg text-sm font-semibold p-2 focus:ring-2 focus:ring-[#0B1E40] outline-none cursor-pointer"
+                                className="flex-1 sm:flex-none bg-slate-50 border-slate-200 rounded-lg text-sm font-semibold p-2 focus:ring-2 focus:ring-[#0B1E40] outline-none cursor-pointer"
                             >
                                 {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                             </select>
-                            <button type="submit" disabled={statusPending} className="px-3 py-2 bg-[#0B1E40] text-white text-sm font-bold rounded-lg hover:bg-[#122b59] disabled:opacity-60 transition-colors">
+                            <button type="submit" disabled={statusPending} className="px-3.5 py-2 bg-[#0B1E40] text-white text-sm font-bold rounded-lg hover:bg-[#122b59] disabled:opacity-60 transition-colors shrink-0">
                                 Guardar
                             </button>
                         </div>
@@ -288,18 +288,18 @@ export function LeadDetail({
                     <QuotesPanel opportunityId={lead.id} quotes={lead.quotes} products={products} />
                 </div>
 
-                <div className="lg:col-span-2 glass-card flex flex-col h-[750px] overflow-hidden">
+                <div className="lg:col-span-2 glass-card flex flex-col h-[520px] sm:h-[650px] lg:h-[750px] overflow-hidden">
                     {lead.message && (
-                        <div className="p-6 border-b border-slate-100 bg-white">
-                            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Mensaje original del formulario</h3>
-                            <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-200 relative">
+                        <div className="p-4 sm:p-6 border-b border-slate-100 bg-white">
+                            <h3 className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-3">Mensaje original del formulario</h3>
+                            <div className="bg-slate-50/50 p-4 sm:p-5 rounded-xl border border-slate-200 relative">
                                 <div className="absolute top-0 left-0 w-1 h-full bg-[#0B1E40] rounded-l-xl"></div>
-                                <p className="text-slate-700 leading-relaxed font-medium italic text-[15px]">&ldquo;{lead.message}&rdquo;</p>
+                                <p className="text-slate-700 leading-relaxed font-medium italic text-sm sm:text-[15px]">&ldquo;{lead.message}&rdquo;</p>
                             </div>
                         </div>
                     )}
 
-                    <div className="flex-1 overflow-y-auto bg-slate-50/50 p-6 space-y-6">
+                    <div className="flex-1 overflow-y-auto bg-slate-50/50 p-4 sm:p-6 space-y-6">
                         <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider text-center relative">
                             <span className="bg-slate-50/50 px-3 relative z-10">Bitácora de gestiones</span>
                             <div className="absolute top-1/2 left-0 w-full h-px bg-slate-200 -z-0"></div>
@@ -311,24 +311,24 @@ export function LeadDetail({
                                 const isLast = i === lead.activities.length - 1;
 
                                 return (
-                                    <div key={a.id} className="relative pl-8 pb-6 group">
+                                    <div key={a.id} className="relative pl-7 sm:pl-8 pb-6 group">
                                         {!isLast && <div className="absolute left-[11px] top-6 bottom-[-24px] w-0.5 bg-slate-200"></div>}
                                         <div className={clsx('absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-slate-50 flex items-center justify-center shadow-sm z-10', isSystem ? 'bg-slate-400' : 'bg-amber-500')}></div>
 
-                                        <div className="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-5">
+                                        <div className="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-4 sm:p-5">
                                             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 border-b border-slate-100 pb-3 gap-2">
                                                 <div>
-                                                    <span className="font-extrabold text-slate-800 text-base">{a.authorName}</span>
-                                                    <span className="ml-3 inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 uppercase tracking-wider">
+                                                    <span className="font-extrabold text-slate-800 text-sm sm:text-base">{a.authorName}</span>
+                                                    <span className="ml-2 sm:ml-3 inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 uppercase tracking-wider">
                                                         {activityTypeLabel(a.type)}
                                                     </span>
                                                 </div>
                                                 <span className="text-xs font-semibold text-slate-500 flex items-center bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
-                                                    <Clock size={14} className="mr-1.5 text-slate-400" />
+                                                    <Clock size={14} className="mr-1.5 text-slate-400 shrink-0" />
                                                     {new Date(a.createdAt).toLocaleString('es-CL', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </div>
-                                            <p className="text-slate-700 text-[15px] whitespace-pre-wrap leading-relaxed font-medium">{a.text}</p>
+                                            <p className="text-slate-700 text-sm sm:text-[15px] whitespace-pre-wrap leading-relaxed font-medium">{a.text}</p>
                                         </div>
                                     </div>
                                 );
@@ -337,25 +337,27 @@ export function LeadDetail({
                         </div>
                     </div>
 
-                    <form ref={noteFormRef} action={activityAction} className="p-4 bg-white border-t border-slate-100 space-y-2">
-                        <div className="flex items-end space-x-3 bg-slate-50 p-2 rounded-2xl border border-slate-200 focus-within:border-[#0B1E40] focus-within:ring-2 focus-within:ring-[#0B1E40]/20 transition-all">
-                            <div className="flex flex-col gap-1 shrink-0 pb-0.5">
+                    <form ref={noteFormRef} action={activityAction} className="p-3 sm:p-4 bg-white border-t border-slate-100 space-y-2">
+                        <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:space-x-3 bg-slate-50 p-2.5 sm:p-2 rounded-2xl border border-slate-200 focus-within:border-[#0B1E40] focus-within:ring-2 focus-within:ring-[#0B1E40]/20 transition-all">
+                            <div className="flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-1 shrink-0 pb-0.5">
                                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide px-1">Tipo de registro</span>
-                                <select name="type" defaultValue="NOTA" className="bg-slate-200/60 hover:bg-slate-200 border border-slate-300 text-sm font-semibold text-slate-700 outline-none rounded-lg py-1.5 px-2 cursor-pointer transition-colors">
+                                <select name="type" defaultValue="NOTA" className="bg-slate-200/60 hover:bg-slate-200 border border-slate-300 text-xs sm:text-sm font-semibold text-slate-700 outline-none rounded-lg py-1.5 px-2 cursor-pointer transition-colors">
                                     {ACTIVITY_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                                 </select>
                             </div>
 
-                            <textarea
-                                name="text"
-                                required
-                                placeholder="Escribe una nota, resumen de llamada o de la conversación por WhatsApp..."
-                                className="flex-1 bg-transparent border-none p-2 focus:ring-0 outline-none resize-none max-h-32 min-h-[44px] text-sm text-slate-700"
-                                rows={1}
-                            ></textarea>
-                            <button type="submit" disabled={activityPending} className="bg-[#0B1E40] disabled:bg-slate-300 disabled:cursor-not-allowed text-white p-3 rounded-xl hover:bg-[#122b59] transition-colors shadow-md shrink-0">
-                                <Send size={18} />
-                            </button>
+                            <div className="flex items-end gap-2 flex-1 w-full">
+                                <textarea
+                                    name="text"
+                                    required
+                                    placeholder="Escribe una nota, resumen de llamada o WhatsApp..."
+                                    className="flex-1 bg-transparent border-none p-2 focus:ring-0 outline-none resize-none max-h-32 min-h-[44px] text-sm text-slate-700"
+                                    rows={1}
+                                />
+                                <button type="submit" disabled={activityPending} className="bg-[#0B1E40] disabled:bg-slate-300 disabled:cursor-not-allowed text-white p-3 rounded-xl hover:bg-[#122b59] transition-colors shadow-md shrink-0">
+                                    <Send size={18} />
+                                </button>
+                            </div>
                         </div>
                         {activityState.error && <p className="text-xs text-red-600 font-medium text-center">{activityState.error}</p>}
                     </form>

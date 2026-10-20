@@ -223,7 +223,7 @@ export function ProfileWizard({ initial }: { initial?: ProfileWizardInitial }) {
                     </div>
                 </div>
                 
-                <div className="flex flex-wrap gap-6 pt-4 border-t border-slate-100">
+                <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-6 pt-4 border-t border-slate-100">
                     <label className="flex items-center gap-2 text-sm font-bold text-slate-700 cursor-pointer">
                         <input type="checkbox" checked={isChileValora} onChange={(e) => setIsChileValora(e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#0B1E40] focus:ring-[#0B1E40]" /> 
                         Certificación ChileValora
@@ -241,11 +241,11 @@ export function ProfileWizard({ initial }: { initial?: ProfileWizardInitial }) {
 
             {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-medium rounded-xl p-4">{error}</div>}
 
-            <div className="flex items-center justify-between sticky bottom-6 bg-white p-4 rounded-2xl shadow-xl border border-slate-200">
+            <div className="flex items-center justify-between gap-3 sticky bottom-3 sm:bottom-6 bg-white/95 backdrop-blur-md p-3 sm:p-4 rounded-2xl shadow-xl border border-slate-200">
                 <button
                     type="button"
                     onClick={() => router.push('/catalogo')}
-                    className="text-slate-500 hover:text-slate-800 font-bold px-4 py-2 transition-colors"
+                    className="text-slate-500 hover:text-slate-800 font-bold px-3 sm:px-4 py-2 text-sm sm:text-base transition-colors"
                 >
                     Cancelar
                 </button>
@@ -254,7 +254,7 @@ export function ProfileWizard({ initial }: { initial?: ProfileWizardInitial }) {
                     type="button"
                     onClick={handleSave}
                     disabled={isPending}
-                    className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-8 py-3 rounded-xl transition-colors disabled:opacity-60 shadow-sm"
+                    className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl transition-colors disabled:opacity-60 shadow-sm"
                 >
                     {isPending ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} 
                     {isPending ? 'Guardando...' : 'Guardar y Publicar'}

@@ -10,7 +10,7 @@ export function LoginForm({ next }: { next?: string }) {
     const [state, formAction, pending] = useActionState(loginAction, initialState);
 
     return (
-        <form action={formAction} className="glass-card w-full max-w-sm p-8 border-t-4 border-t-amber-500 space-y-5">
+        <form action={formAction} className="glass-card w-full max-w-sm p-6 sm:p-8 border-t-4 border-t-amber-500 space-y-5">
             <div className="text-center mb-2">
                 <span className="inline-flex items-center justify-center bg-[#0B1E40] rounded-2xl px-6 py-4 mb-4">
                     <Logo width={150} />

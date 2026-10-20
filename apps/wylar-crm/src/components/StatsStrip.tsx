@@ -17,15 +17,15 @@ export function StatsStrip({ stats }: { stats: BoardStats }) {
     ];
 
     return (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
             {cards.map(({ label, value, icon: Icon, tone }) => (
-                <div key={label} className="glass-card p-4 flex items-center gap-3">
-                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${tone}`}>
-                        <Icon size={20} />
+                <div key={label} className="glass-card p-3.5 sm:p-4 flex items-center gap-3">
+                    <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-xl flex items-center justify-center shrink-0 ${tone}`}>
+                        <Icon size={19} />
                     </div>
-                    <div className="min-w-0">
-                        <p className="text-xl font-extrabold text-slate-900 leading-none">{value}</p>
-                        <p className="text-xs text-slate-500 mt-1 truncate">{label}</p>
+                    <div className="min-w-0 flex-1">
+                        <p className="text-lg sm:text-xl font-extrabold text-slate-900 leading-tight">{value}</p>
+                        <p className="text-xs text-slate-500 mt-0.5 truncate">{label}</p>
                     </div>
                 </div>
             ))}

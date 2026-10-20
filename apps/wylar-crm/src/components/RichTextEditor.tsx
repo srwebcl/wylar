@@ -53,7 +53,7 @@ export function RichTextEditor({ value, onChange, placeholder }: { value: string
                     height: 0;
                 }
             `}</style>
-            <div className="flex items-center gap-1 px-2 py-1.5 bg-slate-50 border-b border-slate-200">
+            <div className="flex items-center flex-wrap gap-1 px-2 py-1.5 bg-slate-50 border-b border-slate-200">
                 <ToolbarButton active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()} title="Negrita">
                     <Bold size={15} />
                 </ToolbarButton>

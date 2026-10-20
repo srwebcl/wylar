@@ -95,9 +95,9 @@ function CategoriesPanel({ categories, isAdmin }: { categories: CategoryRow[]; i
         <div className="glass-card p-6 space-y-4">
             <h2 className="font-bold text-slate-900">Categorías de certificación</h2>
 
-            <form onSubmit={handleCreate} className="flex gap-2">
+            <form onSubmit={handleCreate} className="flex flex-col sm:flex-row gap-2">
                 <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de la categoría" className={inputClass} required />
-                <button type="submit" disabled={isPending} className="shrink-0 flex items-center gap-1.5 bg-[#0B1E40] text-white font-bold px-4 py-2.5 rounded-lg hover:bg-[#122b59] transition-colors disabled:opacity-60">
+                <button type="submit" disabled={isPending} className="shrink-0 flex items-center justify-center gap-1.5 bg-[#0B1E40] text-white font-bold px-4 py-2.5 rounded-lg hover:bg-[#122b59] transition-colors disabled:opacity-60">
                     <Plus size={16} /> Agregar
                 </button>
             </form>
@@ -129,7 +129,7 @@ function CategoriesPanel({ categories, isAdmin }: { categories: CategoryRow[]; i
                         <li key={c.id} className="flex items-center justify-between py-2.5 group">
                             <span className="text-sm text-slate-700">{c.name}</span>
                             {isAdmin && (
-                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => startEdit(c)} className="p-1.5 text-slate-400 hover:text-[#0B1E40] transition-colors" title="Editar">
                                         <Pencil size={14} />
                                     </button>
@@ -220,7 +220,7 @@ function TypesPanel({ types, isAdmin }: { types: TypeRow[]; isAdmin: boolean }) 
                     className={inputClass}
                     required
                 />
-                <button type="submit" disabled={isPending} className="flex items-center gap-1.5 bg-[#0B1E40] text-white font-bold px-4 py-2.5 rounded-lg hover:bg-[#122b59] transition-colors disabled:opacity-60">
+                <button type="submit" disabled={isPending} className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-[#0B1E40] text-white font-bold px-4 py-2.5 rounded-lg hover:bg-[#122b59] transition-colors disabled:opacity-60">
                     <Plus size={16} /> Agregar tipo
                 </button>
             </form>
@@ -249,7 +249,7 @@ function TypesPanel({ types, isAdmin }: { types: TypeRow[]; isAdmin: boolean }) 
                                 <p className="text-xs text-slate-400 truncate">{t.completionText}</p>
                             </div>
                             {isAdmin && (
-                                <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => startEdit(t)} className="p-1.5 text-slate-400 hover:text-[#0B1E40] transition-colors" title="Editar">
                                         <Pencil size={14} />
                                     </button>

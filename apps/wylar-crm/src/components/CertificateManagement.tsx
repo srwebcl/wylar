@@ -267,24 +267,24 @@ export function CertificateManagement({
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
                 <div>
-                    <h1 className="text-2xl font-extrabold text-slate-900">Certificados</h1>
-                    <p className="text-slate-500 text-sm mt-1">Emisión y validación de certificados — se consultan desde wylar.cl/validador. {total} en total.</p>
+                    <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">Certificados</h1>
+                    <p className="text-slate-500 text-xs sm:text-sm mt-1">Emisión y validación de certificados — se consultan desde wylar.cl/validador. {total} en total.</p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
                     <Link
                         href="/certificados/configuracion"
                         title="Tipos y categorías de certificado"
-                        className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-4 py-2.5 rounded-xl transition-colors"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-3.5 py-2.5 rounded-xl transition-colors text-xs sm:text-sm"
                     >
-                        <Settings size={16} /> Tipos y categorías
+                        <Settings size={15} /> Tipos y categorías
                     </Link>
                     <button
                         onClick={openCreateForm}
-                        className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-4 sm:px-5 py-2.5 rounded-xl transition-colors shadow-xs text-xs sm:text-sm"
                     >
-                        <Plus size={18} /> Emitir certificado
+                        <Plus size={16} /> Emitir certificado
                     </button>
                 </div>
             </div>
@@ -295,15 +295,15 @@ export function CertificateManagement({
             {!showForm && success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
 
             {showForm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" onClick={() => setShowForm(false)}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-2.5 sm:p-4" onClick={() => setShowForm(false)}>
                     <form
                         onSubmit={handleSubmit}
                         onClick={(e) => e.stopPropagation()}
-                        className="glass-card bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4"
+                        className="glass-card bg-white w-full max-w-2xl max-h-[92vh] overflow-y-auto p-4 sm:p-6 space-y-4 rounded-2xl shadow-xl"
                     >
-                        <div className="flex items-center justify-between">
-                            <h2 className="font-bold text-slate-900">{editingId != null ? 'Editar certificado' : 'Emitir certificado'}</h2>
-                            <button type="button" onClick={() => setShowForm(false)} className="p-1 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Cerrar">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <h2 className="font-bold text-slate-900 text-base sm:text-lg">{editingId != null ? 'Editar certificado' : 'Emitir certificado'}</h2>
+                            <button type="button" onClick={() => setShowForm(false)} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors rounded-lg hover:bg-slate-100" aria-label="Cerrar">
                                 <X size={20} />
                             </button>
                         </div>
@@ -311,7 +311,7 @@ export function CertificateManagement({
                         {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
                         {success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <Field label="Nombre completo del titular">
                                 <input value={holderName} onChange={(e) => setHolderName(e.target.value)} className={inputClass} required />
                             </Field>
@@ -394,11 +394,11 @@ export function CertificateManagement({
                             </div>
                         </Field>
 
-                        <div className="flex justify-end">
+                        <div className="flex justify-end pt-2 border-t border-slate-100">
                             <button
                                 type="submit"
                                 disabled={isPending}
-                                className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-6 py-2.5 rounded-xl transition-colors disabled:opacity-60"
+                                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-6 py-2.5 rounded-xl transition-colors disabled:opacity-60"
                             >
                                 <ShieldCheck size={16} />
                                 {editingId != null ? (isPending ? 'Guardando…' : 'Guardar cambios') : isPending ? 'Emitiendo…' : 'Emitir certificado'}
@@ -411,88 +411,176 @@ export function CertificateManagement({
             {certificates.length === 0 ? (
                 <div className="glass-card p-10 text-center text-slate-400">Aún no se han emitido certificados.</div>
             ) : (
-                <div className="glass-card overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b border-slate-100 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
-                                    <th className="px-5 py-3">Titular</th>
-                                    <th className="px-5 py-3">RUT</th>
-                                    <th className="px-5 py-3">Certificación</th>
-                                    <th className="px-5 py-3">Categoría</th>
-                                    <th className="px-5 py-3">Tipo</th>
-                                    <th className="px-5 py-3">Código</th>
-                                    <th className="px-5 py-3">Emisión</th>
-                                    <th className="px-5 py-3">Vigencia</th>
-                                    <th className="px-5 py-3">Estado</th>
-                                    <th className="px-5 py-3">Emitido por</th>
-                                    <th className="px-5 py-3 text-right">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {certificates.map((c) => (
-                                    <tr key={c.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
-                                        <td className="px-5 py-3.5 font-bold text-slate-900 whitespace-nowrap">{c.holderName}</td>
-                                        <td className="px-5 py-3.5 text-slate-400 text-xs whitespace-nowrap">{c.holderRut}</td>
-                                        <td className="px-5 py-3.5 text-slate-700 max-w-[220px] truncate">{c.certificationTitle}</td>
-                                        <td className="px-5 py-3.5 text-slate-500 text-xs max-w-[160px] truncate">{c.categoryLabel}</td>
-                                        <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">{typeLabelFor(c.completionText, types)}</td>
-                                        <td className="px-5 py-3.5 font-mono text-xs text-slate-600 whitespace-nowrap">{c.code}</td>
-                                        <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">{formatShortDate(c.issueDate)}</td>
-                                        <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">{c.expiryDate ? formatShortDate(c.expiryDate) : 'Sin vencimiento'}</td>
-                                        <td className="px-5 py-3.5 whitespace-nowrap">
-                                            <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full ${STATUS_TONE[c.status]}`}>{c.statusLabel}</span>
-                                        </td>
-                                        <td className="px-5 py-3.5 text-slate-500 whitespace-nowrap">{c.issuedByName ?? '—'}</td>
-                                        <td className="px-5 py-3.5 whitespace-nowrap">
-                                            <div className="flex items-center justify-end gap-1">
-                                                {c.status !== 'REVOCADO' && (
-                                                    <a
-                                                        href={`/api/public/certificates/${c.code}/pdf`}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="p-2 text-slate-400 hover:text-cyan-700 transition-colors"
-                                                        title="Descargar PDF"
-                                                    >
-                                                        <Download size={16} />
-                                                    </a>
-                                                )}
-                                                {isAdmin && c.status !== 'REVOCADO' && (
-                                                    <button
-                                                        onClick={() => handleRevoke(c.id, c.code)}
-                                                        disabled={isPending}
-                                                        className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50"
-                                                        title="Revocar certificado"
-                                                    >
-                                                        <Ban size={16} />
-                                                    </button>
-                                                )}
-                                                {isAdmin && (
-                                                    <button
-                                                        onClick={() => openEditForm(c)}
-                                                        disabled={isPending}
-                                                        className="p-2 text-slate-400 hover:text-amber-600 transition-colors disabled:opacity-50"
-                                                        title="Editar certificado"
-                                                    >
-                                                        <Pencil size={16} />
-                                                    </button>
-                                                )}
-                                                {isAdmin && (
-                                                    <button
-                                                        onClick={() => handleDelete(c.id, c.code)}
-                                                        disabled={isPending}
-                                                        className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50"
-                                                        title="Eliminar certificado"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
+                <div className="space-y-4">
+                    {/* Tarjetas móviles para pantallas táctiles (< lg) */}
+                    <div className="lg:hidden space-y-3">
+                        {certificates.map((c) => (
+                            <div key={c.id} className="glass-card bg-white p-4 space-y-3">
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0">
+                                        <h3 className="font-extrabold text-[#0B1E40] text-base truncate">{c.holderName}</h3>
+                                        <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                                            <span>RUT: {c.holderRut}</span>
+                                            <span>·</span>
+                                            <span className="font-mono text-slate-600 font-bold">{c.code}</span>
+                                        </div>
+                                    </div>
+                                    <span className={`shrink-0 inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full ${STATUS_TONE[c.status]}`}>
+                                        {c.statusLabel}
+                                    </span>
+                                </div>
+
+                                <div className="bg-slate-50 rounded-lg p-2.5 text-xs space-y-1">
+                                    <p className="font-bold text-slate-800 leading-snug">{c.certificationTitle}</p>
+                                    <div className="flex items-center gap-2 text-slate-500 text-[11px] flex-wrap">
+                                        <span>Cat: <strong className="text-slate-700">{c.categoryLabel}</strong></span>
+                                        <span>·</span>
+                                        <span>Tipo: <strong className="text-slate-700">{typeLabelFor(c.completionText, types)}</strong></span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between text-xs text-slate-500">
+                                    <div>
+                                        <span>Emisión: <strong>{formatShortDate(c.issueDate)}</strong></span>
+                                        <span className="mx-1.5">·</span>
+                                        <span>Vigencia: <strong>{c.expiryDate ? formatShortDate(c.expiryDate) : 'Sin venc.'}</strong></span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                                    <span className="text-slate-400 text-[11px]">Por: {c.issuedByName ?? '—'}</span>
+                                    <div className="flex items-center gap-1">
+                                        {c.status !== 'REVOCADO' && (
+                                            <a
+                                                href={`/api/public/certificates/${c.code}/pdf`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="flex items-center gap-1 py-1 px-2.5 bg-cyan-50 text-cyan-700 font-semibold rounded-lg hover:bg-cyan-100 transition-colors"
+                                                title="Descargar PDF"
+                                            >
+                                                <Download size={14} /> PDF
+                                            </a>
+                                        )}
+                                        {isAdmin && (
+                                            <button
+                                                onClick={() => openEditForm(c)}
+                                                disabled={isPending}
+                                                className="p-1.5 text-slate-500 hover:text-amber-600 transition-colors rounded-md"
+                                                title="Editar"
+                                            >
+                                                <Pencil size={15} />
+                                            </button>
+                                        )}
+                                        {isAdmin && c.status !== 'REVOCADO' && (
+                                            <button
+                                                onClick={() => handleRevoke(c.id, c.code)}
+                                                disabled={isPending}
+                                                className="p-1.5 text-slate-500 hover:text-red-600 transition-colors rounded-md"
+                                                title="Revocar"
+                                            >
+                                                <Ban size={15} />
+                                            </button>
+                                        )}
+                                        {isAdmin && (
+                                            <button
+                                                onClick={() => handleDelete(c.id, c.code)}
+                                                disabled={isPending}
+                                                className="p-1.5 text-slate-500 hover:text-red-600 transition-colors rounded-md"
+                                                title="Eliminar"
+                                            >
+                                                <Trash2 size={15} />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Tabla completa desktop (>= lg) */}
+                    <div className="hidden lg:block glass-card overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-slate-100 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
+                                        <th className="px-5 py-3">Titular</th>
+                                        <th className="px-5 py-3">RUT</th>
+                                        <th className="px-5 py-3">Certificación</th>
+                                        <th className="px-5 py-3">Categoría</th>
+                                        <th className="px-5 py-3">Tipo</th>
+                                        <th className="px-5 py-3">Código</th>
+                                        <th className="px-5 py-3">Emisión</th>
+                                        <th className="px-5 py-3">Vigencia</th>
+                                        <th className="px-5 py-3">Estado</th>
+                                        <th className="px-5 py-3">Emitido por</th>
+                                        <th className="px-5 py-3 text-right">Acciones</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {certificates.map((c) => (
+                                        <tr key={c.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
+                                            <td className="px-5 py-3.5 font-bold text-slate-900 whitespace-nowrap">{c.holderName}</td>
+                                            <td className="px-5 py-3.5 text-slate-400 text-xs whitespace-nowrap">{c.holderRut}</td>
+                                            <td className="px-5 py-3.5 text-slate-700 max-w-[220px] truncate">{c.certificationTitle}</td>
+                                            <td className="px-5 py-3.5 text-slate-500 text-xs max-w-[160px] truncate">{c.categoryLabel}</td>
+                                            <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">{typeLabelFor(c.completionText, types)}</td>
+                                            <td className="px-5 py-3.5 font-mono text-xs text-slate-600 whitespace-nowrap">{c.code}</td>
+                                            <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">{formatShortDate(c.issueDate)}</td>
+                                            <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">{c.expiryDate ? formatShortDate(c.expiryDate) : 'Sin vencimiento'}</td>
+                                            <td className="px-5 py-3.5 whitespace-nowrap">
+                                                <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full ${STATUS_TONE[c.status]}`}>{c.statusLabel}</span>
+                                            </td>
+                                            <td className="px-5 py-3.5 text-slate-500 whitespace-nowrap">{c.issuedByName ?? '—'}</td>
+                                            <td className="px-5 py-3.5 whitespace-nowrap">
+                                                <div className="flex items-center justify-end gap-1">
+                                                    {c.status !== 'REVOCADO' && (
+                                                        <a
+                                                            href={`/api/public/certificates/${c.code}/pdf`}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="p-2 text-slate-400 hover:text-cyan-700 transition-colors"
+                                                            title="Descargar PDF"
+                                                        >
+                                                            <Download size={16} />
+                                                        </a>
+                                                    )}
+                                                    {isAdmin && c.status !== 'REVOCADO' && (
+                                                        <button
+                                                            onClick={() => handleRevoke(c.id, c.code)}
+                                                            disabled={isPending}
+                                                            className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                                                            title="Revocar certificado"
+                                                        >
+                                                            <Ban size={16} />
+                                                        </button>
+                                                    )}
+                                                    {isAdmin && (
+                                                        <button
+                                                            onClick={() => openEditForm(c)}
+                                                            disabled={isPending}
+                                                            className="p-2 text-slate-400 hover:text-amber-600 transition-colors disabled:opacity-50"
+                                                            title="Editar certificado"
+                                                        >
+                                                            <Pencil size={16} />
+                                                        </button>
+                                                    )}
+                                                    {isAdmin && (
+                                                        <button
+                                                            onClick={() => handleDelete(c.id, c.code)}
+                                                            disabled={isPending}
+                                                            className="p-2 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                                                            title="Eliminar certificado"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             )}

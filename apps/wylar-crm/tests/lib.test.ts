@@ -92,7 +92,7 @@ describe('buildLeadsWhere', () => {
         const where = buildLeadsWhere({ q: 'juan', status: 'NUEVO', source: 'WEB' });
         expect(where.status).toBe('NUEVO');
         expect(where.source).toBe('WEB');
-        expect(where.OR).toHaveLength(5);
+        expect(where.OR).toHaveLength(10);
     });
     it('responsable: sin asignar, número válido y basura', () => {
         expect(buildLeadsWhere({ assignedToId: 'sin-asignar' }).assignedToId).toBeNull();
@@ -102,7 +102,7 @@ describe('buildLeadsWhere', () => {
 });
 
 describe('validaciones', () => {
-    const valid = { type: 'PERSONA', name: 'Ana Pérez', email: 'ana@correo.cl', phone: '+56912345678' };
+    const valid = { type: 'PERSONA', name: 'Ana Pérez', rut: '12.345.678-5', email: 'ana@correo.cl', phone: '+56 9 1234 5678', productId: 1 };
     it('lead público: acepta OTEC y rechaza campos gigantes o tipos desconocidos', () => {
         expect(publicLeadSchema.safeParse({ ...valid, type: 'OTEC' }).success).toBe(true);
         expect(publicLeadSchema.safeParse({ ...valid, type: 'XXX' }).success).toBe(false);

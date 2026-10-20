@@ -119,15 +119,15 @@ export function CreateLeadModal({ categories, products }: { categories: Category
             </button>
 
             {open && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" onClick={() => setOpen(false)}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-2.5 sm:p-4" onClick={() => setOpen(false)}>
                     <form
                         onSubmit={handleSubmit}
                         onClick={(e) => e.stopPropagation()}
-                        className="glass-card bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4"
+                        className="glass-card bg-white w-full max-w-2xl max-h-[92vh] overflow-y-auto p-4 sm:p-6 space-y-4 rounded-2xl shadow-xl"
                     >
-                        <div className="flex items-center justify-between">
-                            <h2 className="font-bold text-slate-900">Nueva oportunidad</h2>
-                            <button type="button" onClick={() => setOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Cerrar">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <h2 className="font-bold text-slate-900 text-base sm:text-lg">Nueva oportunidad</h2>
+                            <button type="button" onClick={() => setOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors rounded-lg hover:bg-slate-100" aria-label="Cerrar">
                                 <X size={20} />
                             </button>
                         </div>
@@ -153,7 +153,7 @@ export function CreateLeadModal({ categories, products }: { categories: Category
                             </div>
                         )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <label className="block">
                                 <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Tipo</span>
                                 <select name="type" value={fields.type} onChange={setField('type')} className={inputClass}>
@@ -235,11 +235,11 @@ export function CreateLeadModal({ categories, products }: { categories: Category
                             <textarea name="message" rows={3} value={fields.message} onChange={setField('message')} className={inputClass} placeholder="Contexto adicional, cómo llegó el contacto, etc." />
                         </label>
 
-                        <div className="flex justify-end">
+                        <div className="flex justify-end pt-2 border-t border-slate-100">
                             <button
                                 type="submit"
                                 disabled={pending}
-                                className="flex items-center gap-2 bg-[#0B1E40] text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#122b59] transition-colors disabled:opacity-60"
+                                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#0B1E40] text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#122b59] transition-colors disabled:opacity-60"
                             >
                                 {pending ? 'Guardando…' : 'Crear oportunidad'}
                             </button>

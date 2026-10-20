@@ -43,50 +43,58 @@ export function LeadsSearchBar({
 
     return (
         <div className="space-y-3 mb-5">
-            <div className="flex flex-wrap gap-3">
-                <form className="relative group" onSubmit={(e) => { e.preventDefault(); updateParam('q', q); }}>
-                    <Search className="absolute left-3.5 top-2.5 text-slate-400 group-focus-within:text-[#0B1E40] transition-colors" size={18} />
+            <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+                <form className="relative group flex-1 w-full" onSubmit={(e) => { e.preventDefault(); updateParam('q', q); }}>
+                    <Search className="absolute left-3.5 top-3 text-slate-400 group-focus-within:text-[#0B1E40] transition-colors" size={18} />
                     <input
                         type="text"
                         value={q}
                         onChange={(e) => setQ(e.target.value)}
                         placeholder="Buscar por nombre, RUT, correo, teléfono, certificación, tipo o código..."
-                        className="pl-10 pr-4 py-2.5 w-96 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#0B1E40]/20 focus:border-[#0B1E40] outline-none text-sm transition-all shadow-sm"
+                        className="pl-10 pr-4 py-2.5 w-full bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#0B1E40]/20 focus:border-[#0B1E40] outline-none text-sm transition-all shadow-xs"
                     />
                 </form>
-                <button
-                    type="button"
-                    onClick={() => setShowFilters((v) => !v)}
-                    className="flex items-center px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all font-medium text-sm shadow-sm"
-                >
-                    <Filter size={16} className="mr-2" /> Filtrar
-                </button>
-                {hasFilters && (
-                    <button type="button" onClick={clearFilters} className="flex items-center px-3 py-2.5 text-slate-500 hover:text-red-600 text-sm font-medium">
-                        <X size={16} className="mr-1" /> Limpiar
+                <div className="flex items-center gap-2 shrink-0">
+                    <button
+                        type="button"
+                        onClick={() => setShowFilters((v) => !v)}
+                        className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all font-medium text-sm shadow-xs"
+                    >
+                        <Filter size={16} className="mr-2 text-slate-500" />
+                        <span>Filtros</span>
+                        {hasFilters && <span className="ml-1.5 w-2 h-2 rounded-full bg-amber-500" />}
                     </button>
-                )}
+                    {hasFilters && (
+                        <button
+                            type="button"
+                            onClick={clearFilters}
+                            className="flex items-center justify-center px-3 py-2.5 text-slate-500 hover:text-red-600 text-sm font-medium transition-colors"
+                        >
+                            <X size={16} className="mr-1" /> Limpiar
+                        </button>
+                    )}
+                </div>
             </div>
 
             {showFilters && (
-                <div className="flex flex-wrap gap-3 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Estado</label>
-                        <select defaultValue={searchParams.get('status') ?? ''} onChange={(e) => updateParam('status', e.target.value)} className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
+                        <select defaultValue={searchParams.get('status') ?? ''} onChange={(e) => updateParam('status', e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
                             <option value="">Todos</option>
                             {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                         </select>
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Origen</label>
-                        <select defaultValue={searchParams.get('source') ?? ''} onChange={(e) => updateParam('source', e.target.value)} className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
+                        <select defaultValue={searchParams.get('source') ?? ''} onChange={(e) => updateParam('source', e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
                             <option value="">Todos</option>
                             {SOURCES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                         </select>
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Responsable</label>
-                        <select defaultValue={searchParams.get('assignedToId') ?? ''} onChange={(e) => updateParam('assignedToId', e.target.value)} className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
+                        <select defaultValue={searchParams.get('assignedToId') ?? ''} onChange={(e) => updateParam('assignedToId', e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
                             <option value="">Todos</option>
                             <option value="sin-asignar">Sin asignar</option>
                             {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
@@ -100,7 +108,7 @@ export function LeadsSearchBar({
                                 updateParam('categoryId', e.target.value);
                                 updateParam('productId', '');
                             }}
-                            className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none"
+                            className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none"
                         >
                             <option value="">Todas</option>
                             {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -108,7 +116,7 @@ export function LeadsSearchBar({
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Producto</label>
-                        <select defaultValue={searchParams.get('productId') ?? ''} onChange={(e) => updateParam('productId', e.target.value)} className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
+                        <select defaultValue={searchParams.get('productId') ?? ''} onChange={(e) => updateParam('productId', e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
                             <option value="">Todos</option>
                             {filteredProducts.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                         </select>
@@ -120,16 +128,16 @@ export function LeadsSearchBar({
                             defaultValue={searchParams.get('comuna') ?? ''}
                             onBlur={(e) => updateParam('comuna', e.target.value)}
                             placeholder="Ej: Calama"
-                            className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none w-32"
+                            className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none"
                         />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Desde</label>
-                        <input type="date" defaultValue={searchParams.get('from') ?? ''} onChange={(e) => updateParam('from', e.target.value)} className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" />
+                        <input type="date" defaultValue={searchParams.get('from') ?? ''} onChange={(e) => updateParam('from', e.target.value)} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Hasta</label>
-                        <input type="date" defaultValue={searchParams.get('to') ?? ''} onChange={(e) => updateParam('to', e.target.value)} className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" />
+                        <input type="date" defaultValue={searchParams.get('to') ?? ''} onChange={(e) => updateParam('to', e.target.value)} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" />
                     </div>
                 </div>
             )}
