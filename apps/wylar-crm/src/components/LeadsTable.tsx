@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { Trash2, Loader2, ShieldOff, Contact } from 'lucide-react';
+import { Trash2, Loader2, ShieldOff, Contact, MapPin } from 'lucide-react';
 import { leadTypeLabel, sourceLabel, statusLabel } from '@/lib/constants';
 import { deleteLead } from '@/actions/leads';
+import { formatChileanMobile } from '@/lib/phone';
 import type { Lead, Product, ProductCategory } from '@prisma/client';
 import type { SafeUser as User } from '@/lib/safeUser';
 
@@ -50,16 +51,20 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
             <div className="lg:hidden space-y-3">
                 {leads.map((lead) => {
                     const isDnc = dncMap.has(`${lead.email}|${lead.phone}`);
+                    const formattedPhone = formatChileanMobile(lead.phone) ?? lead.phone;
+                    const formattedEmail = lead.email.toLowerCase();
+                    const formattedName = lead.name.toUpperCase();
+
                     return (
                         <div key={lead.id} className="glass-card bg-white p-4 space-y-3">
                             <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap">
                                         <Link href={`/leads/${lead.id}`} className="font-extrabold text-[#0B1E40] hover:text-amber-600 transition-colors text-base truncate">
-                                            {lead.name}
+                                            {formattedName}
                                         </Link>
                                         {isDnc && (
-                                            <span title={`No contactar: ${dncMap.get(`${lead.email}|${lead.phone}`)}`} className="shrink-0">
+                                             <span title={`No contactar: ${dncMap.get(`${lead.email}|${lead.phone}`)}`} className="shrink-0">
                                                 <ShieldOff size={14} className="text-red-500" />
                                             </span>
                                         )}
@@ -67,10 +72,15 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
                                             <Contact size={14} />
                                         </Link>
                                     </div>
-                                    <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
+                                    <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500 flex-wrap">
                                         <span className="font-mono font-bold text-slate-600">{lead.code}</span>
                                         {lead.rut && <span>· {lead.rut}</span>}
-                                        {lead.company && <span className="truncate">· {lead.company}</span>}
+                                        {lead.comuna && (
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+                                                <MapPin size={11} className="text-slate-400" /> {lead.comuna}
+                                            </span>
+                                        )}
+                                        {lead.company && <span className="truncate">· {lead.company.toUpperCase()}</span>}
                                     </div>
                                 </div>
                                 <span className={`shrink-0 inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${STATUS_BADGE[lead.status]}`}>
@@ -91,14 +101,14 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
                                     href={`tel:${lead.phone}`}
                                     className="flex items-center justify-center gap-1.5 py-2 px-3 bg-white border border-slate-200 rounded-lg text-slate-700 font-semibold hover:bg-slate-50 transition-colors"
                                 >
-                                    📞 {lead.phone}
+                                    📞 {formattedPhone}
                                 </a>
                                 <a
-                                    href={`mailto:${lead.email}`}
+                                    href={`mailto:${formattedEmail}`}
                                     className="flex items-center justify-center gap-1.5 py-2 px-3 bg-white border border-slate-200 rounded-lg text-slate-700 font-semibold hover:bg-slate-50 transition-colors truncate"
-                                    title={lead.email}
+                                    title={formattedEmail}
                                 >
-                                    ✉️ {lead.email.split('@')[0]}…
+                                    ✉️ {formattedEmail.split('@')[0]}…
                                 </a>
                             </div>
 
@@ -143,6 +153,7 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
                                 <th className="px-4 py-3">RUT</th>
                                 <th className="px-4 py-3">Correo</th>
                                 <th className="px-4 py-3">Teléfono</th>
+                                <th className="px-4 py-3">Comuna</th>
                                 <th className="px-4 py-3">Tipo</th>
                                 <th className="px-4 py-3">Producto</th>
                                 <th className="px-4 py-3">Categoría</th>
@@ -154,64 +165,77 @@ export function LeadsTable({ leads, isAdmin = false, dncMap = new Map() }: { lea
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {leads.map((lead) => (
-                                <tr key={lead.id} className="hover:bg-slate-50/80 transition-colors">
-                                    <td className="px-4 py-3 whitespace-nowrap">
-                                        <Link href={`/leads/${lead.id}`} className="font-bold text-[#0B1E40] hover:underline">
-                                            {lead.code}
-                                        </Link>
-                                    </td>
-                                    <td className="px-4 py-3 font-medium text-slate-800 whitespace-nowrap">
-                                        <span className="inline-flex items-center gap-1.5">
-                                            {dncMap.has(`${lead.email}|${lead.phone}`) && (
-                                                <span title={`No contactar: ${dncMap.get(`${lead.email}|${lead.phone}`)}`} className="shrink-0">
-                                                    <ShieldOff size={13} className="text-red-500" />
-                                                </span>
-                                            )}
-                                            {lead.name}
-                                            <Link href={`/clientes/${lead.clientId}`} title="Ver ficha del cliente" className="text-slate-300 hover:text-[#0B1E40] transition-colors">
-                                                <Contact size={13} />
-                                            </Link>
-                                        </span>
-                                        {lead.company && <span className="block text-xs font-normal text-slate-400">{lead.company}</span>}
-                                    </td>
-                                    <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
-                                        {lead.rut || '—'}
-                                    </td>
-                                    <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
-                                        {lead.email}
-                                    </td>
-                                    <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
-                                        {lead.phone}
-                                    </td>
-                                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{leadTypeLabel(lead.type)}</td>
-                                    <td className="px-4 py-3 text-slate-600 max-w-[200px] truncate">{lead.product?.name ?? lead.certificationInterest ?? '—'}</td>
-                                    <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">{lead.product?.category.name ?? '—'}</td>
-                                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{sourceLabel(lead.source)}</td>
-                                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{lead.assignedTo?.name ?? <span className="text-slate-400 italic">Sin asignar</span>}</td>
-                                    <td className="px-4 py-3 whitespace-nowrap">
-                                        <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full border ${STATUS_BADGE[lead.status]}`}>
-                                            {statusLabel(lead.status)}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
-                                        {new Intl.DateTimeFormat('es-CL', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.createdAt))}
-                                    </td>
-                                    {isAdmin && (
+                            {leads.map((lead) => {
+                                const formattedPhone = formatChileanMobile(lead.phone) ?? lead.phone;
+                                const formattedEmail = lead.email.toLowerCase();
+                                const formattedName = lead.name.toUpperCase();
+
+                                return (
+                                    <tr key={lead.id} className="hover:bg-slate-50/80 transition-colors">
                                         <td className="px-4 py-3 whitespace-nowrap">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleDelete(lead.id, lead.code, lead.name)}
-                                                disabled={isPending && pendingId === lead.id}
-                                                title="Eliminar oportunidad"
-                                                className="text-slate-300 hover:text-red-600 disabled:opacity-50 transition-colors"
-                                            >
-                                                {isPending && pendingId === lead.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                                            </button>
+                                            <Link href={`/leads/${lead.id}`} className="font-bold text-[#0B1E40] hover:underline">
+                                                {lead.code}
+                                            </Link>
                                         </td>
-                                    )}
-                                </tr>
-                            ))}
+                                        <td className="px-4 py-3 font-semibold text-slate-900 whitespace-nowrap">
+                                            <span className="inline-flex items-center gap-1.5">
+                                                {dncMap.has(`${lead.email}|${lead.phone}`) && (
+                                                    <span title={`No contactar: ${dncMap.get(`${lead.email}|${lead.phone}`)}`} className="shrink-0">
+                                                        <ShieldOff size={13} className="text-red-500" />
+                                                    </span>
+                                                )}
+                                                {formattedName}
+                                                <Link href={`/clientes/${lead.clientId}`} title="Ver ficha del cliente" className="text-slate-300 hover:text-[#0B1E40] transition-colors">
+                                                    <Contact size={13} />
+                                                </Link>
+                                            </span>
+                                            {lead.company && <span className="block text-xs font-normal text-slate-400">{lead.company.toUpperCase()}</span>}
+                                        </td>
+                                        <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
+                                            {lead.rut || '—'}
+                                        </td>
+                                        <td className="px-4 py-3 text-slate-600 text-xs whitespace-nowrap">
+                                            {formattedEmail}
+                                        </td>
+                                        <td className="px-4 py-3 text-slate-700 text-xs font-medium whitespace-nowrap">
+                                            {formattedPhone}
+                                        </td>
+                                        <td className="px-4 py-3 text-slate-600 text-xs whitespace-nowrap">
+                                            {lead.comuna ? (
+                                                <span className="font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">{lead.comuna}</span>
+                                            ) : (
+                                                <span className="text-slate-300">—</span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{leadTypeLabel(lead.type)}</td>
+                                        <td className="px-4 py-3 text-slate-600 max-w-[200px] truncate">{lead.product?.name ?? lead.certificationInterest ?? '—'}</td>
+                                        <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">{lead.product?.category.name ?? '—'}</td>
+                                        <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{sourceLabel(lead.source)}</td>
+                                        <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{lead.assignedTo?.name ?? <span className="text-slate-400 italic">Sin asignar</span>}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full border ${STATUS_BADGE[lead.status]}`}>
+                                                {statusLabel(lead.status)}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
+                                            {new Intl.DateTimeFormat('es-CL', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.createdAt))}
+                                        </td>
+                                        {isAdmin && (
+                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(lead.id, lead.code, lead.name)}
+                                                    disabled={isPending && pendingId === lead.id}
+                                                    title="Eliminar oportunidad"
+                                                    className="text-slate-300 hover:text-red-600 disabled:opacity-50 transition-colors cursor-pointer"
+                                                >
+                                                    {isPending && pendingId === lead.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                                                </button>
+                                            </td>
+                                        )}
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

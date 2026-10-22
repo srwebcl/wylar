@@ -4,6 +4,7 @@ import { submitLead } from '../lib/crm.js';
 import { getProductList } from '../lib/products.js';
 import { isValidRut, formatRut } from '../lib/rut.js';
 import { isValidChileanMobile, formatChileanMobile } from '../lib/phone.js';
+import ComunaSelector from './ComunaSelector.jsx';
 
 // Motivo de contacto -> tipo de lead para el CRM. La certificación de
 // interés ya no se infiere del motivo: la indica el propio prospecto (ver
@@ -21,6 +22,7 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
     const [selectedMotivo, setSelectedMotivo] = useState(preselectedContext);
     const [rut, setRut] = useState('');
     const [phone, setPhone] = useState('');
+    const [comuna, setComuna] = useState('');
     const [fieldErrors, setFieldErrors] = useState({});
     const [products, setProducts] = useState([]);
 
@@ -72,17 +74,21 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
 
         const motivo = String(data.get('motivo') || '');
         const type = MOTIVO_TYPE[motivo] || 'PERSONA';
+        const normalizedName = String(data.get('name') || '').trim().toUpperCase();
+        const normalizedEmail = String(data.get('email') || '').trim().toLowerCase();
+        const selectedComuna = (comuna || String(data.get('comuna') || '')).trim() || null;
 
         setStatus('sending');
         setErrorMessage('');
         try {
             await submitLead({
                 type,
-                name: data.get('name'),
+                name: normalizedName,
                 rut: canonicalRut,
-                email: data.get('email'),
+                email: normalizedEmail,
                 phone: phoneCanonical,
-                company: data.get('company') || null,
+                company: data.get('company') ? String(data.get('company')).trim().toUpperCase() : null,
+                comuna: selectedComuna,
                 productId: Number(data.get('productId')),
                 message: data.get('message') || null,
             });
@@ -90,6 +96,7 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
             form.reset();
             setRut('');
             setPhone('');
+            setComuna('');
             setFieldErrors({});
         } catch (err) {
             setStatus('error');
@@ -190,15 +197,27 @@ export default function ContactForm({ title = '', subtitle = '', preselectedCont
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Motivo de contacto</label>
-                                    <select name="motivo" value={selectedMotivo} onChange={(e) => setSelectedMotivo(e.target.value)} className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all cursor-pointer" required>
-                                        <option value="" disabled>Seleccione el servicio...</option>
-                                        <option value="personas">Personas</option>
-                                        <option value="empresas">Empresas</option>
-                                        <option value="otec">OTEC</option>
-                                        <option value="instituciones">Instituciones de Educación</option>
-                                    </select>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Comuna</label>
+                                        <ComunaSelector
+                                            value={comuna}
+                                            onChange={setComuna}
+                                            name="comuna"
+                                            required={true}
+                                            placeholder="Busca tu comuna..."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Motivo de contacto</label>
+                                        <select name="motivo" value={selectedMotivo} onChange={(e) => setSelectedMotivo(e.target.value)} className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all cursor-pointer" required>
+                                            <option value="" disabled>Seleccione el servicio...</option>
+                                            <option value="personas">Personas</option>
+                                            <option value="empresas">Empresas</option>
+                                            <option value="otec">OTEC</option>
+                                            <option value="instituciones">Instituciones de Educación</option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 {['empresas', 'otec', 'instituciones'].includes(selectedMotivo) && (

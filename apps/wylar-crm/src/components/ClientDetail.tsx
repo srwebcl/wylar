@@ -57,8 +57,11 @@ export function ClientDetail({
         if (errors.rut || errors.phone) return;
 
         const fd = new FormData(e.currentTarget);
+        fd.set('name', fields.name.trim().toUpperCase());
         fd.set('rut', formatRut(fields.rut));
+        fd.set('email', fields.email.trim().toLowerCase());
         fd.set('phone', phoneCanonical!);
+        if (fields.company) fd.set('company', fields.company.trim().toUpperCase());
         formAction(fd);
     }
 
@@ -67,10 +70,10 @@ export function ClientDetail({
             <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div>
                     <div className="flex items-center gap-3">
-                        <h1 className="text-2xl font-extrabold text-slate-900">{client.name}</h1>
+                        <h1 className="text-2xl font-extrabold text-slate-900">{client.name.toUpperCase()}</h1>
                         <span className="px-3 py-1 rounded-full text-xs font-bold border bg-slate-50 text-slate-500 border-slate-200">{leadTypeLabel(client.type)}</span>
                     </div>
-                    {client.company && <p className="text-slate-500 text-sm mt-1">{client.company}</p>}
+                    {client.company && <p className="text-slate-500 text-sm mt-1">{client.company.toUpperCase()}</p>}
                 </div>
                 <button onClick={() => setEditing((v) => !v)} className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-4 py-2.5 rounded-xl transition-colors">
                     <Pencil size={16} /> {editing ? 'Cancelar' : 'Editar'}
@@ -119,20 +122,20 @@ export function ClientDetail({
                                 )}
                                 <div className="flex items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                                     <Mail size={16} className="text-slate-400 mr-3 shrink-0" />
-                                    <a href={`mailto:${client.email}`} className="text-sm text-slate-700 font-medium hover:underline">
-                                        {client.email}
+                                    <a href={`mailto:${client.email.toLowerCase()}`} className="text-sm text-slate-700 font-medium hover:underline">
+                                        {client.email.toLowerCase()}
                                     </a>
                                 </div>
                                 <div className="flex items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                                     <Phone size={16} className="text-slate-400 mr-3 shrink-0" />
-                                    <a href={`tel:${client.phone}`} className="text-sm text-slate-700 font-medium hover:underline">
-                                        {client.phone}
+                                    <a href={`tel:${formatChileanMobile(client.phone) ?? client.phone}`} className="text-sm text-slate-700 font-medium hover:underline">
+                                        {formatChileanMobile(client.phone) ?? client.phone}
                                     </a>
                                 </div>
                                 {client.company && (
                                     <div className="flex items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                                         <Building2 size={16} className="text-slate-400 mr-3 shrink-0" />
-                                        <span className="text-sm text-slate-700 font-medium">{client.company}</span>
+                                        <span className="text-sm text-slate-700 font-medium">{client.company.toUpperCase()}</span>
                                     </div>
                                 )}
                             </>
@@ -227,19 +230,23 @@ function ClientContactsPanel({ clientId, contacts }: { clientId: number; contact
                         </button>
                     </form>
                 )}
-                {contacts.map((c) => (
-                    <div key={c.id} className="flex items-center justify-between bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                        <div>
-                            <p className="text-sm font-bold text-slate-800">{c.name}</p>
-                            <p className="text-xs text-slate-500">
-                                {[c.role, c.email, c.phone].filter(Boolean).join(' · ') || '—'}
-                            </p>
+                {contacts.map((c) => {
+                    const formattedEmail = c.email ? c.email.toLowerCase() : null;
+                    const formattedPhone = c.phone ? (formatChileanMobile(c.phone) ?? c.phone) : null;
+                    return (
+                        <div key={c.id} className="flex items-center justify-between bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                            <div>
+                                <p className="text-sm font-bold text-slate-800">{c.name.toUpperCase()}</p>
+                                <p className="text-xs text-slate-500">
+                                    {[c.role, formattedEmail, formattedPhone].filter(Boolean).join(' · ') || '—'}
+                                </p>
+                            </div>
+                            <button onClick={() => handleDelete(c.id)} className="text-slate-300 hover:text-red-600 shrink-0">
+                                <Trash2 size={14} />
+                            </button>
                         </div>
-                        <button onClick={() => handleDelete(c.id)} className="text-slate-300 hover:text-red-600 shrink-0">
-                            <Trash2 size={14} />
-                        </button>
-                    </div>
-                ))}
+                    );
+                })}
                 {contacts.length === 0 && !showForm && <p className="text-xs text-slate-400 text-center py-2">Sin contactos adicionales.</p>}
             </div>
         </div>

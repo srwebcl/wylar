@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
-import { Building2, Clock, GraduationCap, User as UserIcon } from 'lucide-react';
+import { Building2, Clock, GraduationCap, User as UserIcon, MapPin } from 'lucide-react';
 import clsx from 'clsx';
 import { changeLeadStatus } from '@/actions/leads';
 import { STATUSES, formatDuration, leadTypeLabel, sourceLabel } from '@/lib/constants';
@@ -173,13 +173,18 @@ function LeadCard({
                 className="block cursor-grab active:cursor-grabbing"
             >
                 <div className="flex items-start justify-between gap-2 mb-1.5">
-                    <p className="font-bold text-slate-900 text-sm leading-tight truncate hover:text-amber-600 transition-colors">{lead.name}</p>
+                    <p className="font-bold text-slate-900 text-sm leading-tight truncate hover:text-amber-600 transition-colors">{lead.name.toUpperCase()}</p>
                     <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-slate-400 font-mono">{lead.code}</span>
                 </div>
 
                 {lead.company && (
                     <p className="flex items-center gap-1.5 text-xs text-slate-500 mb-1 truncate">
-                        <Building2 size={12} className="shrink-0" /> {lead.company}
+                        <Building2 size={12} className="shrink-0" /> {lead.company.toUpperCase()}
+                    </p>
+                )}
+                {lead.comuna && (
+                    <p className="flex items-center gap-1.5 text-xs text-slate-500 mb-1 truncate">
+                        <MapPin size={12} className="shrink-0 text-slate-400" /> {lead.comuna}
                     </p>
                 )}
                 {lead.certificationInterest && (

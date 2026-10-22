@@ -9,6 +9,7 @@ import type { SafeUser as User } from '@/lib/safeUser';
 import { addLeadActivity, assignLead, changeLeadStatusForm, type LeadFormState } from '@/actions/leads';
 import { markDoNotContact, unmarkDoNotContact, type DoNotContactState } from '@/actions/doNotContact';
 import { ACTIVITY_TYPES, STATUSES, SOURCES, leadTypeLabel, sourceLabel, activityTypeLabel, formatDuration } from '@/lib/constants';
+import { formatChileanMobile } from '@/lib/phone';
 import { QuotesPanel } from '@/components/QuotesPanel';
 
 type LeadWithRelations = Lead & {
@@ -173,12 +174,12 @@ export function LeadDetail({
                         <div className="p-5 space-y-4 bg-white">
                             <div>
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre completo</p>
-                                <p className="font-bold text-slate-800 text-lg">{lead.name}</p>
+                                <p className="font-bold text-slate-800 text-lg">{lead.name.toUpperCase()}</p>
                             </div>
                             {lead.company && (
                                 <div className="flex items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                                     <Building2 size={16} className="text-slate-400 mr-3 shrink-0" />
-                                    <span className="text-sm text-slate-700 font-medium">{lead.company}</span>
+                                    <span className="text-sm text-slate-700 font-medium">{lead.company.toUpperCase()}</span>
                                 </div>
                             )}
                             {lead.rut && (
@@ -189,11 +190,11 @@ export function LeadDetail({
                             )}
                             <div className="flex items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                                 <Mail size={16} className="text-slate-400 mr-3 shrink-0" />
-                                <a href={`mailto:${lead.email}`} className="text-sm text-slate-700 font-medium hover:underline">{lead.email}</a>
+                                <a href={`mailto:${lead.email.toLowerCase()}`} className="text-sm text-slate-700 font-medium hover:underline">{lead.email.toLowerCase()}</a>
                             </div>
                             <div className="flex items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                                 <Phone size={16} className="text-slate-400 mr-3 shrink-0" />
-                                <a href={`tel:${lead.phone}`} className="text-sm text-slate-700 font-medium hover:underline">{lead.phone}</a>
+                                <a href={`tel:${formatChileanMobile(lead.phone) ?? lead.phone}`} className="text-sm text-slate-700 font-medium hover:underline">{formatChileanMobile(lead.phone) ?? lead.phone}</a>
                             </div>
 
                             <div className="pt-2 border-t border-slate-100">
@@ -249,15 +250,13 @@ export function LeadDetail({
                                     {lead.product && <p className="text-xs text-slate-500 mt-0.5">{lead.product.category.name}</p>}
                                 </div>
                             </div>
-                            {lead.comuna && (
-                                <div className="flex items-start">
-                                    <MapPin size={16} className="text-slate-400 mr-3 mt-0.5 shrink-0" />
-                                    <div>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Comuna</p>
-                                        <p className="font-bold text-slate-800">{lead.comuna}</p>
-                                    </div>
+                            <div className="flex items-start">
+                                <MapPin size={16} className="text-slate-400 mr-3 mt-0.5 shrink-0" />
+                                <div>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Comuna</p>
+                                    <p className="font-bold text-slate-800">{lead.comuna || 'No especificada'}</p>
                                 </div>
-                            )}
+                            </div>
                             <div className="pt-4 border-t border-slate-100">
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Origen (rastreo)</p>
                                 <p className="font-bold text-slate-800">{SOURCES.find((s) => s.value === lead.source)?.label ?? lead.source}</p>

@@ -9,6 +9,7 @@ import { SYSTEM_ACTIVITY_TYPES, statusLabel } from '@/lib/constants';
 import { audit } from '@/lib/audit';
 import { findDuplicateOpenLead, findSimilarOpenOpportunity } from '@/lib/leadDuplicates';
 import { normalizeRut } from '@/lib/rut';
+import { formatChileanMobile } from '@/lib/phone';
 import { findOrCreateClient } from '@/lib/clients';
 
 export interface LeadFormState {
@@ -96,31 +97,37 @@ export async function createLeadManual(_prevState: LeadFormState, formData: Form
         }
     }
 
+    const normalizedName = data.name.trim().toUpperCase();
+    const normalizedEmail = data.email.trim().toLowerCase();
+    const normalizedPhone = formatChileanMobile(data.phone) ?? data.phone;
+    const normalizedCompany = data.company ? data.company.trim().toUpperCase() : null;
+    const normalizedComuna = data.comuna ? data.comuna.trim() : null;
+
     const client = await findOrCreateClient({
         type: data.type,
-        name: data.name,
+        name: normalizedName,
         rut: data.rut,
         rutNorm: normalizeRut(data.rut),
-        email: data.email,
-        phone: data.phone,
-        company: data.company,
+        email: normalizedEmail,
+        phone: normalizedPhone,
+        company: normalizedCompany,
     });
 
     const lead = await prisma.lead.create({
         data: {
             code: `TEMP-${randomUUID()}`,
             type: data.type,
-            name: data.name,
+            name: normalizedName,
             rut: data.rut,
             rutNorm: normalizeRut(data.rut),
-            email: data.email,
-            phone: data.phone,
-            company: data.company || null,
+            email: normalizedEmail,
+            phone: normalizedPhone,
+            company: normalizedCompany,
             clientId: client.id,
             productId: product.id,
             certificationInterest: product.name,
-            comuna: data.comuna || null,
-            message: data.message || null,
+            comuna: normalizedComuna,
+            message: data.message ? data.message.trim() : null,
             source: 'MANUAL',
             sourceDetail: `Ingresado manualmente por ${currentUser.name}.`,
             status: 'NUEVO',

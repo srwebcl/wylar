@@ -7,6 +7,7 @@ import { createLeadManual, type LeadFormState } from '@/actions/leads';
 import { LEAD_TYPES, PERSON_LEAD_TYPES } from '@/lib/constants';
 import { isValidRut, formatRut } from '@/lib/rut';
 import { isValidChileanMobile, formatChileanMobile } from '@/lib/phone';
+import { ComunaCombobox } from '@/components/ComunaCombobox';
 
 const initialState: LeadFormState = {};
 const inputClass =
@@ -226,7 +227,12 @@ export function CreateLeadModal({ categories, products }: { categories: Category
                             </label>
                             <label className="block">
                                 <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Comuna (opcional)</span>
-                                <input name="comuna" value={fields.comuna} onChange={setField('comuna')} className={inputClass} />
+                                <ComunaCombobox
+                                    value={fields.comuna}
+                                    onChange={(val) => setFields((f) => ({ ...f, comuna: val }))}
+                                    name="comuna"
+                                    placeholder="Busca tu comuna..."
+                                />
                             </label>
                         </div>
 

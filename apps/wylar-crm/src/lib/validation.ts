@@ -30,6 +30,22 @@ const chileanPhoneField = z
     });
 
 
+/** Nombre: siempre normalizado a MAYÚSCULAS */
+const nameField = z
+    .string()
+    .trim()
+    .min(2, 'Ingresa el nombre completo.')
+    .max(120)
+    .transform((val) => val.toUpperCase());
+
+/** Correo: siempre normalizado a minúsculas */
+const emailField = z
+    .string()
+    .trim()
+    .email('Correo inválido.')
+    .max(254)
+    .transform((val) => val.toLowerCase());
+
 /**
  * Datos que envía el formulario web público de wylar.cl (Módulo de Captura
  * de Oportunidades). `source`/`sourceDetail` ya vienen calculados por el
@@ -38,11 +54,11 @@ const chileanPhoneField = z
  */
 export const publicLeadSchema = z.object({
     type: z.enum(LEAD_TYPE_VALUES),
-    name: z.string().trim().min(2, 'Ingresa el nombre completo.').max(120),
+    name: nameField,
     rut: rutField,
-    email: z.string().trim().email('Correo inválido.').max(254),
+    email: emailField,
     phone: chileanPhoneField,
-    company: z.string().trim().max(200).optional().nullable(),
+    company: z.string().trim().max(200).transform((val) => (val ? val.toUpperCase() : val)).optional().nullable(),
     productId: z.coerce.number().int().positive('Selecciona un producto o servicio.'),
     comuna: z.string().trim().max(120).optional().nullable(),
     message: z.string().trim().max(2000).optional().nullable(),
@@ -60,11 +76,11 @@ export const publicLeadSchema = z.object({
 // formulario".
 export const manualLeadSchema = z.object({
     type: z.enum(LEAD_TYPE_VALUES),
-    name: z.string().trim().min(2, 'Ingresa el nombre completo.').max(120),
+    name: nameField,
     rut: rutField,
-    email: z.string().trim().email('Correo inválido.').max(254),
+    email: emailField,
     phone: chileanPhoneField,
-    company: z.string().trim().max(200).optional().nullable(),
+    company: z.string().trim().max(200).transform((val) => (val ? val.toUpperCase() : val)).optional().nullable(),
     productId: z.coerce.number().int().positive('Selecciona un producto o servicio.'),
     comuna: z.string().trim().max(120).optional().nullable(),
     message: z.string().trim().max(2000).optional().nullable(),
@@ -73,18 +89,18 @@ export const manualLeadSchema = z.object({
 // --- Módulo de Clientes ---
 
 export const clientUpdateSchema = z.object({
-    name: z.string().trim().min(2, 'Ingresa el nombre completo.').max(120),
+    name: nameField,
     rut: rutField,
-    email: z.string().trim().email('Correo inválido.').max(254),
+    email: emailField,
     phone: chileanPhoneField,
-    company: z.string().trim().max(200).optional().nullable(),
+    company: z.string().trim().max(200).transform((val) => (val ? val.toUpperCase() : val)).optional().nullable(),
 });
 
 export const clientContactSchema = z.object({
-    name: z.string().trim().min(2, 'Ingresa el nombre del contacto.').max(120),
+    name: z.string().trim().min(2, 'Ingresa el nombre del contacto.').max(120).transform((v) => v.toUpperCase()),
     role: z.string().trim().max(120).optional().nullable(),
-    email: z.string().trim().email('Correo inválido.').max(254).optional().or(z.literal('')),
-    phone: z.string().trim().max(30).optional().or(z.literal('')),
+    email: z.string().trim().email('Correo inválido.').max(254).transform((v) => v.toLowerCase()).optional().or(z.literal('')),
+    phone: z.string().trim().transform((v) => (v ? (isValidChileanMobile(v) ? v : (formatChileanMobile(v) ?? v)) : '')).optional().or(z.literal('')),
 });
 
 // --- Módulo de Productos ---
@@ -269,7 +285,7 @@ export const certificationTitleSchema = z.object({
 });
 
 export const certificateSchema = z.object({
-    holderName: z.string().trim().min(2, 'Ingresa el nombre completo del titular.').max(200),
+    holderName: z.string().trim().min(2, 'Ingresa el nombre completo del titular.').max(200).transform((val) => val.toUpperCase()),
     holderRut: rutField,
     profileId: z.coerce.number().int().positive().optional().nullable(),
     certificationTitle: z.string().trim().min(2, 'Falta el nombre de la certificación.').max(300),
