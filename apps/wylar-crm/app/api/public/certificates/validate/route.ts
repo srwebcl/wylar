@@ -44,6 +44,7 @@ export async function GET(request: Request) {
 
     const data = results.map((cert) => {
         const status = certificateStatus(cert.expiryDate, cert.revokedAt);
+        const isVigente = status === 'VIGENTE' || status === 'SIN_VENCIMIENTO';
         return {
             code: cert.code,
             holderName: cert.holderName,
@@ -55,8 +56,8 @@ export async function GET(request: Request) {
             status,
             statusLabel: certificateStatusLabel(status),
             profileSlug: cert.profile?.slug ?? null,
-            // Un certificado revocado no ofrece descarga.
-            pdfUrl: status === 'REVOCADO' ? null : `/api/public/certificates/${cert.code}/pdf`,
+            // Solo certificados vigentes ofrecen descarga pública de PDF.
+            pdfUrl: isVigente ? `/api/public/certificates/${cert.code}/pdf` : null,
         };
     });
 

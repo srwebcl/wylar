@@ -56,6 +56,14 @@ const STATUS_BADGE: Record<string, string> = {
 
 const initialState: ClientFormState = {};
 
+const TYPE_OPTIONS = [
+    { value: 'PERSONA', label: 'Persona Natural', desc: 'Profesional, trabajador o particular' },
+    { value: 'EMPRESA', label: 'Empresa', desc: 'Razón social o cliente corporativo' },
+    { value: 'INSTITUCION', label: 'Institución', desc: 'Universidad, CFT o entidad educativa' },
+    { value: 'OTEC', label: 'OTEC', desc: 'Organismo técnico de capacitación' },
+    { value: 'ALUMNO_BECADO', label: 'Alumno Becado', desc: 'Estudiante con beneficio o beca' },
+] as const;
+
 export function ClientDetail({
     client,
     contacts,
@@ -70,6 +78,7 @@ export function ClientDetail({
     const router = useRouter();
     const [editing, setEditing] = useState(false);
     const [fields, setFields] = useState({
+        type: client.type,
         name: client.name,
         rut: client.rut ?? '',
         email: client.email,
@@ -78,6 +87,18 @@ export function ClientDetail({
     });
     const [fieldErrors, setFieldErrors] = useState<{ rut?: string; phone?: string }>({});
     const [state, formAction, pending] = useActionState(updateClient.bind(null, client.id), initialState);
+
+    useEffect(() => {
+        setFields({
+            type: client.type,
+            name: client.name,
+            rut: client.rut ?? '',
+            email: client.email,
+            phone: client.phone,
+            company: client.company ?? '',
+        });
+        setFieldErrors({});
+    }, [client, editing]);
 
     // Estado para discrepancias de contacto detectadas
     const [dismissedLeadIds, setDismissedLeadIds] = useState<number[]>([]);
@@ -149,22 +170,48 @@ export function ClientDetail({
         if (state.success) setEditing(false);
     }, [state.success]);
 
+    function handleRutBlur() {
+        if (!fields.rut.trim()) return;
+        if (isValidRut(fields.rut)) {
+            setFields((f) => ({ ...f, rut: formatRut(f.rut) }));
+            setFieldErrors((errs) => ({ ...errs, rut: undefined }));
+        } else {
+            setFieldErrors((errs) => ({ ...errs, rut: 'RUT inválido. Revisa el número y el dígito verificador.' }));
+        }
+    }
+
+    function handlePhoneBlur() {
+        if (!fields.phone.trim()) return;
+        const formatted = isValidChileanMobile(fields.phone) ? fields.phone : formatChileanMobile(fields.phone);
+        if (formatted) {
+            setFields((f) => ({ ...f, phone: formatted }));
+            setFieldErrors((errs) => ({ ...errs, phone: undefined }));
+        } else {
+            setFieldErrors((errs) => ({ ...errs, phone: 'Debe ser un celular chileno (+56 9 XXXX XXXX).' }));
+        }
+    }
+
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         const rutOk = isValidRut(fields.rut);
         const phoneCanonical = isValidChileanMobile(fields.phone) ? fields.phone : formatChileanMobile(fields.phone);
         const errors: { rut?: string; phone?: string } = {};
-        if (!rutOk) errors.rut = 'RUT inválido.';
+        if (!rutOk) errors.rut = 'RUT inválido. Revisa el número y el dígito verificador.';
         if (!phoneCanonical) errors.phone = 'Teléfono inválido. Ej: +56 9 1234 5678.';
         setFieldErrors(errors);
         if (errors.rut || errors.phone) return;
 
         const fd = new FormData(e.currentTarget);
+        fd.set('type', fields.type);
         fd.set('name', fields.name.trim().toUpperCase());
         fd.set('rut', formatRut(fields.rut));
         fd.set('email', fields.email.trim().toLowerCase());
         fd.set('phone', phoneCanonical!);
-        if (fields.company) fd.set('company', fields.company.trim().toUpperCase());
+        if (fields.company.trim()) {
+            fd.set('company', fields.company.trim().toUpperCase());
+        } else {
+            fd.set('company', '');
+        }
         formAction(fd);
     }
 
@@ -297,19 +344,40 @@ export function ClientDetail({
                 <div className="space-y-6">
                     <div className="glass-card p-5 space-y-4">
                         {editing ? (
-                            <form onSubmit={handleSubmit} className="space-y-3">
+                            <form onSubmit={handleSubmit} className="space-y-3.5">
                                 <label className="block">
                                     <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">
-                                        Nombre
+                                        Tipo de cliente
+                                    </span>
+                                    <select
+                                        name="type"
+                                        value={fields.type}
+                                        onChange={(e) => setFields((f) => ({ ...f, type: e.target.value }))}
+                                        className={inputClass}
+                                    >
+                                        {TYPE_OPTIONS.map((opt) => (
+                                            <option key={opt.value} value={opt.value}>
+                                                {opt.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+
+                                <label className="block">
+                                    <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">
+                                        {fields.type !== 'PERSONA' && fields.type !== 'ALUMNO_BECADO'
+                                            ? 'Razón Social / Nombre Oficial'
+                                            : 'Nombre Completo'}
                                     </span>
                                     <input
                                         name="name"
                                         value={fields.name}
-                                        onChange={(e) => setFields((f) => ({ ...f, name: e.target.value }))}
+                                        onChange={(e) => setFields((f) => ({ ...f, name: e.target.value.toUpperCase() }))}
                                         className={inputClass}
                                         required
                                     />
                                 </label>
+
                                 <label className="block">
                                     <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">
                                         RUT
@@ -317,57 +385,97 @@ export function ClientDetail({
                                     <input
                                         name="rut"
                                         value={fields.rut}
-                                        onChange={(e) => setFields((f) => ({ ...f, rut: e.target.value }))}
+                                        onChange={(e) => {
+                                            const val = e.target.value.toUpperCase();
+                                            setFields((f) => ({ ...f, rut: val }));
+                                            if (fieldErrors.rut) setFieldErrors((errs) => ({ ...errs, rut: undefined }));
+                                        }}
+                                        onBlur={handleRutBlur}
+                                        placeholder="12.345.678-9"
                                         className={inputClass}
                                         required
                                     />
                                     {fieldErrors.rut && <p className="text-xs text-red-600 mt-1">{fieldErrors.rut}</p>}
                                 </label>
+
                                 <label className="block">
                                     <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">
-                                        Correo
+                                        Correo Electrónico
                                     </span>
                                     <input
                                         name="email"
                                         type="email"
                                         value={fields.email}
-                                        onChange={(e) => setFields((f) => ({ ...f, email: e.target.value }))}
+                                        onChange={(e) => setFields((f) => ({ ...f, email: e.target.value.toLowerCase() }))}
                                         className={inputClass}
                                         required
                                     />
                                 </label>
+
                                 <label className="block">
                                     <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">
-                                        Teléfono
+                                        Teléfono Celular
                                     </span>
                                     <input
                                         name="phone"
                                         value={fields.phone}
-                                        onChange={(e) => setFields((f) => ({ ...f, phone: e.target.value }))}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setFields((f) => ({ ...f, phone: val }));
+                                            if (fieldErrors.phone) setFieldErrors((errs) => ({ ...errs, phone: undefined }));
+                                        }}
+                                        onBlur={handlePhoneBlur}
+                                        placeholder="+56 9 1234 5678"
                                         className={inputClass}
                                         required
                                     />
                                     {fieldErrors.phone && <p className="text-xs text-red-600 mt-1">{fieldErrors.phone}</p>}
                                 </label>
+
                                 <label className="block">
                                     <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">
-                                        Empresa / institución
+                                        {fields.type !== 'PERSONA' && fields.type !== 'ALUMNO_BECADO'
+                                            ? 'Empresa / Fantasía'
+                                            : 'Empresa / Institución (opcional)'}
                                     </span>
                                     <input
                                         name="company"
                                         value={fields.company}
-                                        onChange={(e) => setFields((f) => ({ ...f, company: e.target.value }))}
+                                        onChange={(e) => setFields((f) => ({ ...f, company: e.target.value.toUpperCase() }))}
+                                        placeholder="Opcional"
                                         className={inputClass}
                                     />
                                 </label>
+
                                 {state.error && <p className="text-xs text-red-600 font-medium">{state.error}</p>}
-                                <button
-                                    type="submit"
-                                    disabled={pending}
-                                    className="w-full bg-[#0B1E40] text-white font-bold py-2.5 rounded-lg hover:bg-[#122b59] disabled:opacity-60 cursor-pointer"
-                                >
-                                    {pending ? 'Guardando…' : 'Guardar cambios'}
-                                </button>
+
+                                <div className="flex items-center gap-2 pt-2">
+                                    <button
+                                        type="submit"
+                                        disabled={pending}
+                                        className="flex-1 bg-[#0B1E40] text-white font-bold py-2.5 rounded-lg hover:bg-[#122b59] disabled:opacity-60 cursor-pointer text-xs transition-colors"
+                                    >
+                                        {pending ? 'Guardando…' : 'Guardar cambios'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setEditing(false);
+                                            setFields({
+                                                type: client.type,
+                                                name: client.name,
+                                                rut: client.rut ?? '',
+                                                email: client.email,
+                                                phone: client.phone,
+                                                company: client.company ?? '',
+                                            });
+                                            setFieldErrors({});
+                                        }}
+                                        className="px-3 py-2.5 border border-slate-200 text-slate-600 font-semibold rounded-lg hover:bg-slate-50 transition-colors text-xs cursor-pointer"
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
                             </form>
                         ) : (
                             <>

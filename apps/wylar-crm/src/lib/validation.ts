@@ -99,6 +99,7 @@ export const clientCreateSchema = z.object({
 });
 
 export const clientUpdateSchema = z.object({
+    type: z.enum(LEAD_TYPE_VALUES).optional(),
     name: nameField,
     rut: rutField,
     email: emailField,

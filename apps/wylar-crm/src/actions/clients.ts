@@ -195,6 +195,7 @@ export async function updateClient(clientId: number, _prevState: ClientFormState
     const user = await requireUser();
 
     const parsed = clientUpdateSchema.safeParse({
+        type: formData.get('type') || undefined,
         name: formData.get('name'),
         rut: formData.get('rut'),
         email: formData.get('email'),
@@ -210,6 +211,7 @@ export async function updateClient(clientId: number, _prevState: ClientFormState
     await prisma.client.update({
         where: { id: clientId },
         data: {
+            ...(data.type ? { type: data.type } : {}),
             name: data.name,
             rut: data.rut,
             rutNorm: normalizeRut(data.rut),

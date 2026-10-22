@@ -29,12 +29,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ code
     if (!limit.ok) return tooManyRequests(limit.retryAfter, headers);
 
     const certificate = code.length <= 40 ? await prisma.certificate.findUnique({ where: { code } }) : null;
-    // Un certificado revocado no se puede descargar.
+    // Un certificado inexistente o revocado no se puede descargar.
     if (!certificate || certificate.revokedAt) {
         return Response.json({ ok: false, error: 'Certificado no encontrado.' }, { status: 404, headers });
     }
 
     const status = certificateStatus(certificate.expiryDate, certificate.revokedAt);
+    const isVigente = status === 'VIGENTE' || status === 'SIN_VENCIMIENTO';
+    if (!isVigente) {
+        return Response.json({ ok: false, error: 'Solo se pueden descargar certificados que estén vigentes.' }, { status: 403, headers });
+    }
     const qrDataUrl = await QRCode.toDataURL(`${siteOrigin()}/validador?code=${encodeURIComponent(certificate.code)}`, { width: 300, margin: 1 });
     const buffer = await renderToBuffer(
         CertificatePdf({

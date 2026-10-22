@@ -42,6 +42,7 @@ export function ClientsTable({
     const [editingClient, setEditingClient] = useState<ClientWithCount | null>(null);
     const [editName, setEditName] = useState('');
     const [editRut, setEditRut] = useState('');
+    const [editType, setEditType] = useState('PERSONA');
     const [editEmail, setEditEmail] = useState('');
     const [editPhone, setEditPhone] = useState('');
     const [editCompany, setEditCompany] = useState('');
@@ -72,6 +73,7 @@ export function ClientsTable({
         setError(null);
         setSuccess(null);
         setEditingClient(c);
+        setEditType(c.type);
         setEditName(c.name);
         setEditRut(c.rut ?? '');
         setEditEmail(c.email);
@@ -86,6 +88,7 @@ export function ClientsTable({
         setSuccess(null);
 
         const formData = new FormData();
+        formData.set('type', editType);
         formData.set('name', editName.toUpperCase());
         formData.set('rut', editRut);
         formData.set('email', editEmail.toLowerCase());
@@ -217,6 +220,21 @@ export function ClientsTable({
                         </div>
 
                         <div className="space-y-3">
+                            <label className="block">
+                                <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Tipo de Cliente</span>
+                                <select
+                                    value={editType}
+                                    onChange={(e) => setEditType(e.target.value)}
+                                    className={inputClass}
+                                >
+                                    <option value="PERSONA">Persona Natural</option>
+                                    <option value="EMPRESA">Empresa</option>
+                                    <option value="INSTITUCION">Institución</option>
+                                    <option value="OTEC">OTEC</option>
+                                    <option value="ALUMNO_BECADO">Alumno Becado</option>
+                                </select>
+                            </label>
+
                             <label className="block">
                                 <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre Completo</span>
                                 <input

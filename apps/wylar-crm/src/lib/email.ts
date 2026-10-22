@@ -8,10 +8,10 @@ import type { Lead } from '@prisma/client';
 // la recepción a quien completó el formulario. Nunca debe tumbar la
 // creación del lead si falla — ver los try/catch en cada función exportada.
 
-const FROM = 'Wylar <notificaciones@wylar.cl>';
+const FROM = 'WYLAR Casa Certificadora <notificaciones@wylar.cl>';
 const REPLY_TO = 'contacto@wylar.cl';
 const TEAM_EMAIL = 'contacto@wylar.cl';
-const LOGO_URL = 'https://www.wylar.cl/images/logo.webp';
+const LOGO_BLANCO_URL = 'https://www.wylar.cl/images/logo-blanco.webp';
 const CRM_APP_URL = process.env.PUBLIC_CRM_ORIGIN || 'https://crm.wylar.cl';
 
 function getResend() {
@@ -20,9 +20,8 @@ function getResend() {
     return new Resend(apiKey);
 }
 
-// Envoltorio HTML compartido: encabezado con el logo, cuerpo, pie de página
-// legal — así ambos correos (equipo y cliente) se ven como el mismo remitente
-// y no como un aviso automático genérico sin marca.
+// Envoltorio HTML compartido: encabezado con el logo blanco sobre fondo azul corporativo (#0B1E40),
+// cuerpo, pie de página legal — así todos los correos se ven oficiales y con la identidad de Wylar.
 function emailShell(bodyHtml: string): string {
     return `<!DOCTYPE html>
 <html lang="es">
@@ -32,8 +31,8 @@ function emailShell(bodyHtml: string): string {
         <td align="center">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
             <tr>
-              <td style="background-color:#ffffff;padding:24px 32px;border-bottom:1px solid #e2e8f0;">
-                <img src="${LOGO_URL}" alt="Wylar" height="36" style="height:36px;width:auto;display:block;" />
+              <td style="background-color:#0B1E40;padding:22px 32px;border-bottom:1px solid #0B1E40;">
+                <img src="${LOGO_BLANCO_URL}" alt="WYLAR Casa Certificadora" height="40" style="height:40px;width:auto;display:block;" />
               </td>
             </tr>
             <tr>
@@ -127,7 +126,7 @@ export async function sendLeadConfirmationEmail(lead: Lead) {
             from: FROM,
             to: lead.email,
             replyTo: REPLY_TO,
-            subject: 'Recibimos tu solicitud — Wylar',
+            subject: 'Recibimos tu solicitud — WYLAR Casa Certificadora',
             html,
         });
         if (error) console.error('[email] Resend rechazó la confirmación al cliente:', error);
@@ -170,7 +169,7 @@ export async function sendQuotePdfEmail(params: {
         <h1 style="margin:0 0 16px;font-size:20px;color:#0B1E40;">Cotización N° ${escapeHtml(params.quoteCode)}</h1>
         <p style="margin:0 0 14px;font-size:15px;color:#334155;">Estimado(a) <strong>${escapeHtml(params.clientName)}</strong>,</p>
         <p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6;">
-            Junto con saludar cordialmente, le hacemos llegar adjunta la propuesta económica correspondiente a los servicios solicitados en Wylar, Casa Certificadora.
+            Junto con saludar cordialmente, le hacemos llegar adjunta la propuesta económica correspondiente a los servicios solicitados en WYLAR Casa Certificadora.
         </p>
 
         ${customMsgHtml}
@@ -207,7 +206,7 @@ export async function sendQuotePdfEmail(params: {
             from: FROM,
             to: params.recipientEmail,
             replyTo: REPLY_TO,
-            subject: `Cotización ${params.quoteCode} - Wylar, Casa Certificadora`,
+            subject: `Cotización ${params.quoteCode} - WYLAR Casa Certificadora`,
             html,
             attachments: [
                 {
