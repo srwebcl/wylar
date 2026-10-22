@@ -12,12 +12,16 @@ import { ACTIVITY_TYPES, STATUSES, SOURCES, leadTypeLabel, sourceLabel, activity
 import { formatChileanMobile } from '@/lib/phone';
 import { QuotesPanel } from '@/components/QuotesPanel';
 
+// `total`/`unitPrice`/`subtotal` llegan ya convertidos a number — Prisma
+// Decimal no es un objeto plano, no puede cruzar el límite Server->Client.
+type SerializedQuote = Omit<Quote, 'total'> & { total: number; items: (Omit<QuoteItem, 'unitPrice' | 'subtotal'> & { unitPrice: number; subtotal: number })[] };
+
 type LeadWithRelations = Lead & {
     assignedTo: User | null;
     activities: LeadActivity[];
     client: Client;
     product: (Product & { category: ProductCategory }) | null;
-    quotes: (Quote & { items: QuoteItem[] })[];
+    quotes: SerializedQuote[];
 };
 
 function statusStyle(s: string) {
@@ -43,7 +47,7 @@ export function LeadDetail({
     lead: LeadWithRelations;
     users: User[];
     dncReason: string | null;
-    products: { id: number; name: string; price: unknown }[];
+    products: { id: number; name: string; price: number | null }[];
 }) {
     const chatEndRef = useRef<HTMLDivElement>(null);
     const noteFormRef = useRef<HTMLFormElement>(null);

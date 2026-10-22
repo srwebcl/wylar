@@ -22,6 +22,7 @@ import {
     bulkToggleProductCategories,
 } from '@/actions/productCategories';
 import { ATTRIBUTE_TEMPLATES, attributeTemplateLabel } from '@/lib/productSpec';
+import { Select } from '@/components/ui/Select';
 
 interface CategoryRow {
     id: number;
@@ -185,11 +186,11 @@ export function ProductCategoriesManagement({
             <div>
                 <Link
                     href="/productos"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#0B1E40] transition-colors mb-2"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#0B1E40] transition-colors mb-2"
                 >
-                    <ArrowLeft size={14} /> Volver al Catálogo
+                    <ArrowLeft size={14} /> Volver al catálogo
                 </Link>
-                <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Categorías del Catálogo</h1>
+                <h1 className="text-2xl font-bold text-slate-900">Categorías del catálogo</h1>
                 <p className="text-slate-500 text-sm mt-1">
                     Clasificación comercial y definición de plantilla de atributos para los servicios del Catálogo.
                 </p>
@@ -215,8 +216,8 @@ export function ProductCategoriesManagement({
 
             {/* Formulario de creación */}
             <div className="glass-card bg-white p-5 border border-slate-200/90 rounded-2xl shadow-sm space-y-3">
-                <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">
-                    Nueva Categoría Comercial
+                <span className="text-sm font-semibold text-slate-700 block">
+                    Nueva categoría comercial
                 </span>
                 <form onSubmit={handleCreate} className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2.5">
                     <input
@@ -226,17 +227,13 @@ export function ProductCategoriesManagement({
                         className={inputClass}
                         required
                     />
-                    <select
-                        value={attributeTemplate}
-                        onChange={(e) => setAttributeTemplate(e.target.value)}
-                        className={inputClass}
-                    >
-                        {ATTRIBUTE_TEMPLATES.map((t) => (
-                            <option key={t.value} value={t.value}>
-                                {t.label}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="sm:w-56">
+                        <Select
+                            value={attributeTemplate}
+                            onChange={setAttributeTemplate}
+                            options={ATTRIBUTE_TEMPLATES.map((t) => ({ value: t.value, label: t.label }))}
+                        />
+                    </div>
                     <button
                         type="submit"
                         disabled={isPending}
@@ -303,7 +300,7 @@ export function ProductCategoriesManagement({
 
             {/* Listado de categorías */}
             <div className="glass-card bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-sm">
-                <div className="p-3.5 bg-slate-50/90 border-b border-slate-200 flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <div className="p-3.5 bg-slate-50/90 border-b border-slate-200 flex items-center justify-between text-xs font-semibold text-slate-500">
                     <div className="flex items-center gap-2.5">
                         <input
                             ref={selectAllRef}
@@ -331,17 +328,13 @@ export function ProductCategoriesManagement({
                                         className={inputClass}
                                         autoFocus
                                     />
-                                    <select
-                                        value={editTemplate}
-                                        onChange={(e) => setEditTemplate(e.target.value)}
-                                        className={inputClass}
-                                    >
-                                        {ATTRIBUTE_TEMPLATES.map((t) => (
-                                            <option key={t.value} value={t.value}>
-                                                {t.label}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <div className="sm:w-56">
+                                        <Select
+                                            value={editTemplate}
+                                            onChange={setEditTemplate}
+                                            options={ATTRIBUTE_TEMPLATES.map((t) => ({ value: t.value, label: t.label }))}
+                                        />
+                                    </div>
                                 </div>
                                 <div className="flex justify-end gap-2">
                                     <button

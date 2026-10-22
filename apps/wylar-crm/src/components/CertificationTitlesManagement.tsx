@@ -78,7 +78,7 @@ export function CertificationTitlesManagement({ titles, isAdmin }: { titles: Tit
         <div className="space-y-6">
             <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div>
-                    <h1 className="text-2xl font-extrabold text-slate-900">Certificaciones</h1>
+                    <h1 className="text-2xl font-bold text-slate-900">Certificaciones</h1>
                     <p className="text-slate-500 text-sm mt-1">Nombres sugeridos al escribir "Nombre de la certificación" al emitir un certificado. {titles.length} en total.</p>
                 </div>
                 <form onSubmit={handleCreate} className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -108,7 +108,7 @@ export function CertificationTitlesManagement({ titles, isAdmin }: { titles: Tit
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="border-b border-slate-100 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
+                                <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-semibold text-slate-500">
                                     <th className="px-5 py-3">Nombre</th>
                                     <th className="px-5 py-3">Creada</th>
                                     <th className="px-5 py-3 text-right">Acciones</th>

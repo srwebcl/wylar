@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/auth';
 import { certificateStatus, certificateStatusLabel } from '@/lib/constants';
 import { buildCertificatesWhere } from '@/lib/certificatesFilter';
 import { CertificateManagement } from '@/components/CertificateManagement';
+import { Pagination, buildPageHref } from '@/components/ui/Pagination';
 
 const PAGE_SIZE = 10;
 
@@ -28,11 +28,6 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
     ]);
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-    const pageHref = (p: number) => {
-        const qs = new URLSearchParams(Object.entries(params).filter(([k, v]) => v && k !== 'page') as [string, string][]);
-        qs.set('page', String(p));
-        return `/certificados?${qs.toString()}`;
-    };
 
     return (
         <div>
@@ -62,23 +57,7 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
                 })}
             />
 
-            {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4 text-sm text-slate-600">
-                    <span>Página {Math.min(page, totalPages)} de {totalPages}</span>
-                    <div className="flex gap-2">
-                        {page > 1 && (
-                            <Link href={pageHref(page - 1)} className="px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-medium">
-                                ← Anterior
-                            </Link>
-                        )}
-                        {page < totalPages && (
-                            <Link href={pageHref(page + 1)} className="px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-medium">
-                                Siguiente →
-                            </Link>
-                        )}
-                    </div>
-                </div>
-            )}
+            <Pagination page={page} totalPages={totalPages} buildHref={(p) => buildPageHref('/certificados', params, p)} />
         </div>
     );
 }

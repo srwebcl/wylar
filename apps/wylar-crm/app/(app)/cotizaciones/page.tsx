@@ -4,8 +4,11 @@ import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/auth';
 import { QuotesSearchBar } from '@/components/QuotesSearchBar';
 import { QuotesTable, type QuoteRow } from '@/components/QuotesTable';
+import { Pagination, buildPageHref } from '@/components/ui/Pagination';
 
 export const dynamic = 'force-dynamic';
+
+const PAGE_SIZE = 50;
 
 function money(amount: number) {
     return `$${Math.round(amount).toLocaleString('es-CL')}`;
@@ -18,6 +21,7 @@ export default async function CotizacionesPage({
 }) {
     await requireUser();
     const params = await searchParams;
+    const page = Math.max(1, Number.parseInt(params.page ?? '1', 10) || 1);
     const q = params.q?.trim();
     const status = params.status?.trim();
 
@@ -43,9 +47,11 @@ export default async function CotizacionesPage({
         ];
     }
 
-    const [quotes, allQuotesForStats] = await Promise.all([
+    const [quotes, total, allQuotesForStats] = await Promise.all([
         prisma.quote.findMany({
             where,
+            take: PAGE_SIZE,
+            skip: (page - 1) * PAGE_SIZE,
             include: {
                 opportunity: {
                     select: {
@@ -72,8 +78,8 @@ export default async function CotizacionesPage({
                 },
             },
             orderBy: { createdAt: 'desc' },
-            take: 100,
         }),
+        prisma.quote.count({ where }),
         prisma.quote.findMany({
             select: {
                 total: true,
@@ -156,6 +162,7 @@ export default async function CotizacionesPage({
 
             <QuotesSearchBar />
             <QuotesTable quotes={formattedQuotes} />
+            <Pagination page={page} totalPages={Math.max(1, Math.ceil(total / PAGE_SIZE))} buildHref={(p) => buildPageHref('/cotizaciones', params, p)} />
         </div>
     );
 }

@@ -27,5 +27,17 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     const dnc = await checkDoNotContact(lead.email, lead.phone);
     const products = await prisma.product.findMany({ where: { active: true }, orderBy: { name: 'asc' }, select: { id: true, name: true, price: true } });
 
-    return <LeadDetail lead={lead} users={users} dncReason={dnc?.reason ?? null} products={products} />;
+    // Prisma Decimal no es un objeto plano — no se puede pasar tal cual de
+    // un Server Component a uno Client, hay que convertirlo a number antes.
+    const serializedLead = {
+        ...lead,
+        quotes: lead.quotes.map((q) => ({
+            ...q,
+            total: Number(q.total),
+            items: q.items.map((it) => ({ ...it, unitPrice: Number(it.unitPrice), subtotal: Number(it.subtotal) })),
+        })),
+    };
+    const serializedProducts = products.map((p) => ({ ...p, price: p.price != null ? Number(p.price) : null }));
+
+    return <LeadDetail lead={serializedLead} users={users} dncReason={dnc?.reason ?? null} products={serializedProducts} />;
 }

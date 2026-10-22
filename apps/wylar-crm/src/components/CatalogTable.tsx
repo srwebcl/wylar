@@ -99,7 +99,7 @@ export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: 
 
                         {/* Catálogo vinculado */}
                         <div className="pt-2 border-t border-slate-100 space-y-1">
-                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Servicio en Catálogo CRM</p>
+                            <p className="text-[11px] font-medium text-slate-400">Servicio en catálogo CRM</p>
                             {p.linkedProduct ? (
                                 <div className="flex items-center gap-1.5 text-xs text-slate-800">
                                     <Package size={13} className="text-amber-600 shrink-0" />
@@ -153,10 +153,10 @@ export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: 
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                <th className="px-5 py-3.5">Ficha Web (wylar.cl)</th>
-                                <th className="px-5 py-3.5">Categoría Web</th>
-                                <th className="px-5 py-3.5">Ítem Catálogo CRM (Comercial)</th>
+                            <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-semibold text-slate-500">
+                                <th className="px-5 py-3.5">Ficha web (wylar.cl)</th>
+                                <th className="px-5 py-3.5">Categoría web</th>
+                                <th className="px-5 py-3.5">Ítem catálogo CRM (comercial)</th>
                                 <th className="px-5 py-3.5">Estado</th>
                                 <th className="px-5 py-3.5 text-right">Acciones</th>
                             </tr>

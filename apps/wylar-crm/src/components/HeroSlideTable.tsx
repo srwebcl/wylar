@@ -108,7 +108,7 @@ export function HeroSlideTable({ slides, isAdmin }: { slides: Row[]; isAdmin: bo
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="border-b border-slate-100 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
+                            <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-semibold text-slate-500">
                                 <th className="px-5 py-3">Orden</th>
                                 <th className="px-5 py-3">Slide</th>
                                 <th className="px-5 py-3">Estado</th>

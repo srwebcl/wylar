@@ -27,7 +27,7 @@ export default async function CatalogoPage() {
                 <div>
                     <div className="flex items-center gap-2">
                         <Globe size={24} className="text-blue-600" />
-                        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Fichas Web (Landing Pages)</h1>
+                        <h1 className="text-2xl font-bold text-slate-900">Fichas web (landing pages)</h1>
                     </div>
                     <p className="text-slate-500 text-sm mt-1">
                         Páginas y contenido de marketing exhibidos en el sitio wylar.cl. Cada ficha se asocia con un ítem del Catálogo comercial maestro.

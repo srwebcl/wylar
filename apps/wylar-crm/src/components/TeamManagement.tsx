@@ -5,6 +5,7 @@ import { Shield, Plus, X, Power, Pencil, Trash2 } from 'lucide-react';
 import type { SafeUser as User } from '@/lib/safeUser';
 import { createUser, updateUser, deleteUser, toggleUserActive, type UserFormState } from '@/actions/users';
 import { ROLES, roleLabel } from '@/lib/constants';
+import { Select } from '@/components/ui/Select';
 
 const initialState: UserFormState = {};
 
@@ -12,6 +13,7 @@ export function TeamManagement({ users, currentUserId }: { users: User[]; curren
     const [showForm, setShowForm] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [state, formAction, pending] = useActionState(createUser, initialState);
+    const [role, setRole] = useState('COMERCIAL');
     const [, startTransition] = useTransition();
     const [deleteError, setDeleteError] = useState<string | null>(null);
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
@@ -36,7 +38,7 @@ export function TeamManagement({ users, currentUserId }: { users: User[]; curren
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-extrabold text-slate-800 flex items-center">
+                    <h2 className="text-2xl font-bold text-slate-900 flex items-center">
                         <Shield className="mr-3 text-[#0B1E40]" size={28} />
                         Equipo comercial
                     </h2>
@@ -57,25 +59,23 @@ export function TeamManagement({ users, currentUserId }: { users: User[]; curren
                     <button onClick={() => setShowForm(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
                         <X size={24} />
                     </button>
-                    <h3 className="text-lg font-bold text-slate-800 mb-6">Crear nuevo miembro del equipo</h3>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-6">Crear nuevo miembro del equipo</h3>
                     <form action={formAction} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Nombre completo *</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-1.5">Nombre completo *</label>
                                 <input name="name" required type="text" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none" placeholder="Ej. Roberto Sánchez" />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Rol *</label>
-                                <select name="role" required defaultValue="COMERCIAL" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none">
-                                    {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-                                </select>
+                                <label className="block text-sm font-medium text-slate-700 mb-1.5">Rol *</label>
+                                <Select name="role" required value={role} onChange={setRole} options={ROLES.map((r) => ({ value: r.value, label: r.label }))} />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Correo corporativo *</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-1.5">Correo corporativo *</label>
                                 <input name="email" required type="email" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none" placeholder="nombre@wylar.cl" />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Contraseña *</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-1.5">Contraseña *</label>
                                 <input name="password" required type="password" minLength={12} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none" placeholder="Mínimo 12 caracteres" />
                             </div>
                         </div>
@@ -155,7 +155,7 @@ export function TeamManagement({ users, currentUserId }: { users: User[]; curren
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-slate-50/80 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+                                <tr className="bg-slate-50/90 text-slate-500 text-xs border-b border-slate-200">
                                     <th className="p-4 pl-6 font-semibold">Usuario</th>
                                     <th className="p-4 font-semibold">Rol</th>
                                     <th className="p-4 font-semibold">Estado</th>
@@ -227,6 +227,7 @@ export function TeamManagement({ users, currentUserId }: { users: User[]; curren
 function EditUserForm({ user, onClose }: { user: User; onClose: () => void }) {
     const boundUpdateUser = updateUser.bind(null, user.id);
     const [state, formAction, pending] = useActionState(boundUpdateUser, initialState);
+    const [role, setRole] = useState(user.role);
 
     useEffect(() => {
         if (state.success) onClose();
@@ -237,25 +238,23 @@ function EditUserForm({ user, onClose }: { user: User; onClose: () => void }) {
             <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
                 <X size={24} />
             </button>
-            <h3 className="text-lg font-bold text-slate-800 mb-6">Editar a {user.name}</h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-6">Editar a {user.name}</h3>
             <form action={formAction} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Nombre completo *</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-1.5">Nombre completo *</label>
                         <input name="name" required type="text" defaultValue={user.name} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none" />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Rol *</label>
-                        <select name="role" required defaultValue={user.role} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none">
-                            {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-                        </select>
+                        <label className="block text-sm font-medium text-slate-700 mb-1.5">Rol *</label>
+                        <Select name="role" required value={role} onChange={setRole} options={ROLES.map((r) => ({ value: r.value, label: r.label }))} />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Correo corporativo *</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-1.5">Correo corporativo *</label>
                         <input name="email" required type="email" defaultValue={user.email} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none" />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Nueva contraseña</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-1.5">Nueva contraseña</label>
                         <input name="password" type="password" minLength={12} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0B1E40] outline-none" placeholder="Dejar en blanco para no cambiarla" />
                     </div>
                 </div>

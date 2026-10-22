@@ -24,6 +24,8 @@ import {
     bulkToggleProducts,
 } from '@/actions/products';
 import { attributeFieldsFor } from '@/lib/productSpec';
+import { Select } from '@/components/ui/Select';
+import { Modal } from '@/components/ui/Modal';
 
 interface CategoryRow {
     id: number;
@@ -268,7 +270,7 @@ export function ProductManagement({
             {/* Encabezado */}
             <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div>
-                    <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Catálogo de Servicios</h1>
+                    <h1 className="text-2xl font-bold text-slate-900">Catálogo de servicios</h1>
                     <p className="text-slate-500 text-sm mt-1">
                         Catálogo comercial maestro — cursos, certificaciones y calificaciones para cotizar y registrar oportunidades.
                     </p>
@@ -292,23 +294,23 @@ export function ProductManagement({
             {/* Tarjetas resumen de estado comercial */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="glass-card bg-white p-4 border border-slate-200/80 rounded-xl">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Servicios</p>
-                    <p className="text-2xl font-black text-slate-900 mt-1">{stats.total}</p>
+                    <p className="text-xs font-medium text-slate-500">Total servicios</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{stats.total}</p>
                     <p className="text-[11px] text-slate-400 mt-0.5">{stats.active} activos comercialmente</p>
                 </div>
                 <div className="glass-card bg-white p-4 border border-slate-200/80 rounded-xl">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Publicados en Web</p>
-                    <p className="text-2xl font-black text-blue-600 mt-1">{stats.withWeb}</p>
+                    <p className="text-xs font-medium text-slate-500">Publicados en web</p>
+                    <p className="text-2xl font-bold text-blue-600 mt-1">{stats.withWeb}</p>
                     <p className="text-[11px] text-slate-400 mt-0.5">Con ficha de marketing en wylar.cl</p>
                 </div>
                 <div className="glass-card bg-white p-4 border border-slate-200/80 rounded-xl">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Solo CRM / Privados</p>
-                    <p className="text-2xl font-black text-slate-700 mt-1">{stats.crmOnly}</p>
+                    <p className="text-xs font-medium text-slate-500">Solo CRM / privados</p>
+                    <p className="text-2xl font-bold text-slate-700 mt-1">{stats.crmOnly}</p>
                     <p className="text-[11px] text-slate-400 mt-0.5">Venta directa sin landing pública</p>
                 </div>
                 <div className="glass-card bg-white p-4 border border-slate-200/80 rounded-xl flex flex-col justify-between">
                     <div>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Fichas Web</p>
+                        <p className="text-xs font-medium text-slate-500">Fichas web</p>
                         <p className="text-xs text-slate-600 mt-1">Edita textos y fotos que ve el público</p>
                     </div>
                     <Link
@@ -405,178 +407,139 @@ export function ProductManagement({
                     />
                 </div>
                 <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <div className="relative flex-1 sm:w-48">
-                        <select
+                    <div className="flex-1 sm:w-48">
+                        <Select
                             value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="w-full py-2 px-3 text-xs font-medium bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 cursor-pointer"
-                        >
-                            <option value="ALL">Todas las categorías</option>
-                            {categories.map((c) => (
-                                <option key={c.id} value={String(c.id)}>
-                                    {c.name}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={setSelectedCategory}
+                            options={[{ value: 'ALL', label: 'Todas las categorías' }, ...categories.map((c) => ({ value: String(c.id), label: c.name }))]}
+                        />
                     </div>
-                    <div className="relative flex-1 sm:w-44">
-                        <select
+                    <div className="flex-1 sm:w-44">
+                        <Select
                             value={webFilter}
-                            onChange={(e) => setWebFilter(e.target.value as any)}
-                            className="w-full py-2 px-3 text-xs font-medium bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 cursor-pointer"
-                        >
-                            <option value="ALL">Todo el catálogo</option>
-                            <option value="WITH_WEB">Publicados en Web</option>
-                            <option value="CRM_ONLY">Solo CRM (Privados)</option>
-                        </select>
+                            onChange={(v) => setWebFilter(v as typeof webFilter)}
+                            options={[
+                                { value: 'ALL', label: 'Todo el catálogo' },
+                                { value: 'WITH_WEB', label: 'Publicados en Web' },
+                                { value: 'CRM_ONLY', label: 'Solo CRM (Privados)' },
+                            ]}
+                        />
                     </div>
                 </div>
             </div>
 
             {/* Modal de creación / edición */}
-            {showForm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm" onClick={() => setShowForm(false)}>
-                    <form
-                        onSubmit={handleSubmit}
-                        onClick={(e) => e.stopPropagation()}
-                        className="glass-card bg-white w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 space-y-4 rounded-2xl shadow-2xl"
-                    >
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                            <div>
-                                <h2 className="font-extrabold text-slate-900 text-lg">
-                                    {editingId != null ? 'Editar servicio del catálogo' : 'Nuevo servicio en el catálogo'}
-                                </h2>
-                                <p className="text-xs text-slate-500 mt-0.5">
-                                    Disponible inmediatamente para oportunidades y cotizaciones del CRM.
-                                </p>
+            <Modal open={showForm} onClose={() => setShowForm(false)} title={editingId != null ? 'Editar servicio del catálogo' : 'Nuevo servicio en el catálogo'}>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <p className="text-xs text-slate-500 -mt-2">Disponible inmediatamente para oportunidades y cotizaciones del CRM.</p>
+
+                    {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
+
+                    <div className="space-y-3.5">
+                        <label className="block">
+                            <span className="block text-sm font-medium text-slate-700 mb-1.5">Categoría comercial</span>
+                            <Select value={String(categoryId)} onChange={(v) => setCategoryId(Number(v))} options={categories.map((c) => ({ value: String(c.id), label: c.name }))} />
+                        </label>
+
+                        <label className="block">
+                            <span className="block text-sm font-medium text-slate-700 mb-1.5">Nombre del servicio / curso</span>
+                            <input
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Ej: Soldador Calificado 3G / Cuidador de Personas Mayores"
+                                className={inputClass}
+                                required
+                            />
+                        </label>
+
+                        <label className="block">
+                            <span className="block text-sm font-medium text-slate-700 mb-1.5">Descripción comercial (opcional)</span>
+                            <textarea
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                rows={2}
+                                placeholder="Resumen o alcance que verá el vendedor en el CRM..."
+                                className={inputClass}
+                            />
+                        </label>
+
+                        <label className="block">
+                            <span className="block text-sm font-medium text-slate-700 mb-1.5">Precio de referencia base (CLP, opcional)</span>
+                            <input
+                                type="number"
+                                min={0}
+                                value={price}
+                                onChange={(e) => setPrice(e.target.value)}
+                                placeholder="Dejar vacío si es 'A cotizar'"
+                                className={inputClass}
+                            />
+                        </label>
+
+                        {/* Ficha Web vinculada */}
+                        <div className="p-3.5 bg-blue-50/60 border border-blue-200/70 rounded-xl space-y-2">
+                            <div className="flex items-center gap-2">
+                                <Globe size={16} className="text-blue-700" />
+                                <span className="text-sm font-medium text-navy-900">
+                                    Ficha Web pública en wylar.cl
+                                </span>
                             </div>
-                            <button type="button" onClick={() => setShowForm(false)} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors" aria-label="Cerrar">
-                                <X size={20} />
-                            </button>
+                            <p className="text-xs text-slate-600">
+                                Vincula este servicio a su landing page de marketing en el sitio web para sincronizar consultas y cotizaciones entrantes.
+                            </p>
+                            <Select
+                                value={profileId}
+                                onChange={setProfileId}
+                                placeholder="Ninguna (Solo CRM / Venta privada sin web)"
+                                options={[{ value: '', label: 'Ninguna (Solo CRM / Venta privada sin web)' }, ...profiles.map((p) => ({ value: String(p.id), label: `${p.title}${p.slug ? ` (/perfil/${p.slug})` : ''}` }))]}
+                            />
                         </div>
 
-                        {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
-
-                        <div className="space-y-3.5">
-                            <label className="block">
-                                <span className="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Categoría comercial</span>
-                                <select value={categoryId} onChange={(e) => setCategoryId(Number(e.target.value))} className={inputClass} required>
-                                    {categories.map((c) => (
-                                        <option key={c.id} value={c.id}>
-                                            {c.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-
-                            <label className="block">
-                                <span className="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Nombre del servicio / curso</span>
-                                <input
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="Ej: Soldador Calificado 3G / Cuidador de Personas Mayores"
-                                    className={inputClass}
-                                    required
-                                />
-                            </label>
-
-                            <label className="block">
-                                <span className="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Descripción comercial (opcional)</span>
-                                <textarea
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    rows={2}
-                                    placeholder="Resumen o alcance que verá el vendedor en el CRM..."
-                                    className={inputClass}
-                                />
-                            </label>
-
-                            <label className="block">
-                                <span className="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Precio de referencia base (CLP, opcional)</span>
-                                <input
-                                    type="number"
-                                    min={0}
-                                    value={price}
-                                    onChange={(e) => setPrice(e.target.value)}
-                                    placeholder="Dejar vacío si es 'A cotizar'"
-                                    className={inputClass}
-                                />
-                            </label>
-
-                            {/* Ficha Web vinculada */}
-                            <div className="p-3.5 bg-blue-50/60 border border-blue-200/70 rounded-xl space-y-2">
-                                <div className="flex items-center gap-2">
-                                    <Globe size={16} className="text-blue-700" />
-                                    <span className="text-xs font-bold text-[#0B1E40] uppercase tracking-wide">
-                                        Ficha Web pública en wylar.cl
-                                    </span>
-                                </div>
-                                <p className="text-xs text-slate-600">
-                                    Vincula este servicio a su landing page de marketing en el sitio web para sincronizar consultas y cotizaciones entrantes.
-                                </p>
-                                <select value={profileId} onChange={(e) => setProfileId(e.target.value)} className={inputClass}>
-                                    <option value="">-- Ninguna (Solo CRM / Venta privada sin web) --</option>
-                                    {profiles.map((p) => (
-                                        <option key={p.id} value={p.id}>
-                                            {p.title} {p.slug ? `(/perfil/${p.slug})` : ''}
-                                        </option>
-                                    ))}
-                                </select>
+                        {attributeFields.length > 0 && (
+                            <div className="space-y-3 border-t border-slate-100 pt-3">
+                                <p className="text-sm font-medium text-slate-500">Atributos específicos de {category?.name}</p>
+                                {attributeFields.map((f) => (
+                                    <label key={f.key} className="block">
+                                        <span className="block text-xs font-medium text-slate-600 mb-1">{f.label}</span>
+                                        {f.type === 'select' ? (
+                                            <Select
+                                                value={attributes[f.key] ?? ''}
+                                                onChange={(v) => setAttributes((a) => ({ ...a, [f.key]: v }))}
+                                                placeholder="Seleccionar..."
+                                                options={(f.options ?? []).map((o) => ({ value: o, label: o }))}
+                                            />
+                                        ) : (
+                                            <input
+                                                type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
+                                                value={attributes[f.key] ?? ''}
+                                                onChange={(e) => setAttributes((a) => ({ ...a, [f.key]: e.target.value }))}
+                                                placeholder={f.placeholder}
+                                                className={inputClass}
+                                            />
+                                        )}
+                                    </label>
+                                ))}
                             </div>
+                        )}
+                    </div>
 
-                            {attributeFields.length > 0 && (
-                                <div className="space-y-3 border-t border-slate-100 pt-3">
-                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Atributos específicos de {category?.name}</p>
-                                    {attributeFields.map((f) => (
-                                        <label key={f.key} className="block">
-                                            <span className="block text-xs font-bold text-slate-600 mb-1">{f.label}</span>
-                                            {f.type === 'select' ? (
-                                                <select
-                                                    value={attributes[f.key] ?? ''}
-                                                    onChange={(e) => setAttributes((a) => ({ ...a, [f.key]: e.target.value }))}
-                                                    className={inputClass}
-                                                >
-                                                    <option value="">— Seleccionar —</option>
-                                                    {f.options?.map((o) => (
-                                                        <option key={o} value={o}>
-                                                            {o}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            ) : (
-                                                <input
-                                                    type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
-                                                    value={attributes[f.key] ?? ''}
-                                                    onChange={(e) => setAttributes((a) => ({ ...a, [f.key]: e.target.value }))}
-                                                    placeholder={f.placeholder}
-                                                    className={inputClass}
-                                                />
-                                            )}
-                                        </label>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-                            <button
-                                type="button"
-                                onClick={() => setShowForm(false)}
-                                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={isPending}
-                                className="bg-[#0B1E40] text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#122b59] transition-colors disabled:opacity-60 text-sm shadow-sm"
-                            >
-                                {isPending ? 'Guardando…' : editingId != null ? 'Guardar cambios' : 'Crear en catálogo'}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
+                    <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                        <button
+                            type="button"
+                            onClick={() => setShowForm(false)}
+                            className="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isPending}
+                            className="bg-[#0B1E40] text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#122b59] transition-colors disabled:opacity-60 text-sm shadow-sm"
+                        >
+                            {isPending ? 'Guardando…' : editingId != null ? 'Guardar cambios' : 'Crear en catálogo'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
 
             {/* Listado de servicios */}
             <div className="space-y-3">
@@ -692,7 +655,7 @@ export function ProductManagement({
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-semibold text-slate-500">
                                     <th className="px-4 py-3.5 w-10 text-center">
                                         <input
                                             ref={selectAllRef}
@@ -703,10 +666,10 @@ export function ProductManagement({
                                             title={isAllSelected ? 'Deseleccionar todos' : 'Seleccionar todos en esta página'}
                                         />
                                     </th>
-                                    <th className="px-4 py-3.5">Servicio / Certificación</th>
+                                    <th className="px-4 py-3.5">Servicio / certificación</th>
                                     <th className="px-4 py-3.5">Categoría</th>
                                     <th className="px-4 py-3.5">Precio base</th>
-                                    <th className="px-4 py-3.5">Ficha Web (wylar.cl)</th>
+                                    <th className="px-4 py-3.5">Ficha web (wylar.cl)</th>
                                     <th className="px-4 py-3.5">Estado</th>
                                     <th className="px-4 py-3.5 text-right">Acciones</th>
                                 </tr>

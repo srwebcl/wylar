@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth';
+import { Pagination, buildPageHref } from '@/components/ui/Pagination';
 
 const ACTION_LABELS: Record<string, string> = {
     CERTIFICADO_EMITIDO: 'Certificado emitido',
@@ -14,15 +15,24 @@ const ACTION_LABELS: Record<string, string> = {
     CONTRASENA_CAMBIADA: 'Contraseña cambiada',
 };
 
-export default async function AuditoriaPage() {
+const PAGE_SIZE = 50;
+
+export default async function AuditoriaPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
     await requireAdmin();
-    const logs = await prisma.auditLog.findMany({ orderBy: { createdAt: 'desc' }, take: 200 });
+    const params = await searchParams;
+    const page = Math.max(1, Number.parseInt(params.page ?? '1', 10) || 1);
+
+    const [logs, total] = await Promise.all([
+        prisma.auditLog.findMany({ orderBy: { createdAt: 'desc' }, take: PAGE_SIZE, skip: (page - 1) * PAGE_SIZE }),
+        prisma.auditLog.count(),
+    ]);
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
     return (
         <div>
             <div className="mb-6">
-                <h1 className="text-2xl font-extrabold text-slate-900">Auditoría</h1>
-                <p className="text-slate-500 text-sm mt-1">Registro de acciones sensibles: quién hizo qué y cuándo (últimas 200).</p>
+                <h1 className="text-2xl font-bold text-slate-900">Auditoría</h1>
+                <p className="text-slate-500 text-sm mt-1">Registro de acciones sensibles: quién hizo qué y cuándo. {total} en total.</p>
             </div>
 
             {/* Vista móvil: tarjetas de auditoría */}
@@ -30,13 +40,13 @@ export default async function AuditoriaPage() {
                 {logs.map((log) => (
                     <div key={log.id} className="glass-card bg-white p-4 space-y-2">
                         <div className="flex items-center justify-between gap-2">
-                            <span className="font-bold text-slate-800 text-sm">{log.userName}</span>
+                            <span className="font-semibold text-slate-800 text-sm">{log.userName}</span>
                             <span className="text-[11px] text-slate-400">
                                 {log.createdAt.toLocaleString('es-CL', { timeZone: 'America/Santiago', dateStyle: 'short', timeStyle: 'short' })}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                            <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
                                 {ACTION_LABELS[log.action] ?? log.action}
                             </span>
                             {log.entityId && <span className="font-mono text-xs text-slate-500">#{log.entityId}</span>}
@@ -56,7 +66,7 @@ export default async function AuditoriaPage() {
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="border-b border-slate-100 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
+                            <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-semibold text-slate-500">
                                 <th className="px-5 py-3">Fecha</th>
                                 <th className="px-5 py-3">Usuario</th>
                                 <th className="px-5 py-3">Acción</th>
@@ -69,7 +79,7 @@ export default async function AuditoriaPage() {
                                     <td className="px-5 py-3 text-slate-500 whitespace-nowrap">{log.createdAt.toLocaleString('es-CL', { timeZone: 'America/Santiago' })}</td>
                                     <td className="px-5 py-3 font-medium text-slate-800">{log.userName}</td>
                                     <td className="px-5 py-3 text-slate-700">
-                                        <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700">
+                                        <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700">
                                             {ACTION_LABELS[log.action] ?? log.action}
                                         </span>
                                     </td>
@@ -90,6 +100,8 @@ export default async function AuditoriaPage() {
                     </table>
                 </div>
             </div>
+
+            <Pagination page={page} totalPages={totalPages} buildHref={(p) => buildPageHref('/auditoria', params, p)} />
         </div>
     );
 }

@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
-import { Ban, Download, Pencil, Plus, Settings, ShieldCheck, Trash2, X } from 'lucide-react';
+import { Ban, Download, Pencil, Plus, Settings, ShieldCheck, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { issueCertificate, revokeCertificate, updateCertificate, deleteCertificate } from '@/actions/certificates';
 import { createCertificateCategory, createCertificationTitle } from '@/actions/certificateMeta';
 import { CertificatesSearchBar } from '@/components/CertificatesSearchBar';
 import { SearchableCreatableSelect } from '@/components/SearchableCreatableSelect';
+import { Select } from '@/components/ui/Select';
+import { Modal } from '@/components/ui/Modal';
 import { isValidRut, formatRut } from '@/lib/rut';
 
 interface CertificateRow {
@@ -269,7 +271,7 @@ export function CertificateManagement({
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">Certificados</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Certificados</h1>
                     <p className="text-slate-500 text-xs sm:text-sm mt-1">Emisión y validación de certificados — se consultan desde wylar.cl/validador. {total} en total.</p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
@@ -294,20 +296,8 @@ export function CertificateManagement({
             {!showForm && error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
             {!showForm && success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
 
-            {showForm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-2.5 sm:p-4" onClick={() => setShowForm(false)}>
-                    <form
-                        onSubmit={handleSubmit}
-                        onClick={(e) => e.stopPropagation()}
-                        className="glass-card bg-white w-full max-w-2xl max-h-[92vh] overflow-y-auto p-4 sm:p-6 space-y-4 rounded-2xl shadow-xl"
-                    >
-                        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                            <h2 className="font-bold text-slate-900 text-base sm:text-lg">{editingId != null ? 'Editar certificado' : 'Emitir certificado'}</h2>
-                            <button type="button" onClick={() => setShowForm(false)} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors rounded-lg hover:bg-slate-100" aria-label="Cerrar">
-                                <X size={20} />
-                            </button>
-                        </div>
-
+            <Modal open={showForm} onClose={() => setShowForm(false)} title={editingId != null ? 'Editar certificado' : 'Emitir certificado'} maxWidth="max-w-2xl">
+                <form onSubmit={handleSubmit} className="space-y-4">
                         {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
                         {success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
 
@@ -350,38 +340,38 @@ export function CertificateManagement({
                             </Field>
                             <Field label="Vigencia">
                                 <div className="flex flex-col gap-2">
-                                    <select value={expiryMode} onChange={(e) => setExpiryMode(e.target.value)} className={inputClass}>
-                                        <option value="indefinida">Indefinida (Sin vencimiento)</option>
-                                        <option value="1">1 Año</option>
-                                        <option value="2">2 Años</option>
-                                        <option value="3">3 Años</option>
-                                        <option value="personalizada">Personalizada...</option>
-                                    </select>
+                                    <Select
+                                        value={expiryMode}
+                                        onChange={setExpiryMode}
+                                        options={[
+                                            { value: 'indefinida', label: 'Indefinida (sin vencimiento)' },
+                                            { value: '1', label: '1 año' },
+                                            { value: '2', label: '2 años' },
+                                            { value: '3', label: '3 años' },
+                                            { value: 'personalizada', label: 'Personalizada...' },
+                                        ]}
+                                    />
                                     {expiryMode === 'personalizada' && (
                                         <input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} className={inputClass} required />
                                     )}
                                 </div>
                             </Field>
                             <Field label="Tipo de certificado">
-                                <select value={completionText} onChange={(e) => setCompletionText(e.target.value)} className={inputClass}>
-                                    {types.map((t) => (
-                                        <option key={t.id} value={t.completionText}>
-                                            {t.label.toUpperCase()}
-                                        </option>
-                                    ))}
-                                </select>
+                                <Select
+                                    value={completionText}
+                                    onChange={setCompletionText}
+                                    options={types.map((t) => ({ value: t.completionText, label: t.label }))}
+                                />
                             </Field>
                         </div>
 
                         <Field label="Texto bajo la certificación (opcional, va en el PDF)">
                             <div className="flex flex-col gap-2">
-                                <select value={detailTemplate} onChange={(e) => handleDetailTemplateChange(e.target.value)} className={inputClass}>
-                                    {DETAIL_TEMPLATES.map((t) => (
-                                        <option key={t.value} value={t.value}>
-                                            {t.label}
-                                        </option>
-                                    ))}
-                                </select>
+                                <Select
+                                    value={detailTemplate}
+                                    onChange={handleDetailTemplateChange}
+                                    options={DETAIL_TEMPLATES.map((t) => ({ value: t.value, label: t.label }))}
+                                />
                                 {detailTemplate !== 'ninguna' && (
                                     <textarea
                                         value={detailText}
@@ -404,9 +394,8 @@ export function CertificateManagement({
                                 {editingId != null ? (isPending ? 'Guardando…' : 'Guardar cambios') : isPending ? 'Emitiendo…' : 'Emitir certificado'}
                             </button>
                         </div>
-                    </form>
-                </div>
-            )}
+                </form>
+            </Modal>
 
             {certificates.length === 0 ? (
                 <div className="glass-card p-10 text-center text-slate-400">Aún no se han emitido certificados.</div>
@@ -502,7 +491,7 @@ export function CertificateManagement({
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-slate-100 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
+                                    <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-semibold text-slate-500">
                                         <th className="px-5 py-3">Titular</th>
                                         <th className="px-5 py-3">RUT</th>
                                         <th className="px-5 py-3">Certificación</th>
@@ -591,7 +580,7 @@ export function CertificateManagement({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
     return (
         <label className="block">
-            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">{label}</span>
+            <span className="block text-sm font-medium text-slate-700 mb-1.5">{label}</span>
             {children}
         </label>
     );

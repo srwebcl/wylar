@@ -8,12 +8,14 @@ import { markQuoteAccepted, markQuoteRejected } from '@/actions/quotes';
 import { SendQuoteModal } from '@/components/SendQuoteModal';
 import type { Quote, QuoteItem } from '@prisma/client';
 
-type QuoteWithItems = Quote & { items: QuoteItem[] };
+// `total`/`unitPrice`/`subtotal` llegan ya convertidos a number — Prisma
+// Decimal no es un objeto plano, no puede cruzar el límite Server->Client.
+type QuoteWithItems = Omit<Quote, 'total'> & { total: number; items: (Omit<QuoteItem, 'unitPrice' | 'subtotal'> & { unitPrice: number; subtotal: number })[] };
 
 interface ProductOption {
     id: number;
     name: string;
-    price: unknown;
+    price: number | null;
 }
 
 const STATUS_STYLE: Record<string, string> = {
