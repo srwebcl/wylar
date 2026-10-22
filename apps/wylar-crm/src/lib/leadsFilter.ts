@@ -4,6 +4,7 @@ import { normalizeRut } from '@/lib/rut';
 
 export interface LeadsFilterParams {
     q?: string;
+    type?: string;
     status?: string;
     source?: string;
     assignedToId?: string;
@@ -19,9 +20,10 @@ export interface LeadsFilterParams {
  * teléfono), el producto de interés y su tipo de contacto, para que una
  * sola barra sirva para encontrar una oportunidad sin saber de antemano en
  * qué campo quedó el dato. */
-export function buildLeadsWhere({ q, status, source, assignedToId, categoryId, productId, comuna, from, to }: LeadsFilterParams): Prisma.LeadWhereInput {
+export function buildLeadsWhere({ q, type, status, source, assignedToId, categoryId, productId, comuna, from, to }: LeadsFilterParams): Prisma.LeadWhereInput {
     const qRutNorm = q ? normalizeRut(q) : '';
     return {
+        ...(type ? { type } : {}),
         ...(status ? { status } : {}),
         ...(source ? { source } : {}),
         ...(assignedToId === 'sin-asignar' ? { assignedToId: null } : assignedToId ? { assignedToId: Number.isInteger(Number(assignedToId)) ? Number(assignedToId) : -1 } : {}),

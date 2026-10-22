@@ -15,10 +15,12 @@ import {
     Eye,
     ExternalLink,
 } from 'lucide-react';
-import { sourceLabel, statusLabel, STATUSES } from '@/lib/constants';
+import { sourceLabel, statusLabel, STATUSES, SOURCES, leadTypeLabel, LEAD_TYPES } from '@/lib/constants';
 import { deleteLead, bulkDeleteLeads, bulkUpdateLeadStatus, bulkAssignLeads, updateLead } from '@/actions/leads';
 import { formatChileanMobile } from '@/lib/phone';
 import { ComunaCombobox } from '@/components/ComunaCombobox';
+import { Select } from '@/components/ui/Select';
+import { Th } from '@/components/ui/Th';
 import type { Lead, Product, ProductCategory } from '@prisma/client';
 import type { SafeUser as User } from '@/lib/safeUser';
 
@@ -309,7 +311,7 @@ export function LeadsTable({
 
                         <div className="space-y-3.5">
                             <label className="block">
-                                <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre Completo</span>
+                                <span className="block text-xs font-medium text-slate-500 mb-1">Nombre completo</span>
                                 <input
                                     value={editName}
                                     onChange={(e) => setEditName(e.target.value.toUpperCase())}
@@ -320,7 +322,7 @@ export function LeadsTable({
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <label className="block">
-                                    <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">RUT</span>
+                                    <span className="block text-xs font-medium text-slate-500 mb-1">RUT</span>
                                     <input
                                         value={editRut}
                                         onChange={(e) => setEditRut(e.target.value)}
@@ -329,7 +331,7 @@ export function LeadsTable({
                                     />
                                 </label>
                                 <label className="block">
-                                    <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Empresa / Razón Social</span>
+                                    <span className="block text-xs font-medium text-slate-500 mb-1">Empresa / razón social</span>
                                     <input
                                         value={editCompany}
                                         onChange={(e) => setEditCompany(e.target.value.toUpperCase())}
@@ -341,7 +343,7 @@ export function LeadsTable({
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <label className="block">
-                                    <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Correo Electrónico</span>
+                                    <span className="block text-xs font-medium text-slate-500 mb-1">Correo electrónico</span>
                                     <input
                                         type="email"
                                         value={editEmail}
@@ -351,7 +353,7 @@ export function LeadsTable({
                                     />
                                 </label>
                                 <label className="block">
-                                    <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Teléfono Móvil</span>
+                                    <span className="block text-xs font-medium text-slate-500 mb-1">Teléfono móvil</span>
                                     <input
                                         value={editPhone}
                                         onChange={(e) => setEditPhone(e.target.value)}
@@ -364,71 +366,46 @@ export function LeadsTable({
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Comuna (Chile)</span>
+                                    <span className="block text-xs font-medium text-slate-500 mb-1">Comuna (Chile)</span>
                                     <ComunaCombobox
                                         value={editComuna}
                                         onChange={(val) => setEditComuna(val)}
                                         placeholder="Buscar comuna..."
                                     />
                                 </div>
-                                <label className="block">
-                                    <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Estado de Oportunidad</span>
-                                    <select
-                                        value={editStatus}
-                                        onChange={(e) => setEditStatus(e.target.value)}
-                                        className={inputClass}
-                                    >
-                                        {STATUSES.map((st) => (
-                                            <option key={st.value} value={st.value}>
-                                                {st.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
+                                <div>
+                                    <span className="block text-xs font-medium text-slate-500 mb-1">Estado de la oportunidad</span>
+                                    <Select value={editStatus} onChange={setEditStatus} options={STATUSES} />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <label className="block">
-                                    <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Producto / Certificación</span>
-                                    <select
-                                        value={editProductId}
-                                        onChange={(e) => setEditProductId(Number(e.target.value))}
-                                        className={inputClass}
-                                    >
-                                        {products.length > 0 ? (
-                                            products.map((p) => (
-                                                <option key={p.id} value={p.id}>
-                                                    {p.name}
-                                                </option>
-                                            ))
-                                        ) : editingLead.product ? (
-                                            <option value={editingLead.product.id}>
-                                                {editingLead.product.name}
-                                            </option>
-                                        ) : (
-                                            <option value={0}>Sin producto asociado</option>
-                                        )}
-                                    </select>
-                                </label>
-                                <label className="block">
-                                    <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Responsable Comercial</span>
-                                    <select
+                                <div>
+                                    <span className="block text-xs font-medium text-slate-500 mb-1">Producto / certificación</span>
+                                    <Select
+                                        value={String(editProductId)}
+                                        onChange={(v) => setEditProductId(Number(v))}
+                                        options={
+                                            products.length > 0
+                                                ? products.map((p) => ({ value: String(p.id), label: p.name }))
+                                                : editingLead.product
+                                                  ? [{ value: String(editingLead.product.id), label: editingLead.product.name }]
+                                                  : [{ value: '0', label: 'Sin producto asociado' }]
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <span className="block text-xs font-medium text-slate-500 mb-1">Responsable comercial</span>
+                                    <Select
                                         value={editAssignedToId}
-                                        onChange={(e) => setEditAssignedToId(e.target.value)}
-                                        className={inputClass}
-                                    >
-                                        <option value="">-- Sin asignar --</option>
-                                        {users.map((u) => (
-                                            <option key={u.id} value={String(u.id)}>
-                                                {u.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
+                                        onChange={setEditAssignedToId}
+                                        options={[{ value: '', label: 'Sin asignar' }, ...users.map((u) => ({ value: String(u.id), label: u.name }))]}
+                                    />
+                                </div>
                             </div>
 
                             <label className="block">
-                                <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Notas Comerciales</span>
+                                <span className="block text-xs font-medium text-slate-500 mb-1">Notas comerciales</span>
                                 <textarea
                                     value={editNotes}
                                     onChange={(e) => setEditNotes(e.target.value)}
@@ -476,24 +453,14 @@ export function LeadsTable({
                             </button>
                         </div>
 
-                        <label className="block">
-                            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nuevo estado</span>
-                            <select
-                                value={bulkStatusValue}
-                                onChange={(e) => setBulkStatusValue(e.target.value)}
-                                className={inputClass}
-                            >
-                                {STATUSES.map((st) => (
-                                    <option key={st.value} value={st.value}>
-                                        {st.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
+                        <div>
+                            <span className="block text-xs font-medium text-slate-500 mb-1.5">Nuevo estado</span>
+                            <Select value={bulkStatusValue} onChange={setBulkStatusValue} options={STATUSES} />
+                        </div>
 
                         {bulkStatusValue === 'DESISTIDO' && (
                             <label className="block">
-                                <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Motivo del desistimiento</span>
+                                <span className="block text-xs font-medium text-slate-500 mb-1.5">Motivo del desistimiento</span>
                                 <textarea
                                     value={bulkLostReason}
                                     onChange={(e) => setBulkLostReason(e.target.value)}
@@ -542,21 +509,14 @@ export function LeadsTable({
                             </button>
                         </div>
 
-                        <label className="block">
-                            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nuevo responsable comercial</span>
-                            <select
+                        <div>
+                            <span className="block text-xs font-medium text-slate-500 mb-1.5">Nuevo responsable comercial</span>
+                            <Select
                                 value={bulkAssigneeValue}
-                                onChange={(e) => setBulkAssigneeValue(e.target.value)}
-                                className={inputClass}
-                            >
-                                <option value="">-- Sin asignar --</option>
-                                {users.map((u) => (
-                                    <option key={u.id} value={String(u.id)}>
-                                        {u.name} ({u.email})
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
+                                onChange={setBulkAssigneeValue}
+                                options={[{ value: '', label: 'Sin asignar' }, ...users.map((u) => ({ value: String(u.id), label: `${u.name} (${u.email})` }))]}
+                            />
+                        </div>
 
                         <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
                             <button
@@ -624,6 +584,9 @@ export function LeadsTable({
                                             >
                                                 {formattedName}
                                             </Link>
+                                            <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                                                {leadTypeLabel(lead.type)}
+                                            </span>
                                             {isDnc && (
                                                 <span title={`No contactar: ${dncMap.get(`${lead.email}|${lead.phone}`)}`} className="shrink-0">
                                                     <ShieldOff size={14} className="text-red-500" />
@@ -727,7 +690,7 @@ export function LeadsTable({
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                            <tr className="bg-slate-50/90 border-b border-slate-200 whitespace-nowrap">
                                 <th className="px-4 py-3.5 w-10 text-center">
                                     <input
                                         ref={selectAllRef}
@@ -738,16 +701,21 @@ export function LeadsTable({
                                         title={isAllSelected ? 'Deseleccionar todas' : 'Seleccionar todas en esta página'}
                                     />
                                 </th>
-                                <th className="px-4 py-3.5">Código</th>
-                                <th className="px-4 py-3.5">Contacto / Empresa</th>
-                                <th className="px-4 py-3.5">RUT</th>
-                                <th className="px-4 py-3.5">Comuna</th>
-                                <th className="px-4 py-3.5">Teléfono & Correo</th>
-                                <th className="px-4 py-3.5">Producto / Servicio</th>
-                                <th className="px-4 py-3.5">Responsable</th>
-                                <th className="px-4 py-3.5">Estado</th>
-                                <th className="px-4 py-3.5">Ingreso</th>
-                                <th className="px-4 py-3.5 text-right">Acciones</th>
+                                <Th label="Código" sortKey="code" />
+                                <Th label="Contacto / empresa" sortKey="name" />
+                                <Th label="Tipo" sortKey="type" filter={{ type: 'select', paramKey: 'type', options: [...LEAD_TYPES] }} />
+                                <Th label="RUT" filter={{ type: 'text', paramKey: 'q', placeholder: 'Buscar RUT...' }} />
+                                <Th label="Comuna" filter={{ type: 'text', paramKey: 'comuna', placeholder: 'Buscar comuna...' }} />
+                                <Th label="Teléfono y correo" />
+                                <Th label="Producto / servicio" filter={{ type: 'text', paramKey: 'q', placeholder: 'Buscar producto...' }} />
+                                <Th
+                                    label="Responsable"
+                                    filter={{ type: 'select', paramKey: 'assignedToId', options: [{ value: 'sin-asignar', label: 'Sin asignar' }, ...users.map((u) => ({ value: String(u.id), label: u.name }))] }}
+                                />
+                                <Th label="Estado" sortKey="status" filter={{ type: 'select', paramKey: 'status', options: [...STATUSES] }} />
+                                <Th label="Origen" filter={{ type: 'select', paramKey: 'source', options: [...SOURCES] }} />
+                                <Th label="Ingreso" sortKey="createdAt" filter={{ type: 'dateRange', paramKey: 'from' }} />
+                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-slate-500">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -809,6 +777,11 @@ export function LeadsTable({
                                                     {lead.company.toUpperCase()}
                                                 </span>
                                             )}
+                                        </td>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <span className="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md">
+                                                {leadTypeLabel(lead.type)}
+                                            </span>
                                         </td>
                                         <td className="px-4 py-3 text-slate-600 text-xs font-mono whitespace-nowrap">
                                             {lead.rut || <span className="text-slate-300">—</span>}

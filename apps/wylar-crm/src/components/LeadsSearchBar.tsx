@@ -3,10 +3,10 @@
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Search, Filter, X } from 'lucide-react';
-import { SOURCES, STATUSES } from '@/lib/constants';
+import { SOURCES, STATUSES, LEAD_TYPES } from '@/lib/constants';
 import type { SafeUser as User } from '@/lib/safeUser';
 
-const FILTER_KEYS = ['status', 'source', 'assignedToId', 'categoryId', 'productId', 'comuna', 'from', 'to'];
+const FILTER_KEYS = ['type', 'status', 'source', 'assignedToId', 'categoryId', 'productId', 'comuna', 'from', 'to'];
 
 export function LeadsSearchBar({
     users,
@@ -78,6 +78,13 @@ export function LeadsSearchBar({
 
             {showFilters && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-1">Tipo de Cliente</label>
+                        <select defaultValue={searchParams.get('type') ?? ''} onChange={(e) => updateParam('type', e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
+                            <option value="">Todos</option>
+                            {LEAD_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                        </select>
+                    </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Estado</label>
                         <select defaultValue={searchParams.get('status') ?? ''} onChange={(e) => updateParam('status', e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">

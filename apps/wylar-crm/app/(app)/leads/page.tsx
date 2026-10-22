@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { FileSpreadsheet } from 'lucide-react';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/auth';
 import { buildLeadsWhere } from '@/lib/leadsFilter';
@@ -7,8 +8,16 @@ import { loadDoNotContactMap } from '@/lib/doNotContact';
 import { LeadsSearchBar } from '@/components/LeadsSearchBar';
 import { LeadsTable } from '@/components/LeadsTable';
 import { CreateLeadModal } from '@/components/CreateLeadModal';
+import { Pagination, buildPageHref } from '@/components/ui/Pagination';
 
 const PAGE_SIZE = 50;
+const SORTABLE_FIELDS = new Set(['code', 'name', 'type', 'status', 'createdAt']);
+
+function buildOrderBy(params: Record<string, string | undefined>): Prisma.LeadOrderByWithRelationInput {
+    const sort = params.sort && SORTABLE_FIELDS.has(params.sort) ? params.sort : 'createdAt';
+    const dir = params.dir === 'desc' ? 'desc' : params.sort ? 'asc' : 'desc';
+    return { [sort]: dir };
+}
 
 export default async function LeadsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
     const currentUser = await requireUser();
@@ -20,7 +29,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         prisma.lead.findMany({
             where,
             include: { assignedTo: { omit: { passwordHash: true } }, client: true, product: { include: { category: true } } },
-            orderBy: { createdAt: 'desc' },
+            orderBy: buildOrderBy(params),
             take: PAGE_SIZE,
             skip: (page - 1) * PAGE_SIZE,
         }),
@@ -33,11 +42,6 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
     const dncMap = await loadDoNotContactMap(leads.map((l) => ({ email: l.email, phone: l.phone })));
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-    const pageHref = (p: number) => {
-        const qs = new URLSearchParams(Object.entries(params).filter(([k, v]) => v && k !== 'page') as [string, string][]);
-        qs.set('page', String(p));
-        return `/leads?${qs.toString()}`;
-    };
     const exportHref = (() => {
         const qs = new URLSearchParams(Object.entries(params).filter(([k, v]) => v && k !== 'page') as [string, string][]);
         return `/api/leads/export?${qs.toString()}`;
@@ -65,23 +69,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
             <LeadsSearchBar users={users} categories={categories} products={products} />
             <LeadsTable leads={leads} isAdmin={currentUser.role === 'ADMIN'} dncMap={dncMap} users={users} products={products} />
 
-            {totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 text-sm text-slate-600">
-                    <span>Página {Math.min(page, totalPages)} de {totalPages}</span>
-                    <div className="flex gap-2 w-full sm:w-auto justify-end">
-                        {page > 1 && (
-                            <Link href={pageHref(page - 1)} className="flex-1 sm:flex-none text-center px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-medium">
-                                ← Anterior
-                            </Link>
-                        )}
-                        {page < totalPages && (
-                            <Link href={pageHref(page + 1)} className="flex-1 sm:flex-none text-center px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-medium">
-                                Siguiente →
-                            </Link>
-                        )}
-                    </div>
-                </div>
-            )}
+            <Pagination page={page} totalPages={totalPages} buildHref={(p) => buildPageHref('/leads', params, p)} />
         </div>
     );
 }
