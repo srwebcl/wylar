@@ -1,15 +1,20 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { renderToBuffer } from '@react-pdf/renderer';
 import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/auth';
 import { quoteSchema } from '@/lib/validation';
 import { audit } from '@/lib/audit';
 import { changeLeadStatus } from '@/actions/leads';
+import { QuotePdf } from '@/components/QuotePdf';
+import { sendQuotePdfEmail } from '@/lib/email';
 
 export interface QuoteFormState {
     error?: string;
     success?: string;
+    quoteId?: number;
+    quoteCode?: string;
 }
 
 /** Genera el código visible de la cotización, ej. "COT-0001", a partir del
@@ -24,7 +29,7 @@ async function assignQuoteCode(quoteId: number): Promise<string> {
  * Nueva cotización para una oportunidad. Si ya existía una cotización no
  * terminal (BORRADOR/ENVIADA) para esa oportunidad, queda marcada
  * REEMPLAZADA — las versiones anteriores nunca se sobrescriben, solo
- * cambian de estado (ver regla de negocio del usuario).
+ * cambian de estado.
  */
 export async function createQuote(_prevState: QuoteFormState, formData: FormData): Promise<QuoteFormState> {
     const user = await requireUser();
@@ -35,6 +40,8 @@ export async function createQuote(_prevState: QuoteFormState, formData: FormData
     } catch {
         return { error: 'Los ítems de la cotización no son válidos.' };
     }
+
+    const initialStatus = formData.get('status') === 'BORRADOR' ? 'BORRADOR' : 'ENVIADA';
 
     const parsed = quoteSchema.safeParse({
         opportunityId: formData.get('opportunityId'),
@@ -60,7 +67,7 @@ export async function createQuote(_prevState: QuoteFormState, formData: FormData
             code: `TEMP-${Date.now()}`,
             opportunityId: data.opportunityId,
             version: nextVersion,
-            status: 'ENVIADA',
+            status: initialStatus,
             notes: data.notes || null,
             total,
             createdById: user.id,
@@ -87,20 +94,114 @@ export async function createQuote(_prevState: QuoteFormState, formData: FormData
             userId: user.id,
             authorName: user.name,
             type: 'NOTA',
-            text: `Cotización ${code} (v${nextVersion}) creada por ${user.name}. Total: $${total.toLocaleString('es-CL')}.`,
+            text: `Cotización ${code} (v${nextVersion}) creada por ${user.name} con estado ${initialStatus}. Total: $${total.toLocaleString('es-CL')}.`,
         },
     });
 
     await audit(user, 'COTIZACION_CREADA', 'cotizacion', code, `oportunidad ${opportunity.code}`);
+
+    revalidatePath('/cotizaciones');
     revalidatePath(`/leads/${data.opportunityId}`);
-    return { success: `Cotización ${code} creada.` };
+    return { success: `Cotización ${code} creada exitosamente.`, quoteId: quote.id, quoteCode: code };
+}
+
+/**
+ * Envía una cotización en PDF adjunta al correo del cliente directamente
+ * a través de Resend desde el CRM.
+ */
+export async function sendQuoteByEmail(
+    quoteId: number,
+    options?: { recipientEmail?: string; customMessage?: string },
+): Promise<QuoteFormState> {
+    const user = await requireUser();
+    const quote = await prisma.quote.findUnique({
+        where: { id: quoteId },
+        include: {
+            items: true,
+            opportunity: true,
+            createdBy: true,
+        },
+    });
+
+    if (!quote) return { error: 'La cotización no existe.' };
+
+    const recipient = options?.recipientEmail?.trim() || quote.opportunity.email;
+    if (!recipient) return { error: 'No hay un correo de destinatario válido.' };
+
+    const buffer = await renderToBuffer(
+        QuotePdf({
+            code: quote.code,
+            version: quote.version,
+            issueDate: quote.issueDate,
+            notes: quote.notes,
+            total: Number(quote.total),
+            opportunity: {
+                code: quote.opportunity.code,
+                name: quote.opportunity.name,
+                rut: quote.opportunity.rut,
+                email: quote.opportunity.email,
+                phone: quote.opportunity.phone,
+                company: quote.opportunity.company,
+                comuna: quote.opportunity.comuna,
+            },
+            items: quote.items.map((it) => ({
+                id: it.id,
+                description: it.description,
+                quantity: it.quantity,
+                unitPrice: Number(it.unitPrice),
+                subtotal: Number(it.subtotal),
+            })),
+            executiveName: quote.createdBy?.name ?? user.name,
+        }),
+    );
+
+    const emailResult = await sendQuotePdfEmail({
+        recipientEmail: recipient,
+        quoteCode: quote.code,
+        clientName: quote.opportunity.name,
+        totalAmount: Number(quote.total),
+        itemsSummary: quote.items.map((it) => ({
+            description: it.description,
+            quantity: it.quantity,
+            subtotal: Number(it.subtotal),
+        })),
+        customMessage: options?.customMessage,
+        pdfBuffer: buffer,
+    });
+
+    if (!emailResult.ok) {
+        return { error: emailResult.error || 'No se pudo enviar el correo.' };
+    }
+
+    if (quote.status === 'BORRADOR') {
+        await prisma.quote.update({
+            where: { id: quoteId },
+            data: { status: 'ENVIADA' },
+        });
+    }
+
+    await prisma.leadActivity.create({
+        data: {
+            leadId: quote.opportunityId,
+            userId: user.id,
+            authorName: user.name,
+            type: 'NOTA',
+            text: `Cotización ${quote.code} enviada con PDF adjunto al correo ${recipient} por ${user.name}.`,
+        },
+    });
+
+    await audit(user, 'COTIZACION_ENVIADA_EMAIL', 'cotizacion', quote.code, `a: ${recipient}`);
+
+    revalidatePath('/cotizaciones');
+    revalidatePath(`/cotizaciones/${quoteId}`);
+    revalidatePath(`/leads/${quote.opportunityId}`);
+
+    return { success: `Cotización ${quote.code} enviada con éxito a ${recipient}.` };
 }
 
 /**
  * Marca una cotización como aceptada: las demás no-terminales de la misma
- * oportunidad quedan REEMPLAZADAS, y la oportunidad pasa a CERRADO (Ganada)
- * — regla explícita del usuario: "la oportunidad debe marcarse como ganada
- * cuando el cliente acepte y confirme la compra".
+ * oportunidad quedan REEMPLAZADAS, y la oportunidad pasa a CERRADO (Ganada).
  */
 export async function markQuoteAccepted(quoteId: number): Promise<QuoteFormState> {
     const user = await requireUser();
@@ -126,6 +227,9 @@ export async function markQuoteAccepted(quoteId: number): Promise<QuoteFormState
 
     await changeLeadStatus(quote.opportunityId, 'CERRADO');
     await audit(user, 'COTIZACION_ACEPTADA', 'cotizacion', quote.code);
+
+    revalidatePath('/cotizaciones');
+    revalidatePath(`/cotizaciones/${quoteId}`);
     revalidatePath(`/leads/${quote.opportunityId}`);
     return { success: `Cotización ${quote.code} marcada como aceptada. La oportunidad pasó a Cerrado.` };
 }
@@ -137,7 +241,46 @@ export async function markQuoteRejected(quoteId: number): Promise<QuoteFormState
     if (!quote) return { error: 'La cotización no existe.' };
 
     await prisma.quote.update({ where: { id: quoteId }, data: { status: 'RECHAZADA' } });
+
+    await prisma.leadActivity.create({
+        data: {
+            leadId: quote.opportunityId,
+            userId: user.id,
+            authorName: user.name,
+            type: 'NOTA',
+            text: `Cotización ${quote.code} marcada como rechazada por ${user.name}.`,
+        },
+    });
+
     await audit(user, 'COTIZACION_RECHAZADA', 'cotizacion', quote.code);
+
+    revalidatePath('/cotizaciones');
+    revalidatePath(`/cotizaciones/${quoteId}`);
     revalidatePath(`/leads/${quote.opportunityId}`);
     return { success: `Cotización ${quote.code} marcada como rechazada.` };
+}
+
+export async function deleteQuote(quoteId: number): Promise<QuoteFormState> {
+    const user = await requireUser();
+
+    const quote = await prisma.quote.findUnique({ where: { id: quoteId } });
+    if (!quote) return { error: 'La cotización no existe.' };
+
+    await prisma.quote.delete({ where: { id: quoteId } });
+
+    await prisma.leadActivity.create({
+        data: {
+            leadId: quote.opportunityId,
+            userId: user.id,
+            authorName: user.name,
+            type: 'NOTA',
+            text: `Cotización ${quote.code} eliminada por ${user.name}.`,
+        },
+    });
+
+    await audit(user, 'COTIZACION_ELIMINADA', 'cotizacion', quote.code);
+
+    revalidatePath('/cotizaciones');
+    revalidatePath(`/leads/${quote.opportunityId}`);
+    return { success: `Cotización ${quote.code} eliminada.` };
 }

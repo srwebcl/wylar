@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { KanbanSquare, ListChecks, Users, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal, ScrollText, Settings, FileBadge, Contact, Package, Tags, X } from 'lucide-react';
+import { KanbanSquare, ListChecks, Users, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal, ScrollText, Settings, FileBadge, Contact, Package, Tags, X, FileSpreadsheet } from 'lucide-react';
 import clsx from 'clsx';
 import { Logo } from '@/components/Logo';
 import type { SafeUser as User } from '@/lib/safeUser';
@@ -12,6 +12,7 @@ const CRM_NAV_ITEMS = [
     { href: '/', label: 'Tablero Oportunidades', icon: KanbanSquare, match: (p: string) => p === '/', adminOnly: false },
     { href: '/leads', label: 'Oportunidades', icon: ListChecks, match: (p: string) => p.startsWith('/leads'), adminOnly: false },
     { href: '/clientes', label: 'Clientes', icon: Contact, match: (p: string) => p.startsWith('/clientes'), adminOnly: false },
+    { href: '/cotizaciones', label: 'Cotizaciones', icon: FileSpreadsheet, match: (p: string) => p.startsWith('/cotizaciones'), adminOnly: false },
     {
         href: '/productos',
         label: 'Productos',

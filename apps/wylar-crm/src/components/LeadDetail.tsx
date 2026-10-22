@@ -284,7 +284,13 @@ export function LeadDetail({
                         </div>
                     </div>
 
-                    <QuotesPanel opportunityId={lead.id} quotes={lead.quotes} products={products} />
+                    <QuotesPanel
+                        opportunityId={lead.id}
+                        quotes={lead.quotes}
+                        products={products}
+                        leadName={lead.name}
+                        leadEmail={lead.email}
+                    />
                 </div>
 
                 <div className="lg:col-span-2 glass-card flex flex-col h-[520px] sm:h-[650px] lg:h-[750px] overflow-hidden">

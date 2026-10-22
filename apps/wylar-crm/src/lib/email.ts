@@ -135,3 +135,96 @@ export async function sendLeadConfirmationEmail(lead: Lead) {
         console.error('[email] no se pudo enviar la confirmación al cliente:', error);
     }
 }
+
+/** Envío de cotización con PDF adjunto al correo del cliente */
+export async function sendQuotePdfEmail(params: {
+    recipientEmail: string;
+    quoteCode: string;
+    clientName: string;
+    totalAmount: number;
+    itemsSummary: Array<{ description: string; quantity: number; subtotal: number }>;
+    customMessage?: string | null;
+    pdfBuffer: Buffer | Uint8Array;
+}): Promise<{ ok: boolean; error?: string }> {
+    const resend = getResend();
+    if (!resend) {
+        return { ok: false, error: 'Servicio de correo no configurado (falta RESEND_API_KEY).' };
+    }
+
+    const itemsRows = params.itemsSummary
+        .map(
+            (it) =>
+                `<tr>
+                    <td style="padding:8px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#1e293b;">${escapeHtml(it.description)}</td>
+                    <td style="padding:8px;border-bottom:1px solid #e2e8f0;font-size:13px;text-align:center;color:#64748b;">${it.quantity}</td>
+                    <td style="padding:8px;border-bottom:1px solid #e2e8f0;font-size:13px;text-align:right;font-weight:600;color:#0B1E40;">$${Math.round(it.subtotal).toLocaleString('es-CL')}</td>
+                </tr>`,
+        )
+        .join('');
+
+    const customMsgHtml = params.customMessage
+        ? `<div style="margin:20px 0;padding:14px;background-color:#f8fafc;border-left:4px solid #0B1E40;border-radius:4px;color:#334155;font-size:14px;line-height:1.5;">${escapeHtml(params.customMessage)}</div>`
+        : '';
+
+    const html = emailShell(`
+        <h1 style="margin:0 0 16px;font-size:20px;color:#0B1E40;">Cotización N° ${escapeHtml(params.quoteCode)}</h1>
+        <p style="margin:0 0 14px;font-size:15px;color:#334155;">Estimado(a) <strong>${escapeHtml(params.clientName)}</strong>,</p>
+        <p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6;">
+            Junto con saludar cordialmente, le hacemos llegar adjunta la propuesta económica oficial correspondiente a los servicios solicitados en Wylar, Centro Acreditado por ChileValora.
+        </p>
+
+        ${customMsgHtml}
+
+        <div style="margin:20px 0;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13px;">
+                <thead>
+                    <tr style="background-color:#0B1E40;color:#ffffff;">
+                        <th style="padding:8px 10px;text-align:left;font-size:12px;text-transform:uppercase;">Descripción</th>
+                        <th style="padding:8px 10px;text-align:center;font-size:12px;text-transform:uppercase;">Cant.</th>
+                        <th style="padding:8px 10px;text-align:right;font-size:12px;text-transform:uppercase;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsRows}
+                    <tr style="background-color:#f8fafc;">
+                        <td colspan="2" style="padding:10px;font-weight:700;color:#0B1E40;text-align:right;">TOTAL PROPUESTA:</td>
+                        <td style="padding:10px;font-weight:800;color:#1C64B4;text-align:right;font-size:15px;">$${Math.round(params.totalAmount).toLocaleString('es-CL')} CLP</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p style="margin:16px 0;font-size:14px;color:#475569;line-height:1.6;">
+            En el archivo PDF adjunto a este correo encontrará el desglose completo, vigencia de la oferta y las condiciones comerciales.
+        </p>
+        <p style="margin:24px 0 0;color:#64748b;font-size:13px;">
+            Para coordinar o resolver cualquier consulta, puede responder directamente a este correo o comunicarse con nosotros al <a href="tel:+56984534364" style="color:#2563eb;font-weight:600;">+56 9 8453 4364</a>.
+        </p>
+    `);
+
+    try {
+        const { error } = await resend.emails.send({
+            from: FROM,
+            to: params.recipientEmail,
+            replyTo: REPLY_TO,
+            subject: `Cotización ${params.quoteCode} - Wylar Capacitación y Certificación`,
+            html,
+            attachments: [
+                {
+                    filename: `Cotizacion-${params.quoteCode}.pdf`,
+                    content: Buffer.from(params.pdfBuffer),
+                },
+            ],
+        });
+
+        if (error) {
+            console.error('[email] Error enviando cotización vía Resend:', error);
+            return { ok: false, error: error.message };
+        }
+        return { ok: true };
+    } catch (err) {
+        console.error('[email] Excepción enviando cotización:', err);
+        return { ok: false, error: err instanceof Error ? err.message : 'Error inesperado al enviar el correo.' };
+    }
+}
+
