@@ -231,12 +231,21 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
                                 <span className="font-bold text-slate-700 block uppercase tracking-wide">
                                     Condiciones Comerciales y Pago
                                 </span>
-                                <ul className="text-slate-600 space-y-1 list-disc list-inside">
-                                    <li>Validez de la oferta: 15 días corridos.</li>
-                                    <li>Forma de pago: Transferencia electrónica o Factura 30 días contra OC.</li>
-                                    <li>Incluye proceso de evaluación, materiales de prueba y certificado ChileValora.</li>
-                                    {quote.notes && <li>Observaciones: {quote.notes}</li>}
-                                </ul>
+                                {quote.notes && quote.notes.trim() ? (
+                                    <ul className="text-slate-600 space-y-1.5 list-disc list-inside">
+                                        {quote.notes
+                                            .split('\n')
+                                            .map((line) => line.trim())
+                                            .filter(Boolean)
+                                            .map((cond, idx) => (
+                                                <li key={idx} className="leading-relaxed">
+                                                    {cond}
+                                                </li>
+                                            ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-slate-400 italic">No se especificaron condiciones particulares para esta propuesta.</p>
+                                )}
                             </div>
 
                             <div className="w-full sm:w-64 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">

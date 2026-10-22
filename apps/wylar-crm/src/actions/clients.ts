@@ -3,18 +3,194 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireUser, requireAdmin } from '@/lib/auth';
-import { clientUpdateSchema, clientContactSchema } from '@/lib/validation';
+import { clientUpdateSchema, clientContactSchema, clientCreateSchema } from '@/lib/validation';
 import { normalizeRut } from '@/lib/rut';
 import { audit } from '@/lib/audit';
 
 export interface ClientFormState {
     error?: string;
     success?: string;
+    clientId?: number;
+    duplicate?: boolean;
+    duplicateReason?: 'rut' | 'email' | 'phone';
+    existingClient?: {
+        id: number;
+        name: string;
+        rut: string | null;
+        email: string;
+        phone: string;
+        company: string | null;
+        type: string;
+    } | null;
 }
 
-/** Edita la ficha de un cliente — cualquier usuario autenticado, igual que
- * editar una oportunidad hoy. No crea uno nuevo (eso lo hace
- * findOrCreateClient al dar de alta una oportunidad). */
+/** Verifica si ya existe un cliente con el mismo RUT, email o teléfono */
+export async function checkClientDuplicate(params: {
+    rut?: string;
+    email?: string;
+    phone?: string;
+}): Promise<{
+    hasDuplicate: boolean;
+    duplicateReason?: 'rut' | 'email' | 'phone';
+    client?: {
+        id: number;
+        name: string;
+        rut: string | null;
+        email: string;
+        phone: string;
+        company: string | null;
+        type: string;
+    };
+}> {
+    await requireUser();
+    const rutNorm = params.rut ? normalizeRut(params.rut) : '';
+    const emailNorm = params.email?.trim().toLowerCase();
+    const phoneNorm = params.phone?.trim();
+
+    if (rutNorm) {
+        const found = await prisma.client.findFirst({
+            where: { rutNorm },
+            select: { id: true, name: true, rut: true, email: true, phone: true, company: true, type: true },
+        });
+        if (found) {
+            return { hasDuplicate: true, duplicateReason: 'rut', client: found };
+        }
+    }
+
+    if (emailNorm) {
+        const found = await prisma.client.findFirst({
+            where: { email: { equals: emailNorm, mode: 'insensitive' } },
+            select: { id: true, name: true, rut: true, email: true, phone: true, company: true, type: true },
+        });
+        if (found) {
+            return { hasDuplicate: true, duplicateReason: 'email', client: found };
+        }
+    }
+
+    if (phoneNorm) {
+        const found = await prisma.client.findFirst({
+            where: { phone: phoneNorm },
+            select: { id: true, name: true, rut: true, email: true, phone: true, company: true, type: true },
+        });
+        if (found) {
+            return { hasDuplicate: true, duplicateReason: 'phone', client: found };
+        }
+    }
+
+    return { hasDuplicate: false };
+}
+
+/** Crea un nuevo cliente de forma manual, alertando si hay duplicados a menos que se fuerce */
+export async function createClientManual(_prevState: ClientFormState, formData: FormData): Promise<ClientFormState> {
+    const user = await requireUser();
+    const force = formData.get('force') === 'true';
+
+    const parsed = clientCreateSchema.safeParse({
+        type: formData.get('type'),
+        name: formData.get('name'),
+        rut: formData.get('rut'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        company: formData.get('company') || null,
+    });
+    if (!parsed.success) {
+        return { error: parsed.error.issues[0]?.message ?? 'Revisa los datos ingresados.' };
+    }
+    const data = parsed.data;
+    const rutNorm = normalizeRut(data.rut);
+
+    if (!force) {
+        const dupCheck = await checkClientDuplicate({ rut: data.rut, email: data.email, phone: data.phone });
+        if (dupCheck.hasDuplicate) {
+            const reasonLabel = dupCheck.duplicateReason === 'rut' ? 'RUT' : dupCheck.duplicateReason === 'email' ? 'correo electrónico' : 'teléfono';
+            return {
+                duplicate: true,
+                duplicateReason: dupCheck.duplicateReason,
+                existingClient: dupCheck.client,
+                error: `Ya existe un cliente con este ${reasonLabel}: ${dupCheck.client?.name}.`,
+            };
+        }
+    }
+
+    const newClient = await prisma.client.create({
+        data: {
+            type: data.type,
+            name: data.name,
+            rut: data.rut,
+            rutNorm,
+            email: data.email,
+            phone: data.phone,
+            company: data.company || null,
+        },
+    });
+
+    await audit(user, 'CLIENTE_CREADO', 'cliente', String(newClient.id), newClient.name);
+    revalidatePath('/clientes');
+    return { success: 'Cliente creado exitosamente.', clientId: newClient.id };
+}
+
+/** Aplica resolución de discrepancia de contacto (actualizar principal o guardar secundario) */
+export async function applyClientContactDiscrepancy(
+    clientId: number,
+    data: {
+        action: 'UPDATE_PRIMARY' | 'ADD_SECONDARY';
+        newEmail?: string;
+        newPhone?: string;
+        leadCode?: string;
+    },
+): Promise<{ ok: boolean; error?: string; success?: string }> {
+    const user = await requireUser();
+    const client = await prisma.client.findUnique({ where: { id: clientId } });
+    if (!client) return { ok: false, error: 'Cliente no encontrado.' };
+
+    if (data.action === 'UPDATE_PRIMARY') {
+        const updateData: { email?: string; phone?: string } = {};
+        if (data.newEmail) updateData.email = data.newEmail.trim().toLowerCase();
+        if (data.newPhone) updateData.phone = data.newPhone.trim();
+
+        await prisma.client.update({
+            where: { id: clientId },
+            data: updateData,
+        });
+
+        await audit(
+            user,
+            'CLIENTE_ACTUALIZADO_DESDE_OPORTUNIDAD',
+            'cliente',
+            String(clientId),
+            `Actualizados datos principales con info de ${data.leadCode ?? 'oportunidad'}`,
+        );
+        revalidatePath(`/clientes/${clientId}`);
+        revalidatePath('/clientes');
+        return { ok: true, success: 'Datos principales del cliente actualizados.' };
+    }
+
+    if (data.action === 'ADD_SECONDARY') {
+        await prisma.clientContact.create({
+            data: {
+                clientId,
+                name: `Contacto ${data.leadCode ?? 'adicional'}`,
+                role: 'Contacto ingresado en oportunidad',
+                email: data.newEmail?.trim().toLowerCase() || null,
+                phone: data.newPhone?.trim() || null,
+            },
+        });
+
+        await audit(
+            user,
+            'CONTACTO_SECUNDARIO_DESDE_OPORTUNIDAD',
+            'cliente',
+            String(clientId),
+            `Agregado como contacto secundario desde ${data.leadCode ?? 'oportunidad'}`,
+        );
+        revalidatePath(`/clientes/${clientId}`);
+        return { ok: true, success: 'Contacto secundario agregado con éxito.' };
+    }
+
+    return { ok: false, error: 'Acción no válida.' };
+}
+
+/** Edita la ficha de un cliente — cualquier usuario autenticado */
 export async function updateClient(clientId: number, _prevState: ClientFormState, formData: FormData): Promise<ClientFormState> {
     const user = await requireUser();
 

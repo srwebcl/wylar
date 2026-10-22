@@ -8,9 +8,85 @@ import { activityEntrySchema, assignSchema, manualLeadSchema, statusChangeSchema
 import { SYSTEM_ACTIVITY_TYPES, statusLabel } from '@/lib/constants';
 import { audit } from '@/lib/audit';
 import { findDuplicateOpenLead, findSimilarOpenOpportunity } from '@/lib/leadDuplicates';
-import { normalizeRut } from '@/lib/rut';
+import { normalizeRut, formatRut } from '@/lib/rut';
 import { formatChileanMobile } from '@/lib/phone';
 import { findOrCreateClient } from '@/lib/clients';
+
+export async function updateOpportunityFromQuote(
+    leadId: number,
+    data: {
+        name: string;
+        email: string;
+        phone: string;
+        company?: string | null;
+        comuna?: string | null;
+        rut?: string | null;
+    },
+): Promise<{
+    ok: boolean;
+    error?: string;
+    lead?: {
+        id: number;
+        code: string;
+        name: string;
+        rut: string | null;
+        email: string;
+        phone: string;
+        company: string | null;
+        comuna: string | null;
+    };
+}> {
+    const currentUser = await requireUser();
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+    if (!lead) return { ok: false, error: 'Oportunidad no encontrada.' };
+
+    const name = data.name.trim().toUpperCase();
+    const email = data.email.trim().toLowerCase();
+    const formattedPhone = formatChileanMobile(data.phone) ?? data.phone.trim();
+    const rutNorm = data.rut ? normalizeRut(data.rut) : null;
+    const company = data.company?.trim().toUpperCase() || null;
+    const comuna = data.comuna?.trim() || null;
+
+    const updated = await prisma.lead.update({
+        where: { id: leadId },
+        data: {
+            name,
+            email,
+            phone: formattedPhone,
+            rut: data.rut ? formatRut(data.rut) : lead.rut,
+            rutNorm: rutNorm ?? lead.rutNorm,
+            company,
+            comuna,
+        },
+        select: {
+            id: true,
+            code: true,
+            name: true,
+            rut: true,
+            email: true,
+            phone: true,
+            company: true,
+            comuna: true,
+        },
+    });
+
+    await prisma.leadActivity.create({
+        data: {
+            leadId,
+            userId: currentUser.id,
+            authorName: currentUser.name,
+            type: 'NOTA',
+            text: `Datos corregidos desde emisión de cotización por ${currentUser.name}: Correo=${email}, Teléfono=${formattedPhone}.`,
+        },
+    });
+
+    await audit(currentUser, 'LEAD_EDITADO_DESDE_COTIZACION', 'lead', lead.code, `${name} (${email})`);
+
+    revalidatePath(`/leads/${leadId}`);
+    revalidatePath('/leads');
+
+    return { ok: true, lead: updated };
+}
 
 export interface LeadFormState {
     error?: string;

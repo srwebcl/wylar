@@ -88,6 +88,15 @@ export const manualLeadSchema = z.object({
 
 // --- Módulo de Clientes ---
 
+export const clientCreateSchema = z.object({
+    type: z.enum(LEAD_TYPE_VALUES),
+    name: nameField,
+    rut: rutField,
+    email: emailField,
+    phone: chileanPhoneField,
+    company: z.string().trim().max(200).transform((val) => (val ? val.toUpperCase() : val)).optional().nullable(),
+});
+
 export const clientUpdateSchema = z.object({
     name: nameField,
     rut: rutField,

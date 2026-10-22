@@ -505,12 +505,21 @@ export function QuotePdf({
                 <View style={styles.bottomSection}>
                     <View style={styles.conditionsBox}>
                         <Text style={styles.conditionTitle}>Condiciones Comerciales y Pago</Text>
-                        <Text style={styles.conditionText}>
-                            • Validez de la oferta: {validityDays} días a partir de la fecha de emisión.{'\n'}
-                            • Forma de pago: Transferencia electrónica / Factura a 30 días con orden de compra.{'\n'}
-                            • Incluye proceso completo de evaluación, materiales de prueba y emisión de certificado oficial ChileValora.{'\n'}
-                            {notes ? `• Observaciones: ${notes}` : ''}
-                        </Text>
+                        {notes && notes.trim() ? (
+                            <View style={{ marginBottom: 4 }}>
+                                {notes
+                                    .split('\n')
+                                    .map((line) => line.trim())
+                                    .filter(Boolean)
+                                    .map((cond, idx) => (
+                                        <Text key={idx} style={styles.conditionText}>
+                                            • {cond}
+                                        </Text>
+                                    ))}
+                            </View>
+                        ) : (
+                            <Text style={styles.conditionText}>Sin condiciones comerciales especiales especificadas.</Text>
+                        )}
 
                         <View style={styles.bankBlock}>
                             <Text style={styles.conditionTitle}>Datos de Transferencia Bancaria</Text>
