@@ -63,7 +63,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
             </div>
 
             <LeadsSearchBar users={users} categories={categories} products={products} />
-            <LeadsTable leads={leads} isAdmin={currentUser.role === 'ADMIN'} dncMap={dncMap} />
+            <LeadsTable leads={leads} isAdmin={currentUser.role === 'ADMIN'} dncMap={dncMap} users={users} />
 
             {totalPages > 1 && (
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 text-sm text-slate-600">

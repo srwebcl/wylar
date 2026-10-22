@@ -95,3 +95,64 @@ export async function toggleProductActive(productId: number): Promise<ProductFor
     revalidatePath('/productos');
     return { success: product.active ? 'Producto desactivado.' : 'Producto activado.' };
 }
+
+/** Elimina un servicio del catálogo si no tiene oportunidades ni cotizaciones asociadas. */
+export async function deleteProduct(productId: number): Promise<ProductFormState> {
+    const admin = await requireAdmin();
+    const product = await prisma.product.findUnique({
+        where: { id: productId },
+        include: { _count: { select: { opportunities: true, quoteItems: true } } },
+    });
+    if (!product) return { error: 'El servicio no existe.' };
+
+    const totalUsage = product._count.opportunities + product._count.quoteItems;
+    if (totalUsage > 0) {
+        return {
+            error: `No se puede eliminar "${product.name}" porque tiene ${totalUsage} registro(s) históricos asociados (oportunidades o cotizaciones). Te sugerimos desactivarlo.`,
+        };
+    }
+
+    await prisma.product.delete({ where: { id: productId } });
+    await audit(admin, 'PRODUCTO_ELIMINADO', 'producto', product.name);
+    revalidatePath('/productos');
+    return { success: `Servicio "${product.name}" eliminado del catálogo.` };
+}
+
+/** Eliminación masiva de servicios seleccionados. */
+export async function bulkDeleteProducts(productIds: number[]): Promise<ProductFormState> {
+    const admin = await requireAdmin();
+    if (!productIds.length) return { error: 'No se seleccionaron servicios.' };
+
+    const products = await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        include: { _count: { select: { opportunities: true, quoteItems: true } } },
+    });
+
+    const withUsage = products.filter((p) => p._count.opportunities + p._count.quoteItems > 0);
+    if (withUsage.length > 0) {
+        return {
+            error: `No se pueden eliminar ${withUsage.length} servicio(s) porque tienen ventas o cotizaciones asociadas (${withUsage.map((p) => p.name).join(', ')}). Desactívalos en su lugar.`,
+        };
+    }
+
+    await prisma.product.deleteMany({ where: { id: { in: productIds } } });
+    await audit(admin, 'PRODUCTOS_ELIMINADOS_MASIVO', 'producto', `${products.length} servicios`, products.map((p) => p.name).join(', '));
+    revalidatePath('/productos');
+    return { success: `${products.length} servicios eliminados del catálogo.` };
+}
+
+/** Activación o desactivación masiva de servicios seleccionados. */
+export async function bulkToggleProducts(productIds: number[], active: boolean): Promise<ProductFormState> {
+    const admin = await requireAdmin();
+    if (!productIds.length) return { error: 'No se seleccionaron servicios.' };
+
+    await prisma.product.updateMany({
+        where: { id: { in: productIds } },
+        data: { active },
+    });
+
+    const action = active ? 'PRODUCTOS_ACTIVADOS_MASIVO' : 'PRODUCTOS_DESACTIVADOS_MASIVO';
+    await audit(admin, action, 'producto', `${productIds.length} servicios`, `Estado: ${active ? 'Activo' : 'Inactivo'}`);
+    revalidatePath('/productos');
+    return { success: `${productIds.length} servicios ${active ? 'activados' : 'desactivados'} exitosamente.` };
+}

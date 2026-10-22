@@ -7,7 +7,7 @@ import { ClientsTable } from '@/components/ClientsTable';
 const PAGE_SIZE = 50;
 
 export default async function ClientesPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-    await requireUser();
+    const currentUser = await requireUser();
     const params = await searchParams;
     const where = buildClientsWhere(params);
 
@@ -29,7 +29,7 @@ export default async function ClientesPage({ searchParams }: { searchParams: Pro
             </div>
 
             <ClientsSearchBar />
-            <ClientsTable clients={clients} />
+            <ClientsTable clients={clients} isAdmin={currentUser.role === 'ADMIN'} />
         </div>
     );
 }

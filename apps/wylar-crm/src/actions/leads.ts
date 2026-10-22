@@ -257,6 +257,101 @@ export async function deleteLead(leadId: number): Promise<LeadFormState> {
     return { success: `Oportunidad ${lead.code} eliminada.` };
 }
 
+/** Eliminación masiva de oportunidades seleccionadas (solo administradores). */
+export async function bulkDeleteLeads(leadIds: number[]): Promise<LeadFormState> {
+    const admin = await requireAdmin();
+    if (!leadIds.length) return { error: 'No se seleccionaron oportunidades.' };
+
+    const leads = await prisma.lead.findMany({
+        where: { id: { in: leadIds } },
+        select: { id: true, code: true, name: true },
+    });
+
+    await prisma.lead.deleteMany({ where: { id: { in: leadIds } } });
+    await audit(admin, 'LEADS_ELIMINADOS_MASIVO', 'lead', `${leads.length} oportunidades`, leads.map((l) => l.code).join(', '));
+
+    revalidatePath('/leads');
+    revalidatePath('/');
+    return { success: `${leads.length} oportunidades eliminadas exitosamente.` };
+}
+
+/** Actualización masiva de estado para las oportunidades seleccionadas. */
+export async function bulkUpdateLeadStatus(leadIds: number[], status: string, lostReason?: string | null): Promise<LeadFormState> {
+    const user = await requireUser();
+    if (!leadIds.length) return { error: 'No se seleccionaron oportunidades.' };
+    if (!statusChangeSchema.safeParse({ status }).success) return { error: 'Estado inválido.' };
+
+    const leads = await prisma.lead.findMany({
+        where: { id: { in: leadIds } },
+        select: { id: true, code: true, status: true },
+    });
+
+    await prisma.lead.updateMany({
+        where: { id: { in: leadIds } },
+        data: {
+            status,
+            lostReason: status === 'DESISTIDO' ? lostReason || 'Desistido en acción masiva' : null,
+            closedAt: status === 'CERRADO' || status === 'DESISTIDO' ? new Date() : null,
+        },
+    });
+
+    const label = statusLabel(status);
+    await Promise.all(
+        leads.map((l) =>
+            prisma.leadActivity.create({
+                data: {
+                    leadId: l.id,
+                    userId: user.id,
+                    authorName: user.name,
+                    type: SYSTEM_ACTIVITY_TYPES.CAMBIO_ESTADO,
+                    text: `Estado actualizado a "${label}" en acción masiva por ${user.name}.`,
+                },
+            }),
+        ),
+    );
+
+    await audit(user, 'LEADS_ESTADO_MASIVO', 'lead', `${leads.length} oportunidades`, `Nuevo estado: ${label}`);
+
+    revalidatePath('/leads');
+    revalidatePath('/');
+    return { success: `Estado actualizado a "${label}" en ${leads.length} oportunidades.` };
+}
+
+/** Asignación masiva de responsable para las oportunidades seleccionadas. */
+export async function bulkAssignLeads(leadIds: number[], assignedToId: number | null): Promise<LeadFormState> {
+    const user = await requireUser();
+    if (!leadIds.length) return { error: 'No se seleccionaron oportunidades.' };
+
+    const assignee = assignedToId ? await prisma.user.findUnique({ where: { id: assignedToId } }) : null;
+
+    await prisma.lead.updateMany({
+        where: { id: { in: leadIds } },
+        data: { assignedToId: assignee?.id ?? null },
+    });
+
+    const assigneeText = assignee ? `Asignado a: ${assignee.name}.` : 'Quedó sin responsable asignado.';
+
+    await Promise.all(
+        leadIds.map((id) =>
+            prisma.leadActivity.create({
+                data: {
+                    leadId: id,
+                    userId: user.id,
+                    authorName: user.name,
+                    type: SYSTEM_ACTIVITY_TYPES.ASIGNACION,
+                    text: `${assigneeText} (Acción masiva por ${user.name})`,
+                },
+            }),
+        ),
+    );
+
+    await audit(user, 'LEADS_ASIGNACION_MASIVA', 'lead', `${leadIds.length} oportunidades`, assigneeText);
+
+    revalidatePath('/leads');
+    revalidatePath('/');
+    return { success: `${leadIds.length} oportunidades reasignadas a ${assignee?.name ?? 'Sin asignar'}.` };
+}
+
 /** Auditoría de Tiempos de Respuesta: registra la fecha de la primera atención, una sola vez. */
 async function markFirstAttendedIfNeeded(leadId: number) {
     const lead = await prisma.lead.findUniqueOrThrow({ where: { id: leadId } });

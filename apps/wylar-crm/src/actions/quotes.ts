@@ -284,3 +284,44 @@ export async function deleteQuote(quoteId: number): Promise<QuoteFormState> {
     revalidatePath(`/leads/${quote.opportunityId}`);
     return { success: `Cotización ${quote.code} eliminada.` };
 }
+
+/** Eliminación masiva de cotizaciones seleccionadas. */
+export async function bulkDeleteQuotes(quoteIds: number[]): Promise<QuoteFormState> {
+    const user = await requireUser();
+    if (!quoteIds.length) return { error: 'No se seleccionaron cotizaciones.' };
+
+    const quotes = await prisma.quote.findMany({
+        where: { id: { in: quoteIds } },
+        select: { id: true, code: true, opportunityId: true },
+    });
+
+    await prisma.quote.deleteMany({ where: { id: { in: quoteIds } } });
+    await audit(user, 'COTIZACIONES_ELIMINADAS_MASIVO', 'cotizacion', `${quotes.length} cotizaciones`, quotes.map((q) => q.code).join(', '));
+
+    revalidatePath('/cotizaciones');
+    return { success: `${quotes.length} cotizaciones eliminadas exitosamente.` };
+}
+
+/** Cambio de estado masivo de cotizaciones seleccionadas. */
+export async function bulkUpdateQuoteStatus(quoteIds: number[], status: string): Promise<QuoteFormState> {
+    const user = await requireUser();
+    if (!quoteIds.length) return { error: 'No se seleccionaron cotizaciones.' };
+
+    const validStatuses = ['BORRADOR', 'ENVIADA', 'ACEPTADA', 'RECHAZADA'];
+    if (!validStatuses.includes(status)) return { error: 'Estado de cotización inválido.' };
+
+    const quotes = await prisma.quote.findMany({
+        where: { id: { in: quoteIds } },
+        select: { id: true, code: true, opportunityId: true },
+    });
+
+    await prisma.quote.updateMany({
+        where: { id: { in: quoteIds } },
+        data: { status },
+    });
+
+    await audit(user, 'COTIZACIONES_ESTADO_MASIVO', 'cotizacion', `${quotes.length} cotizaciones`, `Nuevo estado: ${status}`);
+
+    revalidatePath('/cotizaciones');
+    return { success: `Estado actualizado a "${status}" en ${quotes.length} cotizaciones.` };
+}

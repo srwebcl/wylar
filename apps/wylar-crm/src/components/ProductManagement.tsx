@@ -2,8 +2,29 @@
 
 import { useState, useTransition, useMemo } from 'react';
 import Link from 'next/link';
-import { Pencil, Plus, Power, Settings, X, Globe, ExternalLink, Search } from 'lucide-react';
-import { createProduct, updateProduct, toggleProductActive } from '@/actions/products';
+import {
+    Pencil,
+    Plus,
+    Power,
+    Settings,
+    X,
+    Globe,
+    ExternalLink,
+    Search,
+    Trash2,
+    CheckSquare,
+    Square,
+    Loader2,
+    CheckCircle2,
+} from 'lucide-react';
+import {
+    createProduct,
+    updateProduct,
+    toggleProductActive,
+    deleteProduct,
+    bulkDeleteProducts,
+    bulkToggleProducts,
+} from '@/actions/products';
 import { attributeFieldsFor } from '@/lib/productSpec';
 
 interface CategoryRow {
@@ -54,10 +75,14 @@ export function ProductManagement({
     isAdmin: boolean;
 }) {
     const [isPending, startTransition] = useTransition();
+    const [pendingId, setPendingId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
+
+    // Multi-selección
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
     // Filtros y búsqueda
     const [search, setSearch] = useState('');
@@ -107,6 +132,22 @@ export function ProductManagement({
             return true;
         });
     }, [products, search, selectedCategory, webFilter]);
+
+    const filteredIds = useMemo(() => filteredProducts.map((p) => p.id), [filteredProducts]);
+    const isAllSelected = filteredProducts.length > 0 && selectedIds.length === filteredProducts.length;
+    const isSomeSelected = selectedIds.length > 0 && selectedIds.length < filteredProducts.length;
+
+    function toggleSelectAll() {
+        if (isAllSelected) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(filteredIds);
+        }
+    }
+
+    function toggleSelect(id: number) {
+        setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    }
 
     function resetForm() {
         setName('');
@@ -174,8 +215,51 @@ export function ProductManagement({
         });
     }
 
+    function handleDelete(id: number, serviceName: string) {
+        if (!confirm(`¿Eliminar "${serviceName}" del catálogo? Esta acción no se puede deshacer.`)) return;
+        setError(null);
+        setSuccess(null);
+        setPendingId(id);
+        startTransition(async () => {
+            const result = await deleteProduct(id);
+            if (result.error) setError(result.error);
+            else {
+                setSuccess(result.success ?? 'Servicio eliminado.');
+                setSelectedIds((prev) => prev.filter((x) => x !== id));
+            }
+            setPendingId(null);
+        });
+    }
+
+    function handleBulkDelete() {
+        if (!confirm(`¿Eliminar los ${selectedIds.length} servicios seleccionados del catálogo? Esta acción es irreversible.`)) return;
+        setError(null);
+        setSuccess(null);
+        startTransition(async () => {
+            const result = await bulkDeleteProducts(selectedIds);
+            if (result.error) setError(result.error);
+            else {
+                setSuccess(result.success ?? 'Servicios eliminados exitosamente.');
+                setSelectedIds([]);
+            }
+        });
+    }
+
+    function handleBulkToggle(active: boolean) {
+        setError(null);
+        setSuccess(null);
+        startTransition(async () => {
+            const result = await bulkToggleProducts(selectedIds, active);
+            if (result.error) setError(result.error);
+            else {
+                setSuccess(result.success ?? 'Estado actualizado exitosamente.');
+                setSelectedIds([]);
+            }
+        });
+    }
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
             {/* Encabezado */}
             <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div>
@@ -246,6 +330,60 @@ export function ProductManagement({
                     <button onClick={() => setSuccess(null)} className="text-emerald-500 hover:text-emerald-700">
                         <X size={16} />
                     </button>
+                </div>
+            )}
+
+            {/* Barra flotante de acciones masivas */}
+            {selectedIds.length > 0 && (
+                <div className="sticky top-4 z-30 bg-[#0B1E40] text-white px-4 sm:px-5 py-3 rounded-2xl shadow-2xl flex items-center justify-between gap-3 flex-wrap border border-cyan-500/30 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center gap-3">
+                        <span className="bg-amber-500 text-[#0B1E40] font-black text-xs px-2.5 py-1 rounded-full shadow-sm">
+                            {selectedIds.length}
+                        </span>
+                        <span className="text-xs font-semibold text-slate-200">
+                            {selectedIds.length === 1 ? 'servicio seleccionado' : 'servicios seleccionados'}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <button
+                            type="button"
+                            onClick={() => handleBulkToggle(true)}
+                            disabled={isPending}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-200 hover:text-white text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                        >
+                            <CheckCircle2 size={14} /> Activar
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => handleBulkToggle(false)}
+                            disabled={isPending}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-500/20 hover:bg-slate-500 text-slate-200 hover:text-white text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                        >
+                            <Power size={14} /> Desactivar
+                        </button>
+
+                        {isAdmin && (
+                            <button
+                                type="button"
+                                onClick={handleBulkDelete}
+                                disabled={isPending}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                            >
+                                <Trash2 size={14} /> Eliminar
+                            </button>
+                        )}
+
+                        <button
+                            type="button"
+                            onClick={() => setSelectedIds([])}
+                            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors ml-1"
+                            title="Deseleccionar todos"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
                 </div>
             )}
 
@@ -439,65 +577,111 @@ export function ProductManagement({
             <div className="space-y-3">
                 {/* Vista móvil: tarjetas táctiles */}
                 <div className="block lg:hidden space-y-3">
-                    {filteredProducts.map((p) => (
-                        <div key={p.id} className={`glass-card bg-white p-4 space-y-3 border border-slate-200/80 rounded-xl ${p.active ? '' : 'opacity-65'}`}>
-                            <div className="flex items-start justify-between gap-2">
-                                <div className="space-y-0.5">
-                                    <p className="font-bold text-slate-900 text-sm">{p.name}</p>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
-                                            {p.categoryName}
-                                        </span>
-                                        <span className="text-xs font-extrabold text-[#0B1E40]">{money(p.price)}</span>
-                                    </div>
-                                </div>
-                                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 ${p.active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                                    {p.active ? 'Activo' : 'Inactivo'}
-                                </span>
-                            </div>
+                    <div className="flex items-center justify-between px-1 text-xs text-slate-500 font-semibold">
+                        <button
+                            type="button"
+                            onClick={toggleSelectAll}
+                            className="inline-flex items-center gap-2 hover:text-[#0B1E40] transition-colors"
+                        >
+                            {isAllSelected ? (
+                                <CheckSquare size={16} className="text-amber-500" />
+                            ) : (
+                                <Square size={16} className="text-slate-400" />
+                            )}
+                            <span>{isAllSelected ? 'Deseleccionar todos' : 'Seleccionar todos'}</span>
+                        </button>
+                        <span>{filteredProducts.length} servicios</span>
+                    </div>
 
-                            {/* Estado web */}
-                            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                                <span className="text-slate-500 font-medium">Presencia web:</span>
-                                {p.profileId != null ? (
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
-                                            <Globe size={11} /> wylar.cl
-                                        </span>
-                                        <Link
-                                            href={`/catalogo/${p.profileId}`}
-                                            className="text-[11px] font-bold text-amber-700 hover:underline inline-flex items-center gap-0.5"
+                    {filteredProducts.map((p) => {
+                        const isSelected = selectedIds.includes(p.id);
+
+                        return (
+                            <div
+                                key={p.id}
+                                className={`glass-card bg-white p-4 space-y-3 border rounded-xl transition-all ${
+                                    isSelected ? 'border-amber-400 ring-2 ring-amber-400/20 bg-amber-50/20' : 'border-slate-200/80'
+                                } ${p.active ? '' : 'opacity-65'}`}
+                            >
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="flex items-start gap-2.5 min-w-0">
+                                        <button
+                                            type="button"
+                                            onClick={() => toggleSelect(p.id)}
+                                            className="mt-0.5 text-slate-400 hover:text-amber-500 transition-colors"
                                         >
-                                            Editar web <ExternalLink size={10} />
-                                        </Link>
+                                            {isSelected ? (
+                                                <CheckSquare size={18} className="text-amber-500" />
+                                            ) : (
+                                                <Square size={18} className="text-slate-300" />
+                                            )}
+                                        </button>
+                                        <div className="space-y-0.5 min-w-0">
+                                            <p className="font-bold text-slate-900 text-sm truncate">{p.name}</p>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
+                                                    {p.categoryName}
+                                                </span>
+                                                <span className="text-xs font-extrabold text-[#0B1E40]">{money(p.price)}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                ) : (
-                                    <span className="text-[11px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md">
-                                        Solo CRM (Privado)
+                                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 ${p.active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                        {p.active ? 'Activo' : 'Inactivo'}
                                     </span>
+                                </div>
+
+                                {/* Estado web */}
+                                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                                    <span className="text-slate-500 font-medium">Presencia web:</span>
+                                    {p.profileId != null ? (
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
+                                                <Globe size={11} /> wylar.cl
+                                            </span>
+                                            <Link
+                                                href={`/catalogo/${p.profileId}`}
+                                                className="text-[11px] font-bold text-amber-700 hover:underline inline-flex items-center gap-0.5"
+                                            >
+                                                Editar web <ExternalLink size={10} />
+                                            </Link>
+                                        </div>
+                                    ) : (
+                                        <span className="text-[11px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md">
+                                            Solo CRM (Privado)
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Acciones */}
+                                {isAdmin && (
+                                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                                        <button
+                                            onClick={() => openEditForm(p)}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#0B1E40] bg-amber-100/60 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors"
+                                        >
+                                            <Pencil size={13} /> Editar
+                                        </button>
+                                        <button
+                                            onClick={() => handleToggle(p.id)}
+                                            disabled={isPending}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors disabled:opacity-50"
+                                        >
+                                            <Power size={13} /> {p.active ? 'Desactivar' : 'Activar'}
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(p.id, p.name)}
+                                            disabled={isPending && pendingId === p.id}
+                                            className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition-colors disabled:opacity-50"
+                                            title="Eliminar servicio"
+                                        >
+                                            {isPending && pendingId === p.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                                        </button>
+                                    </div>
                                 )}
                             </div>
-
-                            {/* Acciones */}
-                            {isAdmin && (
-                                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                                    <button
-                                        onClick={() => openEditForm(p)}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#0B1E40] bg-amber-100/60 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors"
-                                    >
-                                        <Pencil size={13} /> Editar
-                                    </button>
-                                    <button
-                                        onClick={() => handleToggle(p.id)}
-                                        disabled={isPending}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors disabled:opacity-50"
-                                    >
-                                        <Power size={13} /> {p.active ? 'Desactivar' : 'Activar'}
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                        );
+                    })}
 
                     {filteredProducts.length === 0 && (
                         <div className="glass-card bg-white p-8 text-center text-slate-400 text-sm border border-slate-200 rounded-xl">
@@ -506,108 +690,154 @@ export function ProductManagement({
                     )}
                 </div>
 
-                {/* Vista desktop: tabla */}
+                {/* Vista desktop: tabla HubSpot / GHL style */}
                 <div className="hidden lg:block glass-card bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                    <th className="px-5 py-3.5">Servicio / Certificación</th>
-                                    <th className="px-5 py-3.5">Categoría</th>
-                                    <th className="px-5 py-3.5">Precio base</th>
-                                    <th className="px-5 py-3.5">Ficha Web (wylar.cl)</th>
-                                    <th className="px-5 py-3.5">Estado</th>
-                                    <th className="px-5 py-3.5 text-right">Acciones</th>
+                                    <th className="px-4 py-3.5 w-10 text-center">
+                                        <button
+                                            type="button"
+                                            onClick={toggleSelectAll}
+                                            className="text-slate-400 hover:text-[#0B1E40] transition-colors inline-flex items-center justify-center"
+                                            title={isAllSelected ? 'Deseleccionar todos' : 'Seleccionar todos en esta página'}
+                                        >
+                                            {isAllSelected ? (
+                                                <CheckSquare size={16} className="text-amber-500" />
+                                            ) : isSomeSelected ? (
+                                                <CheckSquare size={16} className="text-slate-400 opacity-60" />
+                                            ) : (
+                                                <Square size={16} className="text-slate-300" />
+                                            )}
+                                        </button>
+                                    </th>
+                                    <th className="px-4 py-3.5">Servicio / Certificación</th>
+                                    <th className="px-4 py-3.5">Categoría</th>
+                                    <th className="px-4 py-3.5">Precio base</th>
+                                    <th className="px-4 py-3.5">Ficha Web (wylar.cl)</th>
+                                    <th className="px-4 py-3.5">Estado</th>
+                                    <th className="px-4 py-3.5 text-right">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                {filteredProducts.map((p) => (
-                                    <tr key={p.id} className={`hover:bg-slate-50/70 transition-colors ${p.active ? '' : 'opacity-60 bg-slate-50/30'}`}>
-                                        <td className="px-5 py-3.5">
-                                            <p className="font-bold text-slate-900">{p.name}</p>
-                                            {p.description && (
-                                                <p className="text-xs text-slate-400 mt-0.5 line-clamp-1 max-w-sm">{p.description}</p>
-                                            )}
-                                        </td>
-                                        <td className="px-5 py-3.5">
-                                            <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
-                                                {p.categoryName}
-                                            </span>
-                                        </td>
-                                        <td className="px-5 py-3.5 font-bold text-slate-800">
-                                            {money(p.price)}
-                                        </td>
-                                        <td className="px-5 py-3.5">
-                                            {p.profileId != null ? (
-                                                <div className="space-y-1">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200/60 px-2.5 py-0.5 rounded-full">
-                                                            <Globe size={12} className="text-blue-600" /> Publicado en Web
-                                                        </span>
-                                                        <Link
-                                                            href={`/catalogo/${p.profileId}`}
-                                                            className="text-xs text-amber-700 hover:text-amber-900 font-bold inline-flex items-center gap-0.5 hover:underline"
-                                                            title="Editar textos, imágenes y bloques de marketing"
-                                                        >
-                                                            Editar ficha <ExternalLink size={11} />
-                                                        </Link>
-                                                    </div>
-                                                    {p.profileTitle && (
-                                                        <p className="text-[11px] text-slate-500 font-medium truncate max-w-xs">
-                                                            {p.profileTitle}
-                                                        </p>
+                                {filteredProducts.map((p) => {
+                                    const isSelected = selectedIds.includes(p.id);
+
+                                    return (
+                                        <tr
+                                            key={p.id}
+                                            className={`transition-colors ${
+                                                isSelected ? 'bg-amber-50/40 hover:bg-amber-50/60' : 'hover:bg-slate-50/70'
+                                            } ${p.active ? '' : 'opacity-60 bg-slate-50/30'}`}
+                                        >
+                                            <td className="px-4 py-3 text-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleSelect(p.id)}
+                                                    className="text-slate-400 hover:text-amber-500 transition-colors inline-flex items-center justify-center"
+                                                >
+                                                    {isSelected ? (
+                                                        <CheckSquare size={16} className="text-amber-500" />
+                                                    ) : (
+                                                        <Square size={16} className="text-slate-300" />
                                                     )}
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full">
-                                                        Solo CRM (Privado)
-                                                    </span>
-                                                    {isAdmin && (
-                                                        <button
-                                                            onClick={() => openEditForm(p)}
-                                                            className="text-xs text-slate-500 hover:text-blue-700 font-semibold underline decoration-dotted"
-                                                        >
-                                                            + Asociar web
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="px-5 py-3.5">
-                                            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${p.active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-slate-100 text-slate-500'}`}>
-                                                {p.active ? 'Activo' : 'Inactivo'}
-                                            </span>
-                                        </td>
-                                        <td className="px-5 py-3.5">
-                                            <div className="flex items-center justify-end gap-1">
-                                                {isAdmin && (
-                                                    <>
-                                                        <button
-                                                            onClick={() => openEditForm(p)}
-                                                            className="p-2 text-slate-400 hover:text-[#0B1E40] hover:bg-slate-100 rounded-lg transition-colors"
-                                                            title="Editar servicio"
-                                                        >
-                                                            <Pencil size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleToggle(p.id)}
-                                                            disabled={isPending}
-                                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                                                            title={p.active ? 'Desactivar para cotizaciones nuevas' : 'Activar'}
-                                                        >
-                                                            <Power size={16} />
-                                                        </button>
-                                                    </>
+                                                </button>
+                                            </td>
+                                            <td className="px-4 py-3.5">
+                                                <p className="font-bold text-slate-900">{p.name}</p>
+                                                {p.description && (
+                                                    <p className="text-xs text-slate-400 mt-0.5 line-clamp-1 max-w-sm">{p.description}</p>
                                                 )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                            </td>
+                                            <td className="px-4 py-3.5">
+                                                <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
+                                                    {p.categoryName}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3.5 font-bold text-slate-800">
+                                                {money(p.price)}
+                                            </td>
+                                            <td className="px-4 py-3.5">
+                                                {p.profileId != null ? (
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200/60 px-2.5 py-0.5 rounded-full">
+                                                                <Globe size={12} className="text-blue-600" /> Publicado en Web
+                                                            </span>
+                                                            <Link
+                                                                href={`/catalogo/${p.profileId}`}
+                                                                className="text-xs text-amber-700 hover:text-amber-900 font-bold inline-flex items-center gap-0.5 hover:underline"
+                                                                title="Editar textos, imágenes y bloques de marketing"
+                                                            >
+                                                                Editar ficha <ExternalLink size={11} />
+                                                            </Link>
+                                                        </div>
+                                                        {p.profileTitle && (
+                                                            <p className="text-[11px] text-slate-500 font-medium truncate max-w-xs">
+                                                                {p.profileTitle}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full">
+                                                            Solo CRM (Privado)
+                                                        </span>
+                                                        {isAdmin && (
+                                                            <button
+                                                                onClick={() => openEditForm(p)}
+                                                                className="text-xs text-slate-500 hover:text-blue-700 font-semibold underline decoration-dotted"
+                                                            >
+                                                                + Asociar web
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-3.5">
+                                                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${p.active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-slate-100 text-slate-500'}`}>
+                                                    {p.active ? 'Activo' : 'Inactivo'}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3.5">
+                                                <div className="flex items-center justify-end gap-1">
+                                                    {isAdmin && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => openEditForm(p)}
+                                                                className="p-1.5 text-slate-400 hover:text-[#0B1E40] hover:bg-slate-100 rounded-lg transition-colors"
+                                                                title="Editar servicio"
+                                                            >
+                                                                <Pencil size={15} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleToggle(p.id)}
+                                                                disabled={isPending}
+                                                                className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors disabled:opacity-50"
+                                                                title={p.active ? 'Desactivar para cotizaciones nuevas' : 'Activar'}
+                                                            >
+                                                                <Power size={15} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDelete(p.id, p.name)}
+                                                                disabled={isPending && pendingId === p.id}
+                                                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                                                title="Eliminar servicio del catálogo"
+                                                            >
+                                                                {isPending && pendingId === p.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
 
                                 {filteredProducts.length === 0 && (
                                     <tr>
-                                        <td colSpan={6} className="px-5 py-12 text-center text-slate-400 text-sm">
+                                        <td colSpan={7} className="px-5 py-12 text-center text-slate-400 text-sm">
                                             No se encontraron servicios registrados con los filtros actuales.
                                         </td>
                                     </tr>
