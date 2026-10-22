@@ -408,7 +408,7 @@ export function QuotePdf({
                         <Text style={styles.institutionTitle}>Centro de Evaluación y Certificación de Competencias Laborales</Text>
                         <Text style={styles.institutionDetails}>
                             Acreditado por ChileValora · Certificadora Wylar SpA{'\n'}
-                            RUT: 76.543.210-K · contacto@wylar.cl · +56 9 8453 4364{'\n'}
+                            RUT: 76.543.210-K · contacto@wylar.cl · +56 9 2956 6326{'\n'}
                             Av. Libertador Bernardo O&apos;Higgins 252, Santiago · Río Blanco 1371, Arica
                         </Text>
                     </View>

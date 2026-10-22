@@ -150,7 +150,7 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
                                 <h2 className="text-xl font-black text-[#0B1E40] tracking-tight">WYLAR LTDA.</h2>
                                 <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
                                     Evaluación y Certificación de Competencias Laborales<br />
-                                    contacto@wylar.cl · +56 9 8453 4364 · www.wylar.cl
+                                    contacto@wylar.cl · +56 9 2956 6326 · www.wylar.cl
                                 </p>
                             </div>
 

@@ -32,8 +32,8 @@ function emailShell(bodyHtml: string): string {
         <td align="center">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
             <tr>
-              <td style="background-color:#050B14;padding:24px 32px;">
-                <img src="${LOGO_URL}" alt="Wylar" height="32" style="height:32px;width:auto;display:block;" />
+              <td style="background-color:#ffffff;padding:24px 32px;border-bottom:1px solid #e2e8f0;">
+                <img src="${LOGO_URL}" alt="Wylar" height="36" style="height:36px;width:auto;display:block;" />
               </td>
             </tr>
             <tr>
@@ -43,7 +43,7 @@ function emailShell(bodyHtml: string): string {
             </tr>
             <tr>
               <td style="padding:20px 32px;background-color:#f8fafc;border-top:1px solid #e2e8f0;color:#94a3b8;font-size:12px;line-height:1.5;">
-                Wylar Ltda. · Centro de Evaluación y Certificación de Competencias Laborales acreditado por ChileValora.<br />
+                Wylar Ltda. · La Casa Certificadora de Chile.<br />
                 Río Blanco 1371, Barrio Industrial, Arica · Av. Libertador Bernardo O'Higgins 252 oficina 21, Santiago.
               </td>
             </tr>
@@ -170,7 +170,7 @@ export async function sendQuotePdfEmail(params: {
         <h1 style="margin:0 0 16px;font-size:20px;color:#0B1E40;">Cotización N° ${escapeHtml(params.quoteCode)}</h1>
         <p style="margin:0 0 14px;font-size:15px;color:#334155;">Estimado(a) <strong>${escapeHtml(params.clientName)}</strong>,</p>
         <p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6;">
-            Junto con saludar cordialmente, le hacemos llegar adjunta la propuesta económica oficial correspondiente a los servicios solicitados en Wylar, Centro Acreditado por ChileValora.
+            Junto con saludar cordialmente, le hacemos llegar adjunta la propuesta económica correspondiente a los servicios solicitados en Wylar, Casa Certificadora.
         </p>
 
         ${customMsgHtml}
@@ -197,8 +197,8 @@ export async function sendQuotePdfEmail(params: {
         <p style="margin:16px 0;font-size:14px;color:#475569;line-height:1.6;">
             En el archivo PDF adjunto a este correo encontrará el desglose completo, vigencia de la oferta y las condiciones comerciales.
         </p>
-        <p style="margin:24px 0 0;color:#64748b;font-size:13px;">
-            Para coordinar o resolver cualquier consulta, puede responder directamente a este correo o comunicarse con nosotros al <a href="tel:+56984534364" style="color:#2563eb;font-weight:600;">+56 9 8453 4364</a>.
+        <p style="margin:24px 0 0;color:#64748b;font-size:13px;line-height:1.6;">
+            Para coordinar o resolver cualquier consulta, puede contactarnos al correo <a href="mailto:contacto@wylar.cl" style="color:#2563eb;font-weight:600;text-decoration:none;">contacto@wylar.cl</a> o al teléfono directamente a este correo o comunicarse con nosotros al <a href="tel:+56929566326" style="color:#2563eb;font-weight:600;text-decoration:none;">+56 9 2956 6326</a>.
         </p>
     `);
 
@@ -207,7 +207,7 @@ export async function sendQuotePdfEmail(params: {
             from: FROM,
             to: params.recipientEmail,
             replyTo: REPLY_TO,
-            subject: `Cotización ${params.quoteCode} - Wylar Capacitación y Certificación`,
+            subject: `Cotización ${params.quoteCode} - Wylar, Casa Certificadora`,
             html,
             attachments: [
                 {
