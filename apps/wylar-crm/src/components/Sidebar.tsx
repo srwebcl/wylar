@@ -95,27 +95,30 @@ export function Sidebar({
     return (
         <aside
             className={clsx(
-                'w-72 bg-[#0B1E40] text-white flex flex-col shadow-2xl z-50 h-screen overflow-y-auto transition-transform duration-300 ease-in-out',
-                'fixed inset-y-0 left-0 lg:static lg:sticky lg:top-0 lg:translate-x-0 lg:z-20 lg:shrink-0',
-                isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+                'w-72 bg-[#0B1E40] text-white flex flex-col z-40 shrink-0 transition-transform duration-300 ease-in-out',
+                // Móvil / tablet (<lg): cajón fijo que vuela sobre el contenido con sombra profunda
+                'fixed inset-y-0 left-0 h-full shadow-2xl',
+                isOpen ? 'translate-x-0' : '-translate-x-full',
+                // Escritorio (>=lg): estático dentro del flex h-screen, siempre altura completa (h-full), borde sutil
+                'lg:static lg:h-full lg:translate-x-0 lg:shadow-none lg:border-r lg:border-[#122b59]/60',
             )}
             aria-label="Navegación principal"
         >
             <div className="p-5 flex items-center justify-between border-b border-white/10 shrink-0">
-                <div className="flex-1 flex justify-center lg:justify-center">
+                <div className="flex-1 flex justify-center">
                     <Logo width={140} />
                 </div>
                 <button
                     type="button"
                     onClick={onClose}
-                    className="lg:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors shrink-0"
+                    className="lg:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
                     aria-label="Cerrar navegación"
                 >
                     <X size={20} />
                 </button>
             </div>
 
-            <nav className="flex-1 px-3 py-5 space-y-5">
+            <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-5">
                 <div>
                     <p className="px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">CRM</p>
                     <div className="space-y-1">

@@ -30,7 +30,7 @@ export function AppShell({ currentUser, children }: { currentUser: User; childre
     }, [mobileOpen]);
 
     return (
-        <div className="flex min-h-screen bg-slate-50 font-sans relative overflow-x-hidden">
+        <div className="flex h-screen h-dvh w-full bg-slate-50 font-sans overflow-hidden relative">
             {/* Fondos decorativos con blur suave */}
             <div className="fixed inset-0 pointer-events-none z-0">
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] lg:w-[40%] h-[40%] rounded-full bg-cyan-100/40 blur-[120px]"></div>
@@ -41,26 +41,26 @@ export function AppShell({ currentUser, children }: { currentUser: User; childre
             {mobileOpen && (
                 <div
                     onClick={() => setMobileOpen(false)}
-                    className="fixed inset-0 bg-[#050B14]/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 animate-fadeIn"
+                    className="fixed inset-0 bg-[#050B14]/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
                     aria-label="Cerrar menú de navegación"
                 />
             )}
 
-            {/* Sidebar responsivo: cajón deslizante en móvil (<lg), columna fija en desktop (>=lg) */}
+            {/* Sidebar responsivo: cajón deslizante en móvil (<lg), columna fija a toda altura en desktop (>=lg) */}
             <Sidebar
                 currentUser={currentUser}
                 isOpen={mobileOpen}
                 onClose={() => setMobileOpen(false)}
             />
 
-            {/* Contenido principal */}
-            <div className="flex-1 relative z-10 min-w-0 flex flex-col w-full">
+            {/* Contenedor principal */}
+            <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative z-10">
                 <TopBar
                     currentUser={currentUser}
                     onToggleMenu={() => setMobileOpen((v) => !v)}
                 />
-                <main className="p-3.5 sm:p-5 md:p-8 flex-1 min-w-0">
-                    <div className="max-w-7xl mx-auto w-full min-w-0">{children}</div>
+                <main className="flex-1 overflow-y-auto min-w-0 p-4 sm:p-6 lg:p-8">
+                    <div className="max-w-7xl mx-auto w-full min-w-0 pb-16">{children}</div>
                 </main>
             </div>
         </div>
