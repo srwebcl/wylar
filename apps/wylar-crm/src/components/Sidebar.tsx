@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { KanbanSquare, ListChecks, Users, LayoutDashboard, BookOpen, ShieldCheck, GalleryHorizontal, ScrollText, Settings, FileBadge, Contact, Package, Tags, X, FileSpreadsheet } from 'lucide-react';
+import { KanbanSquare, ListChecks, Users, LayoutDashboard, Globe, ShieldCheck, GalleryHorizontal, ScrollText, Settings, FileBadge, Contact, Package, Tags, X, FileSpreadsheet } from 'lucide-react';
 import clsx from 'clsx';
 import { Logo } from '@/components/Logo';
 import type { SafeUser as User } from '@/lib/safeUser';
@@ -15,7 +15,7 @@ const CRM_NAV_ITEMS = [
     { href: '/cotizaciones', label: 'Cotizaciones', icon: FileSpreadsheet, match: (p: string) => p.startsWith('/cotizaciones'), adminOnly: false },
     {
         href: '/productos',
-        label: 'Productos',
+        label: 'Catálogo',
         icon: Package,
         match: (p: string) => p === '/productos',
         adminOnly: false,
@@ -25,7 +25,7 @@ const CRM_NAV_ITEMS = [
 
 const WEB_NAV_ITEMS = [
     { href: '/hero', label: 'Banners', icon: GalleryHorizontal, match: (p: string) => p.startsWith('/hero'), adminOnly: false },
-    { href: '/catalogo', label: 'Catálogo', icon: BookOpen, match: (p: string) => p.startsWith('/catalogo'), adminOnly: false },
+    { href: '/catalogo', label: 'Fichas Web', icon: Globe, match: (p: string) => p.startsWith('/catalogo'), adminOnly: false },
     {
         href: '/certificados',
         label: 'Certificados',

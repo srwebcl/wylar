@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Check, Pencil, Plus, X, Power } from 'lucide-react';
+import Link from 'next/link';
+import { Check, Pencil, Plus, X, Power, ArrowLeft } from 'lucide-react';
 import { createProductCategory, updateProductCategory, toggleProductCategoryActive } from '@/actions/productCategories';
 import { ATTRIBUTE_TEMPLATES, attributeTemplateLabel } from '@/lib/productSpec';
 
@@ -74,8 +75,16 @@ export function ProductCategoriesManagement({ categories, isAdmin }: { categorie
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-extrabold text-slate-900">Categorías de productos</h1>
-                <p className="text-slate-500 text-sm mt-1">Cada categoría define qué atributos extra pide el formulario de producto.</p>
+                <Link
+                    href="/productos"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#0B1E40] transition-colors mb-2"
+                >
+                    <ArrowLeft size={14} /> Volver al Catálogo
+                </Link>
+                <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Categorías del Catálogo</h1>
+                <p className="text-slate-500 text-sm mt-1">
+                    Clasificación comercial y definición de atributos para los servicios del Catálogo.
+                </p>
             </div>
 
             <div className="glass-card p-6 space-y-4 max-w-2xl">
