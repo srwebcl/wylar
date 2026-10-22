@@ -236,6 +236,83 @@ export async function assignLead(leadId: number, formData: FormData) {
     revalidatePath('/leads');
 }
 
+/** Edita los datos de contacto y comerciales de una oportunidad desde el CRM. */
+export async function updateLead(leadId: number, formData: FormData): Promise<LeadFormState> {
+    const currentUser = await requireUser();
+
+    const name = (formData.get('name') as string)?.trim().toUpperCase();
+    const rut = (formData.get('rut') as string)?.trim() || null;
+    const email = (formData.get('email') as string)?.trim().toLowerCase();
+    const phone = (formData.get('phone') as string)?.trim();
+    const company = (formData.get('company') as string)?.trim().toUpperCase() || null;
+    const comuna = (formData.get('comuna') as string)?.trim() || null;
+    const productIdStr = formData.get('productId') as string;
+    const status = formData.get('status') as string;
+    const assignedToIdStr = formData.get('assignedToId') as string;
+    const notes = (formData.get('notes') as string)?.trim() || null;
+
+    if (!name || !email || !phone) {
+        return { error: 'Nombre, correo y teléfono son obligatorios.' };
+    }
+
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+    if (!lead) return { error: 'La oportunidad no existe.' };
+
+    const formattedPhone = formatChileanMobile(phone) ?? phone;
+    const rutNorm = rut ? normalizeRut(rut) : null;
+    const productId = productIdStr ? Number(productIdStr) : lead.productId;
+    const assignedToId = assignedToIdStr === '' ? null : (assignedToIdStr ? Number(assignedToIdStr) : lead.assignedToId);
+
+    await prisma.lead.update({
+        where: { id: leadId },
+        data: {
+            name,
+            rut,
+            rutNorm,
+            email,
+            phone: formattedPhone,
+            company,
+            comuna,
+            productId,
+            status: status || lead.status,
+            assignedToId,
+            message: notes !== null ? notes : lead.message,
+        },
+    });
+
+    if (lead.clientId) {
+        await prisma.client.update({
+            where: { id: lead.clientId },
+            data: {
+                name,
+                rut: rut || undefined,
+                rutNorm: rutNorm || undefined,
+                email,
+                phone: formattedPhone,
+                company: company || undefined,
+            },
+        });
+    }
+
+    await prisma.leadActivity.create({
+        data: {
+            leadId,
+            userId: currentUser.id,
+            authorName: currentUser.name,
+            type: 'NOTA',
+            text: `Datos de contacto u oportunidad actualizados por ${currentUser.name}.`,
+        },
+    });
+
+    await audit(currentUser, 'LEAD_EDITADO', 'lead', lead.code, `${name} · ${email}`);
+
+    revalidatePath('/leads');
+    revalidatePath(`/leads/${leadId}`);
+    revalidatePath('/clientes');
+    revalidatePath('/');
+    return { success: 'Oportunidad actualizada exitosamente.' };
+}
+
 /**
  * Elimina un prospecto (ej. registros de prueba). Solo administradores —
  * la baja queda registrada en /auditoria (quién, cuándo, código y datos

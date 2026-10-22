@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useMemo } from 'react';
+import { useState, useTransition, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import {
     Pencil,
@@ -9,8 +9,6 @@ import {
     Power,
     ArrowLeft,
     Trash2,
-    CheckSquare,
-    Square,
     Loader2,
     CheckCircle2,
     Package,
@@ -59,10 +57,17 @@ export function ProductCategoriesManagement({
 
     // Multi-selección
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const selectAllRef = useRef<HTMLInputElement>(null);
 
     const allIds = useMemo(() => categories.map((c) => c.id), [categories]);
     const isAllSelected = categories.length > 0 && selectedIds.length === categories.length;
     const isSomeSelected = selectedIds.length > 0 && selectedIds.length < categories.length;
+
+    useEffect(() => {
+        if (selectAllRef.current) {
+            selectAllRef.current.indeterminate = isSomeSelected;
+        }
+    }, [isSomeSelected]);
 
     function toggleSelectAll() {
         if (isAllSelected) {
@@ -244,12 +249,12 @@ export function ProductCategoriesManagement({
 
             {/* Barra flotante de acciones masivas */}
             {selectedIds.length > 0 && (
-                <div className="sticky top-4 z-30 bg-[#0B1E40] text-white px-4 sm:px-5 py-3 rounded-2xl shadow-2xl flex items-center justify-between gap-3 flex-wrap border border-cyan-500/30 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0B1E40]/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center justify-between gap-4 border border-cyan-500/30 animate-in fade-in slide-in-from-bottom-4 duration-200 w-[95%] max-w-xl">
                     <div className="flex items-center gap-3">
                         <span className="bg-amber-500 text-[#0B1E40] font-black text-xs px-2.5 py-1 rounded-full shadow-sm">
                             {selectedIds.length}
                         </span>
-                        <span className="text-xs font-semibold text-slate-200">
+                        <span className="text-xs font-semibold text-slate-200 hidden sm:inline">
                             {selectedIds.length === 1 ? 'categoría seleccionada' : 'categorías seleccionadas'}
                         </span>
                     </div>
@@ -300,20 +305,14 @@ export function ProductCategoriesManagement({
             <div className="glass-card bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-sm">
                 <div className="p-3.5 bg-slate-50/90 border-b border-slate-200 flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
                     <div className="flex items-center gap-2.5">
-                        <button
-                            type="button"
-                            onClick={toggleSelectAll}
-                            className="text-slate-400 hover:text-[#0B1E40] transition-colors inline-flex items-center justify-center"
+                        <input
+                            ref={selectAllRef}
+                            type="checkbox"
+                            checked={isAllSelected}
+                            onChange={toggleSelectAll}
+                            className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
                             title={isAllSelected ? 'Deseleccionar todas' : 'Seleccionar todas'}
-                        >
-                            {isAllSelected ? (
-                                <CheckSquare size={16} className="text-amber-500" />
-                            ) : isSomeSelected ? (
-                                <CheckSquare size={16} className="text-slate-400 opacity-60" />
-                            ) : (
-                                <Square size={16} className="text-slate-300" />
-                            )}
-                        </button>
+                        />
                         <span>Categoría</span>
                     </div>
                     <span>Acciones</span>
@@ -370,17 +369,12 @@ export function ProductCategoriesManagement({
                                 } ${c.active ? '' : 'opacity-60 bg-slate-50/30'}`}
                             >
                                 <div className="flex items-center gap-3 min-w-0">
-                                    <button
-                                        type="button"
-                                        onClick={() => toggleSelect(c.id)}
-                                        className="text-slate-400 hover:text-amber-500 transition-colors inline-flex items-center justify-center shrink-0"
-                                    >
-                                        {isSelected ? (
-                                            <CheckSquare size={16} className="text-amber-500" />
-                                        ) : (
-                                            <Square size={16} className="text-slate-300" />
-                                        )}
-                                    </button>
+                                    <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        onChange={() => toggleSelect(c.id)}
+                                        className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer shrink-0"
+                                    />
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2 flex-wrap">
                                             <p className="text-sm font-bold text-slate-900 truncate">{c.name}</p>

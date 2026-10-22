@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useMemo } from 'react';
+import { useState, useTransition, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import {
     FileText,
@@ -9,15 +9,19 @@ import {
     CheckCircle2,
     XCircle,
     Building2,
-    CheckSquare,
-    Square,
     X,
     Trash2,
     Eye,
+    Pencil,
     Loader2,
-    ArrowUpRight,
 } from 'lucide-react';
-import { markQuoteAccepted, markQuoteRejected, deleteQuote, bulkDeleteQuotes, bulkUpdateQuoteStatus } from '@/actions/quotes';
+import {
+    markQuoteAccepted,
+    markQuoteRejected,
+    deleteQuote,
+    bulkDeleteQuotes,
+    bulkUpdateQuoteStatus,
+} from '@/actions/quotes';
 import { SendQuoteModal } from '@/components/SendQuoteModal';
 
 export interface QuoteRow {
@@ -64,12 +68,23 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
 
     // Multi-selección
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const selectAllRef = useRef<HTMLInputElement>(null);
     const [showBulkStatusModal, setShowBulkStatusModal] = useState(false);
     const [bulkStatusValue, setBulkStatusValue] = useState('ENVIADA');
+
+    // Modal de cambio de estado individual
+    const [editingStatusQuote, setEditingStatusQuote] = useState<QuoteRow | null>(null);
+    const [individualStatusValue, setIndividualStatusValue] = useState('ENVIADA');
 
     const allIds = useMemo(() => quotes.map((q) => q.id), [quotes]);
     const isAllSelected = quotes.length > 0 && selectedIds.length === quotes.length;
     const isSomeSelected = selectedIds.length > 0 && selectedIds.length < quotes.length;
+
+    useEffect(() => {
+        if (selectAllRef.current) {
+            selectAllRef.current.indeterminate = isSomeSelected;
+        }
+    }, [isSomeSelected]);
 
     function toggleSelectAll() {
         if (isAllSelected) {
@@ -128,6 +143,21 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
         });
     }
 
+    function handleIndividualStatusSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        if (!editingStatusQuote) return;
+        setError(null);
+        setSuccess(null);
+        startTransition(async () => {
+            const result = await bulkUpdateQuoteStatus([editingStatusQuote.id], individualStatusValue);
+            if (result.error) setError(result.error);
+            else {
+                setSuccess(result.success ?? 'Estado actualizado.');
+                setEditingStatusQuote(null);
+            }
+        });
+    }
+
     if (quotes.length === 0) {
         return (
             <div className="glass-card bg-white p-12 text-center text-slate-500 border border-slate-200/80 rounded-2xl shadow-sm">
@@ -158,14 +188,14 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                 </div>
             )}
 
-            {/* Barra flotante de acciones masivas */}
+            {/* Barra flotante inferior de acciones masivas */}
             {selectedIds.length > 0 && (
-                <div className="sticky top-4 z-30 bg-[#0B1E40] text-white px-4 sm:px-5 py-3 rounded-2xl shadow-2xl flex items-center justify-between gap-3 flex-wrap border border-cyan-500/30 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0B1E40]/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center justify-between gap-4 border border-cyan-500/30 animate-in fade-in slide-in-from-bottom-4 duration-200 w-[95%] max-w-2xl">
                     <div className="flex items-center gap-3">
                         <span className="bg-amber-500 text-[#0B1E40] font-black text-xs px-2.5 py-1 rounded-full shadow-sm">
                             {selectedIds.length}
                         </span>
-                        <span className="text-xs font-semibold text-slate-200">
+                        <span className="text-xs font-semibold text-slate-200 hidden sm:inline">
                             {selectedIds.length === 1 ? 'cotización seleccionada' : 'cotizaciones seleccionadas'}
                         </span>
                     </div>
@@ -201,7 +231,7 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                 </div>
             )}
 
-            {/* Modal de cambio masivo de estado de cotización */}
+            {/* Modal de Cambio de Estado Masivo */}
             {showBulkStatusModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm" onClick={() => setShowBulkStatusModal(false)}>
                     <form
@@ -223,12 +253,12 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                             <select
                                 value={bulkStatusValue}
                                 onChange={(e) => setBulkStatusValue(e.target.value)}
-                                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0B1E40]/20"
                             >
                                 <option value="BORRADOR">Borrador</option>
-                                <option value="ENVIADA">Enviada</option>
-                                <option value="ACEPTADA">Aceptada (Ganada)</option>
-                                <option value="RECHAZADA">Rechazada</option>
+                                <option value="ENVIADA">Enviada al Cliente</option>
+                                <option value="ACEPTADA">Aceptada / Ganada</option>
+                                <option value="RECHAZADA">Rechazada / Perdida</option>
                             </select>
                         </label>
 
@@ -245,35 +275,86 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                                 disabled={isPending}
                                 className="px-5 py-2 text-xs font-bold bg-[#0B1E40] text-white hover:bg-[#122b59] rounded-lg transition-colors disabled:opacity-60"
                             >
-                                {isPending ? 'Guardando…' : 'Aplicar cambio'}
+                                {isPending ? 'Actualizando…' : 'Aplicar cambio'}
                             </button>
                         </div>
                     </form>
                 </div>
             )}
 
-            {/* Vista Móvil: Tarjetas táctiles */}
+            {/* Modal de Edición de Estado Individual */}
+            {editingStatusQuote && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm" onClick={() => setEditingStatusQuote(null)}>
+                    <form
+                        onSubmit={handleIndividualStatusSubmit}
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4"
+                    >
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 className="font-extrabold text-slate-900 text-base">
+                                    Editar Estado · <span className="font-mono text-amber-600">{editingStatusQuote.code}</span>
+                                </h3>
+                                <p className="text-xs text-slate-500 mt-0.5">Cliente: {editingStatusQuote.opportunity.name}</p>
+                            </div>
+                            <button type="button" onClick={() => setEditingStatusQuote(null)} className="text-slate-400 hover:text-slate-600">
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <label className="block">
+                            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Estado Comercial</span>
+                            <select
+                                value={individualStatusValue}
+                                onChange={(e) => setIndividualStatusValue(e.target.value)}
+                                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0B1E40]/20"
+                            >
+                                <option value="BORRADOR">Borrador</option>
+                                <option value="ENVIADA">Enviada al Cliente</option>
+                                <option value="ACEPTADA">Aceptada / Ganada</option>
+                                <option value="RECHAZADA">Rechazada / Perdida</option>
+                            </select>
+                        </label>
+
+                        <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                            <button
+                                type="button"
+                                onClick={() => setEditingStatusQuote(null)}
+                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={isPending}
+                                className="px-5 py-2 text-xs font-bold bg-[#0B1E40] text-white hover:bg-[#122b59] rounded-lg transition-colors disabled:opacity-60"
+                            >
+                                {isPending ? 'Guardando…' : 'Guardar Estado'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {/* Vista móvil: tarjetas interactivas */}
             <div className="lg:hidden space-y-3">
                 <div className="flex items-center justify-between px-1 text-xs text-slate-500 font-semibold">
-                    <button
-                        type="button"
-                        onClick={toggleSelectAll}
-                        className="inline-flex items-center gap-2 hover:text-[#0B1E40] transition-colors"
-                    >
-                        {isAllSelected ? (
-                            <CheckSquare size={16} className="text-amber-500" />
-                        ) : (
-                            <Square size={16} className="text-slate-400" />
-                        )}
+                    <label className="inline-flex items-center gap-2 cursor-pointer hover:text-[#0B1E40] transition-colors">
+                        <input
+                            type="checkbox"
+                            checked={isAllSelected}
+                            onChange={toggleSelectAll}
+                            className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
+                        />
                         <span>{isAllSelected ? 'Deseleccionar todas' : 'Seleccionar todas'}</span>
-                    </button>
+                    </label>
                     <span>{quotes.length} cotizaciones</span>
                 </div>
 
                 {quotes.map((q) => {
                     const isSelected = selectedIds.includes(q.id);
-                    const clientName = q.opportunity.name.toUpperCase();
-                    const company = q.opportunity.company?.toUpperCase();
+                    const clientName = q.opportunity?.name ?? 'Cliente Desconocido';
+                    const company = q.opportunity?.company;
                     const badge = STATUS_CONFIG[q.status] ?? STATUS_CONFIG.BORRADOR;
 
                     return (
@@ -285,97 +366,97 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                         >
                             <div className="flex items-start justify-between gap-3">
                                 <div className="flex items-start gap-2.5 min-w-0">
-                                    <button
-                                        type="button"
-                                        onClick={() => toggleSelect(q.id)}
-                                        className="mt-0.5 text-slate-400 hover:text-amber-500 transition-colors"
-                                    >
-                                        {isSelected ? (
-                                            <CheckSquare size={18} className="text-amber-500" />
-                                        ) : (
-                                            <Square size={18} className="text-slate-300" />
-                                        )}
-                                    </button>
+                                    <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        onChange={() => toggleSelect(q.id)}
+                                        className="mt-1 w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
+                                    />
                                     <div className="min-w-0">
-                                        <div className="flex items-center gap-1.5">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
                                             <Link
                                                 href={`/cotizaciones/${q.id}`}
-                                                className="font-extrabold text-[#0B1E40] hover:text-amber-600 transition-colors text-base"
+                                                className="font-black text-[#0B1E40] hover:text-amber-600 transition-colors text-sm"
                                             >
                                                 {q.code}
                                             </Link>
-                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">
                                                 v{q.version}
                                             </span>
                                         </div>
-                                        <p className="font-bold text-slate-900 text-sm mt-0.5 truncate">{clientName}</p>
+                                        <p className="font-bold text-slate-800 text-xs mt-0.5 truncate">{clientName}</p>
                                         {company && (
-                                            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5 truncate">
-                                                <Building2 size={12} className="text-slate-400 shrink-0" /> {company}
-                                            </p>
+                                            <span className="text-[11px] text-slate-500 inline-flex items-center gap-1">
+                                                <Building2 size={11} className="text-slate-400" />
+                                                {company}
+                                            </span>
                                         )}
                                     </div>
                                 </div>
-                                <span className={`shrink-0 inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-0.5 rounded-full border ${badge.bg} ${badge.text} ${badge.border}`}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`}></span>
-                                    {badge.label}
+
+                                <div className="text-right shrink-0">
+                                    <p className="text-base font-black text-[#0B1E40]">{money(q.total)}</p>
+                                    <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border ${badge.bg} ${badge.text} ${badge.border} mt-1`}>
+                                        <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`}></span>
+                                        {badge.label}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-50/80 rounded-xl p-2.5 text-xs border border-slate-100">
+                                <span className="text-slate-400 font-medium">{q.itemsCount} {q.itemsCount === 1 ? 'ítem' : 'ítems'}: </span>
+                                <span className="font-semibold text-slate-700 line-clamp-1">{q.itemsSummary}</span>
+                            </div>
+
+                            {/* Acciones móviles */}
+                            <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                                <span className="text-slate-400 text-[11px]">
+                                    {new Date(q.issueDate).toLocaleDateString('es-CL')}
                                 </span>
-                            </div>
-
-                            <div className="p-2.5 bg-slate-50/90 rounded-xl text-xs space-y-1.5 border border-slate-100">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-slate-500">Oportunidad:</span>
-                                    <Link href={`/leads/${q.opportunityId}`} className="font-bold text-blue-700 hover:underline">
-                                        {q.opportunity.code}
-                                    </Link>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-slate-500">Total neto:</span>
-                                    <span className="font-extrabold text-[#0B1E40] text-sm">{money(q.total)} CLP</span>
-                                </div>
-                                <div className="flex justify-between text-[11px] text-slate-400">
-                                    <span>Emisión: {new Date(q.issueDate).toLocaleDateString('es-CL')}</span>
-                                    <span>{q.itemsCount} {q.itemsCount === 1 ? 'ítem' : 'ítems'}</span>
-                                </div>
-                            </div>
-
-                            {/* Acciones */}
-                            <div className="flex items-center justify-between pt-2 border-t border-slate-100 gap-2 flex-wrap">
                                 <div className="flex items-center gap-1.5">
                                     <a
                                         href={`/api/quotes/${q.id}/pdf`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
+                                        className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors"
                                         title="Descargar PDF"
                                     >
-                                        <Download size={13} /> PDF
+                                        <Download size={14} />
                                     </a>
                                     <button
                                         type="button"
                                         onClick={() => setSelectedForEmail(q)}
-                                        className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
-                                        title="Enviar por correo"
+                                        className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors"
+                                        title="Enviar por Correo"
                                     >
-                                        <Mail size={13} /> Enviar
+                                        <Mail size={14} />
                                     </button>
-                                </div>
-
-                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setEditingStatusQuote(q);
+                                            setIndividualStatusValue(q.status);
+                                        }}
+                                        className="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg transition-colors"
+                                        title="Editar estado"
+                                    >
+                                        <Pencil size={14} />
+                                    </button>
                                     <Link
                                         href={`/cotizaciones/${q.id}`}
-                                        className="font-bold text-xs text-amber-700 hover:text-amber-800 inline-flex items-center gap-0.5"
+                                        className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors"
+                                        title="Ver detalle"
                                     >
-                                        Ver <ArrowUpRight size={12} />
+                                        <Eye size={14} />
                                     </Link>
                                     <button
                                         type="button"
                                         onClick={() => handleDelete(q.id, q.code)}
                                         disabled={isPending && pendingId === q.id}
                                         className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition-colors"
-                                        title="Eliminar cotización"
+                                        title="Eliminar"
                                     >
-                                        {isPending && pendingId === q.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                                        {isPending && pendingId === q.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                                     </button>
                                 </div>
                             </div>
@@ -384,33 +465,27 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                 })}
             </div>
 
-            {/* Vista Desktop: Tabla HubSpot / GHL style */}
+            {/* Vista desktop: tabla HubSpot / GHL style */}
             <div className="hidden lg:block glass-card bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                 <th className="px-4 py-3.5 w-10 text-center">
-                                    <button
-                                        type="button"
-                                        onClick={toggleSelectAll}
-                                        className="text-slate-400 hover:text-[#0B1E40] transition-colors inline-flex items-center justify-center"
-                                        title={isAllSelected ? 'Deseleccionar todas' : 'Seleccionar todas en esta página'}
-                                    >
-                                        {isAllSelected ? (
-                                            <CheckSquare size={16} className="text-amber-500" />
-                                        ) : isSomeSelected ? (
-                                            <CheckSquare size={16} className="text-slate-400 opacity-60" />
-                                        ) : (
-                                            <Square size={16} className="text-slate-300" />
-                                        )}
-                                    </button>
+                                    <input
+                                        ref={selectAllRef}
+                                        type="checkbox"
+                                        checked={isAllSelected}
+                                        onChange={toggleSelectAll}
+                                        className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
+                                        title={isAllSelected ? 'Deseleccionar todas' : 'Seleccionar todas'}
+                                    />
                                 </th>
                                 <th className="px-4 py-3.5">Código</th>
-                                <th className="px-4 py-3.5">Cliente & Oportunidad</th>
-                                <th className="px-4 py-3.5">Fecha</th>
-                                <th className="px-4 py-3.5">Ítems Cotizados</th>
-                                <th className="px-4 py-3.5">Total CLP</th>
+                                <th className="px-4 py-3.5">Cliente / Empresa</th>
+                                <th className="px-4 py-3.5">Fecha Emisión</th>
+                                <th className="px-4 py-3.5">Detalle Ítems</th>
+                                <th className="px-4 py-3.5">Total (Neto)</th>
                                 <th className="px-4 py-3.5">Estado</th>
                                 <th className="px-4 py-3.5 text-right">Acciones</th>
                             </tr>
@@ -418,8 +493,8 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                         <tbody className="divide-y divide-slate-100">
                             {quotes.map((q) => {
                                 const isSelected = selectedIds.includes(q.id);
-                                const clientName = q.opportunity.name.toUpperCase();
-                                const company = q.opportunity.company?.toUpperCase();
+                                const clientName = q.opportunity?.name ?? 'Cliente Desconocido';
+                                const company = q.opportunity?.company;
                                 const badge = STATUS_CONFIG[q.status] ?? STATUS_CONFIG.BORRADOR;
 
                                 return (
@@ -430,23 +505,18 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                                         }`}
                                     >
                                         <td className="px-4 py-3 text-center">
-                                            <button
-                                                type="button"
-                                                onClick={() => toggleSelect(q.id)}
-                                                className="text-slate-400 hover:text-amber-500 transition-colors inline-flex items-center justify-center"
-                                            >
-                                                {isSelected ? (
-                                                    <CheckSquare size={16} className="text-amber-500" />
-                                                ) : (
-                                                    <Square size={16} className="text-slate-300" />
-                                                )}
-                                            </button>
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={() => toggleSelect(q.id)}
+                                                className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
+                                            />
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap">
                                             <div className="flex items-center gap-1.5">
                                                 <Link
                                                     href={`/cotizaciones/${q.id}`}
-                                                    className="font-mono font-bold text-[#0B1E40] hover:text-amber-600 transition-colors"
+                                                    className="font-black text-xs text-[#0B1E40] hover:text-amber-600 hover:underline"
                                                 >
                                                     {q.code}
                                                 </Link>
@@ -503,7 +573,7 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedForEmail(q)}
-                                                    className="p-1.5 hover:bg-blue-50 text-blue-600 hover:text-blue-800 rounded-lg transition-colors"
+                                                    className="p-1.5 hover:bg-blue-50 text-blue-600 hover:text-blue-800 rounded-lg transition-colors cursor-pointer"
                                                     title="Enviar cotización por correo"
                                                 >
                                                     <Mail size={15} />
@@ -513,7 +583,7 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                                                         <button
                                                             type="button"
                                                             onClick={() => startTransition(async () => { await markQuoteAccepted(q.id); })}
-                                                            className="p-1.5 hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700 rounded-lg transition-colors"
+                                                            className="p-1.5 hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700 rounded-lg transition-colors cursor-pointer"
                                                             title="Marcar como Aceptada"
                                                         >
                                                             <CheckCircle2 size={15} />
@@ -521,13 +591,24 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                                                         <button
                                                             type="button"
                                                             onClick={() => startTransition(async () => { await markQuoteRejected(q.id); })}
-                                                            className="p-1.5 hover:bg-rose-50 text-rose-500 hover:text-rose-700 rounded-lg transition-colors"
+                                                            className="p-1.5 hover:bg-rose-50 text-rose-500 hover:text-rose-700 rounded-lg transition-colors cursor-pointer"
                                                             title="Marcar como Rechazada"
                                                         >
                                                             <XCircle size={15} />
                                                         </button>
                                                     </>
                                                 )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setEditingStatusQuote(q);
+                                                        setIndividualStatusValue(q.status);
+                                                    }}
+                                                    className="p-1.5 hover:bg-amber-50 text-slate-400 hover:text-amber-700 rounded-lg transition-colors cursor-pointer"
+                                                    title="Editar estado"
+                                                >
+                                                    <Pencil size={15} />
+                                                </button>
                                                 <Link
                                                     href={`/cotizaciones/${q.id}`}
                                                     className="p-1.5 hover:bg-slate-100 text-slate-500 hover:text-[#0B1E40] rounded-lg transition-colors"
@@ -539,7 +620,7 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                                                     type="button"
                                                     onClick={() => handleDelete(q.id, q.code)}
                                                     disabled={isPending && pendingId === q.id}
-                                                    className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-lg transition-colors disabled:opacity-50"
+                                                    className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                                                     title="Eliminar cotización"
                                                 >
                                                     {isPending && pendingId === q.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}

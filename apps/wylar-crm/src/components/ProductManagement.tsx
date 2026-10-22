@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useMemo } from 'react';
+import { useState, useTransition, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import {
     Pencil,
@@ -12,8 +12,6 @@ import {
     ExternalLink,
     Search,
     Trash2,
-    CheckSquare,
-    Square,
     Loader2,
     CheckCircle2,
 } from 'lucide-react';
@@ -83,6 +81,7 @@ export function ProductManagement({
 
     // Multi-selección
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const selectAllRef = useRef<HTMLInputElement>(null);
 
     // Filtros y búsqueda
     const [search, setSearch] = useState('');
@@ -136,6 +135,12 @@ export function ProductManagement({
     const filteredIds = useMemo(() => filteredProducts.map((p) => p.id), [filteredProducts]);
     const isAllSelected = filteredProducts.length > 0 && selectedIds.length === filteredProducts.length;
     const isSomeSelected = selectedIds.length > 0 && selectedIds.length < filteredProducts.length;
+
+    useEffect(() => {
+        if (selectAllRef.current) {
+            selectAllRef.current.indeterminate = isSomeSelected;
+        }
+    }, [isSomeSelected]);
 
     function toggleSelectAll() {
         if (isAllSelected) {
@@ -335,12 +340,12 @@ export function ProductManagement({
 
             {/* Barra flotante de acciones masivas */}
             {selectedIds.length > 0 && (
-                <div className="sticky top-4 z-30 bg-[#0B1E40] text-white px-4 sm:px-5 py-3 rounded-2xl shadow-2xl flex items-center justify-between gap-3 flex-wrap border border-cyan-500/30 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0B1E40]/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center justify-between gap-4 border border-cyan-500/30 animate-in fade-in slide-in-from-bottom-4 duration-200 w-[95%] max-w-2xl">
                     <div className="flex items-center gap-3">
                         <span className="bg-amber-500 text-[#0B1E40] font-black text-xs px-2.5 py-1 rounded-full shadow-sm">
                             {selectedIds.length}
                         </span>
-                        <span className="text-xs font-semibold text-slate-200">
+                        <span className="text-xs font-semibold text-slate-200 hidden sm:inline">
                             {selectedIds.length === 1 ? 'servicio seleccionado' : 'servicios seleccionados'}
                         </span>
                     </div>
@@ -578,18 +583,15 @@ export function ProductManagement({
                 {/* Vista móvil: tarjetas táctiles */}
                 <div className="block lg:hidden space-y-3">
                     <div className="flex items-center justify-between px-1 text-xs text-slate-500 font-semibold">
-                        <button
-                            type="button"
-                            onClick={toggleSelectAll}
-                            className="inline-flex items-center gap-2 hover:text-[#0B1E40] transition-colors"
-                        >
-                            {isAllSelected ? (
-                                <CheckSquare size={16} className="text-amber-500" />
-                            ) : (
-                                <Square size={16} className="text-slate-400" />
-                            )}
+                        <label className="inline-flex items-center gap-2 cursor-pointer hover:text-[#0B1E40] transition-colors">
+                            <input
+                                type="checkbox"
+                                checked={isAllSelected}
+                                onChange={toggleSelectAll}
+                                className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
+                            />
                             <span>{isAllSelected ? 'Deseleccionar todos' : 'Seleccionar todos'}</span>
-                        </button>
+                        </label>
                         <span>{filteredProducts.length} servicios</span>
                     </div>
 
@@ -605,17 +607,12 @@ export function ProductManagement({
                             >
                                 <div className="flex items-start justify-between gap-2">
                                     <div className="flex items-start gap-2.5 min-w-0">
-                                        <button
-                                            type="button"
-                                            onClick={() => toggleSelect(p.id)}
-                                            className="mt-0.5 text-slate-400 hover:text-amber-500 transition-colors"
-                                        >
-                                            {isSelected ? (
-                                                <CheckSquare size={18} className="text-amber-500" />
-                                            ) : (
-                                                <Square size={18} className="text-slate-300" />
-                                            )}
-                                        </button>
+                                        <input
+                                            type="checkbox"
+                                            checked={isSelected}
+                                            onChange={() => toggleSelect(p.id)}
+                                            className="mt-1 w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
+                                        />
                                         <div className="space-y-0.5 min-w-0">
                                             <p className="font-bold text-slate-900 text-sm truncate">{p.name}</p>
                                             <div className="flex items-center gap-2">
@@ -697,20 +694,14 @@ export function ProductManagement({
                             <thead>
                                 <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
                                     <th className="px-4 py-3.5 w-10 text-center">
-                                        <button
-                                            type="button"
-                                            onClick={toggleSelectAll}
-                                            className="text-slate-400 hover:text-[#0B1E40] transition-colors inline-flex items-center justify-center"
+                                        <input
+                                            ref={selectAllRef}
+                                            type="checkbox"
+                                            checked={isAllSelected}
+                                            onChange={toggleSelectAll}
+                                            className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
                                             title={isAllSelected ? 'Deseleccionar todos' : 'Seleccionar todos en esta página'}
-                                        >
-                                            {isAllSelected ? (
-                                                <CheckSquare size={16} className="text-amber-500" />
-                                            ) : isSomeSelected ? (
-                                                <CheckSquare size={16} className="text-slate-400 opacity-60" />
-                                            ) : (
-                                                <Square size={16} className="text-slate-300" />
-                                            )}
-                                        </button>
+                                        />
                                     </th>
                                     <th className="px-4 py-3.5">Servicio / Certificación</th>
                                     <th className="px-4 py-3.5">Categoría</th>
@@ -732,17 +723,12 @@ export function ProductManagement({
                                             } ${p.active ? '' : 'opacity-60 bg-slate-50/30'}`}
                                         >
                                             <td className="px-4 py-3 text-center">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => toggleSelect(p.id)}
-                                                    className="text-slate-400 hover:text-amber-500 transition-colors inline-flex items-center justify-center"
-                                                >
-                                                    {isSelected ? (
-                                                        <CheckSquare size={16} className="text-amber-500" />
-                                                    ) : (
-                                                        <Square size={16} className="text-slate-300" />
-                                                    )}
-                                                </button>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isSelected}
+                                                    onChange={() => toggleSelect(p.id)}
+                                                    className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
+                                                />
                                             </td>
                                             <td className="px-4 py-3.5">
                                                 <p className="font-bold text-slate-900">{p.name}</p>

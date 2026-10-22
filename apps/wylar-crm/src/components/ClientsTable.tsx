@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useTransition, useMemo } from 'react';
+import { useState, useTransition, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import {
     Pencil,
     Trash2,
     Eye,
-    CheckSquare,
-    Square,
     X,
     Building2,
     Loader2,
@@ -22,7 +20,7 @@ import type { Client } from '@prisma/client';
 type ClientWithCount = Client & { _count: { opportunities: number } };
 
 const inputClass =
-    'w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 focus:bg-white transition-all text-sm text-slate-900';
+    'w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B1E40]/20 focus:border-[#0B1E40] focus:bg-white transition-all text-sm text-slate-900';
 
 export function ClientsTable({
     clients,
@@ -38,6 +36,7 @@ export function ClientsTable({
 
     // Multi-selección
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const selectAllRef = useRef<HTMLInputElement>(null);
 
     // Modal de edición individual
     const [editingClient, setEditingClient] = useState<ClientWithCount | null>(null);
@@ -50,6 +49,12 @@ export function ClientsTable({
     const allIds = useMemo(() => clients.map((c) => c.id), [clients]);
     const isAllSelected = clients.length > 0 && selectedIds.length === clients.length;
     const isSomeSelected = selectedIds.length > 0 && selectedIds.length < clients.length;
+
+    useEffect(() => {
+        if (selectAllRef.current) {
+            selectAllRef.current.indeterminate = isSomeSelected;
+        }
+    }, [isSomeSelected]);
 
     function toggleSelectAll() {
         if (isAllSelected) {
@@ -81,11 +86,11 @@ export function ClientsTable({
         setSuccess(null);
 
         const formData = new FormData();
-        formData.set('name', editName);
+        formData.set('name', editName.toUpperCase());
         formData.set('rut', editRut);
-        formData.set('email', editEmail);
+        formData.set('email', editEmail.toLowerCase());
         formData.set('phone', editPhone);
-        formData.set('company', editCompany);
+        formData.set('company', editCompany.toUpperCase());
 
         startTransition(async () => {
             const result = await updateClient(editingClient.id, {}, formData);
@@ -157,14 +162,14 @@ export function ClientsTable({
                 </div>
             )}
 
-            {/* Barra flotante de acciones masivas (HubSpot / GHL style) */}
+            {/* Barra flotante inferior de acciones masivas (HubSpot / GHL style) */}
             {selectedIds.length > 0 && (
-                <div className="sticky top-4 z-30 bg-[#0B1E40] text-white px-4 sm:px-5 py-3 rounded-2xl shadow-2xl flex items-center justify-between gap-3 flex-wrap border border-cyan-500/30 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0B1E40]/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center justify-between gap-4 border border-cyan-500/30 animate-in fade-in slide-in-from-bottom-4 duration-200 w-[95%] max-w-xl">
                     <div className="flex items-center gap-3">
                         <span className="bg-amber-500 text-[#0B1E40] font-black text-xs px-2.5 py-1 rounded-full shadow-sm">
                             {selectedIds.length}
                         </span>
-                        <span className="text-xs font-semibold text-slate-200">
+                        <span className="text-xs font-semibold text-slate-200 hidden sm:inline">
                             {selectedIds.length === 1 ? 'cliente seleccionado' : 'clientes seleccionados'}
                         </span>
                     </div>
@@ -216,7 +221,7 @@ export function ClientsTable({
                                 <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre Completo</span>
                                 <input
                                     value={editName}
-                                    onChange={(e) => setEditName(e.target.value)}
+                                    onChange={(e) => setEditName(e.target.value.toUpperCase())}
                                     className={inputClass}
                                     required
                                 />
@@ -236,7 +241,7 @@ export function ClientsTable({
                                     <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Empresa / Razón Social</span>
                                     <input
                                         value={editCompany}
-                                        onChange={(e) => setEditCompany(e.target.value)}
+                                        onChange={(e) => setEditCompany(e.target.value.toUpperCase())}
                                         placeholder="Opcional"
                                         className={inputClass}
                                     />
@@ -249,13 +254,13 @@ export function ClientsTable({
                                     <input
                                         type="email"
                                         value={editEmail}
-                                        onChange={(e) => setEditEmail(e.target.value)}
+                                        onChange={(e) => setEditEmail(e.target.value.toLowerCase())}
                                         className={inputClass}
                                         required
                                     />
                                 </label>
                                 <label className="block">
-                                    <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Teléfono</span>
+                                    <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Teléfono Móvil</span>
                                     <input
                                         value={editPhone}
                                         onChange={(e) => setEditPhone(e.target.value)}
@@ -290,18 +295,15 @@ export function ClientsTable({
             {/* Vista móvil: tarjetas táctiles */}
             <div className="sm:hidden space-y-3">
                 <div className="flex items-center justify-between px-1 text-xs text-slate-500 font-semibold">
-                    <button
-                        type="button"
-                        onClick={toggleSelectAll}
-                        className="inline-flex items-center gap-2 hover:text-[#0B1E40] transition-colors"
-                    >
-                        {isAllSelected ? (
-                            <CheckSquare size={16} className="text-amber-500" />
-                        ) : (
-                            <Square size={16} className="text-slate-400" />
-                        )}
+                    <label className="inline-flex items-center gap-2 cursor-pointer hover:text-[#0B1E40] transition-colors">
+                        <input
+                            type="checkbox"
+                            checked={isAllSelected}
+                            onChange={toggleSelectAll}
+                            className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
+                        />
                         <span>{isAllSelected ? 'Deseleccionar todos' : 'Seleccionar todos'}</span>
-                    </button>
+                    </label>
                     <span>{clients.length} clientes</span>
                 </div>
 
@@ -318,83 +320,84 @@ export function ClientsTable({
                                 isSelected ? 'border-amber-400 ring-2 ring-amber-400/20 bg-amber-50/20' : 'border-slate-200/90'
                             }`}
                         >
-                            <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start justify-between gap-3">
                                 <div className="flex items-start gap-2.5 min-w-0">
-                                    <button
-                                        type="button"
-                                        onClick={() => toggleSelect(c.id)}
-                                        className="mt-0.5 text-slate-400 hover:text-amber-500 transition-colors"
-                                    >
-                                        {isSelected ? (
-                                            <CheckSquare size={18} className="text-amber-500" />
-                                        ) : (
-                                            <Square size={18} className="text-slate-300" />
-                                        )}
-                                    </button>
+                                    <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        onChange={() => toggleSelect(c.id)}
+                                        className="mt-1 w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
+                                    />
                                     <div className="min-w-0">
-                                        <Link href={`/clientes/${c.id}`} className="font-extrabold text-[#0B1E40] hover:text-amber-600 transition-colors text-sm truncate block">
-                                            {formattedName}
-                                        </Link>
-                                        {c.company && (
-                                            <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1 truncate">
-                                                <Building2 size={12} className="text-slate-400 shrink-0" /> {c.company.toUpperCase()}
-                                            </p>
-                                        )}
-                                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-400 flex-wrap">
-                                            {c.rut && <span>RUT: {c.rut}</span>}
-                                            <span>·</span>
-                                            <span className="font-medium text-slate-600">{leadTypeLabel(c.type)}</span>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <Link
+                                                href={`/clientes/${c.id}`}
+                                                className="font-extrabold text-[#0B1E40] hover:text-amber-600 transition-colors text-sm truncate"
+                                            >
+                                                {formattedName}
+                                            </Link>
+                                            <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                                                {leadTypeLabel(c.type)}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
+                                            {c.rut && <span className="font-mono">{c.rut}</span>}
+                                            {c.company && (
+                                                <span className="inline-flex items-center gap-1 font-medium text-slate-700">
+                                                    <Building2 size={12} className="text-slate-400" />
+                                                    {c.company.toUpperCase()}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
-                                <span className="shrink-0 inline-flex items-center text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200/70">
+
+                                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 shrink-0">
                                     {c._count.opportunities} {c._count.opportunities === 1 ? 'oportunidad' : 'oportunidades'}
                                 </span>
                             </div>
 
-                            {/* Contactos */}
-                            <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="grid grid-cols-2 gap-2 text-xs pt-1">
                                 <a
-                                    href={`tel:${formattedPhone}`}
-                                    className="flex items-center justify-center gap-1.5 py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-semibold hover:bg-slate-100 transition-colors"
+                                    href={`tel:${c.phone}`}
+                                    className="flex items-center justify-center gap-1.5 py-2 px-3 bg-white border border-slate-200 rounded-lg text-slate-700 font-semibold hover:bg-slate-50 transition-colors"
                                 >
                                     📞 {formattedPhone}
                                 </a>
                                 <a
                                     href={`mailto:${formattedEmail}`}
-                                    className="flex items-center justify-center gap-1.5 py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-semibold hover:bg-slate-100 transition-colors truncate"
+                                    className="flex items-center justify-center gap-1.5 py-2 px-3 bg-white border border-slate-200 rounded-lg text-slate-700 font-semibold hover:bg-slate-50 transition-colors truncate"
                                     title={formattedEmail}
                                 >
                                     ✉️ {formattedEmail.split('@')[0]}…
                                 </a>
                             </div>
 
-                            {/* Acciones */}
-                            <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                                <Link href={`/clientes/${c.id}`} className="font-bold text-xs text-amber-700 hover:text-amber-800 inline-flex items-center gap-1">
+                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                                <Link
+                                    href={`/clientes/${c.id}`}
+                                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-[#0B1E40] bg-slate-100 rounded-lg transition-colors"
+                                >
                                     Ver ficha <ExternalLink size={11} />
                                 </Link>
-                                <div className="flex items-center gap-1">
+                                <button
+                                    type="button"
+                                    onClick={() => openEditModal(c)}
+                                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors"
+                                >
+                                    <Pencil size={11} /> Editar
+                                </button>
+                                {isAdmin && (
                                     <button
                                         type="button"
-                                        onClick={() => openEditModal(c)}
-                                        className="p-1.5 text-slate-400 hover:text-[#0B1E40] rounded-lg transition-colors"
-                                        title="Editar cliente"
+                                        onClick={() => handleDelete(c.id, c.name)}
+                                        disabled={isPending && pendingId === c.id}
+                                        className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition-colors disabled:opacity-50"
+                                        title="Eliminar cliente"
                                     >
-                                        <Pencil size={14} />
+                                        {isPending && pendingId === c.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                                     </button>
-                                    {isAdmin && (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleDelete(c.id, c.name)}
-                                            disabled={isPending && pendingId === c.id}
-                                            className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition-colors disabled:opacity-50"
-                                            title="Eliminar cliente"
-                                        >
-                                            {isPending && pendingId === c.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                                        </button>
-                                    )}
-                                </div>
+                                )}
                             </div>
                         </div>
                     );
@@ -406,22 +409,16 @@ export function ClientsTable({
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                            <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
                                 <th className="px-4 py-3.5 w-10 text-center">
-                                    <button
-                                        type="button"
-                                        onClick={toggleSelectAll}
-                                        className="text-slate-400 hover:text-[#0B1E40] transition-colors inline-flex items-center justify-center"
-                                        title={isAllSelected ? 'Deseleccionar todos' : 'Seleccionar todos en esta página'}
-                                    >
-                                        {isAllSelected ? (
-                                            <CheckSquare size={16} className="text-amber-500" />
-                                        ) : isSomeSelected ? (
-                                            <CheckSquare size={16} className="text-slate-400 opacity-60" />
-                                        ) : (
-                                            <Square size={16} className="text-slate-300" />
-                                        )}
-                                    </button>
+                                    <input
+                                        ref={selectAllRef}
+                                        type="checkbox"
+                                        checked={isAllSelected}
+                                        onChange={toggleSelectAll}
+                                        className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
+                                        title={isAllSelected ? 'Deseleccionar todos' : 'Seleccionar todos'}
+                                    />
                                 </th>
                                 <th className="px-4 py-3.5">Cliente</th>
                                 <th className="px-4 py-3.5">RUT</th>
@@ -447,17 +444,12 @@ export function ClientsTable({
                                         }`}
                                     >
                                         <td className="px-4 py-3 text-center">
-                                            <button
-                                                type="button"
-                                                onClick={() => toggleSelect(c.id)}
-                                                className="text-slate-400 hover:text-amber-500 transition-colors inline-flex items-center justify-center"
-                                            >
-                                                {isSelected ? (
-                                                    <CheckSquare size={16} className="text-amber-500" />
-                                                ) : (
-                                                    <Square size={16} className="text-slate-300" />
-                                                )}
-                                            </button>
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={() => toggleSelect(c.id)}
+                                                className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
+                                            />
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
@@ -507,7 +499,7 @@ export function ClientsTable({
                                                 <button
                                                     type="button"
                                                     onClick={() => openEditModal(c)}
-                                                    className="p-1.5 text-slate-400 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
+                                                    className="p-1.5 text-slate-400 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
                                                     title="Editar cliente"
                                                 >
                                                     <Pencil size={15} />
@@ -517,7 +509,7 @@ export function ClientsTable({
                                                         type="button"
                                                         onClick={() => handleDelete(c.id, c.name)}
                                                         disabled={isPending && pendingId === c.id}
-                                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50 transition-colors"
+                                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50 transition-colors cursor-pointer"
                                                         title="Eliminar cliente"
                                                     >
                                                         {isPending && pendingId === c.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
