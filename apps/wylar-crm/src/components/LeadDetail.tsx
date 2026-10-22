@@ -49,7 +49,6 @@ export function LeadDetail({
     dncReason: string | null;
     products: { id: number; name: string; price: number | null }[];
 }) {
-    const chatEndRef = useRef<HTMLDivElement>(null);
     const noteFormRef = useRef<HTMLFormElement>(null);
 
     const [pendingStatus, setPendingStatus] = useState(lead.status);
@@ -60,10 +59,6 @@ export function LeadDetail({
     const [dncReasonInput, setDncReasonInput] = useState('');
     const [dncState, dncAction, dncPending] = useActionState(markDoNotContact.bind(null, lead.email, lead.phone), initialDncState);
     const [, startUnmarkTransition] = useTransition();
-
-    useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [lead.activities.length]);
 
     useEffect(() => {
         if (activityState.success) noteFormRef.current?.reset();
@@ -288,6 +283,135 @@ export function LeadDetail({
                         </div>
                     </div>
 
+                </div>
+
+                <div className="lg:col-span-2 space-y-6">
+                    {/* Tarjeta de Bitácora de Gestiones */}
+                    <div className="glass-card flex flex-col h-[520px] sm:h-[620px] lg:h-[660px] overflow-hidden bg-white shadow-sm border border-slate-200">
+                        {/* Campo superior para escribir nuevos registros / gestiones */}
+                        <div className="p-4 sm:p-5 border-b border-slate-200 bg-white">
+                            <form ref={noteFormRef} action={activityAction} className="space-y-3">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                            <Send size={13} className="text-[#0B1E40]" /> Registrar Nueva Gestión
+                                        </span>
+                                        <span className="text-xs text-slate-300">|</span>
+                                        <select
+                                            name="type"
+                                            defaultValue="NOTA"
+                                            className="bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-700 outline-none rounded-lg py-1 px-2.5 cursor-pointer transition-colors"
+                                        >
+                                            {ACTIVITY_TYPES.map((t) => (
+                                                <option key={t.value} value={t.value}>
+                                                    {t.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+                                        Se registrará con tu usuario arriba en la bitácora
+                                    </span>
+                                </div>
+
+                                <div className="flex items-end gap-2 bg-slate-50 p-2 sm:p-2.5 rounded-xl border border-slate-200 focus-within:border-[#0B1E40] focus-within:ring-2 focus-within:ring-[#0B1E40]/20 focus-within:bg-white transition-all">
+                                    <textarea
+                                        name="text"
+                                        required
+                                        placeholder="Escribe una nota, resumen de llamada, acuerdo, correo o mensaje de WhatsApp..."
+                                        className="flex-1 bg-transparent border-none p-1 focus:ring-0 outline-none resize-none min-h-[44px] max-h-32 text-sm text-slate-800 placeholder:text-slate-400 font-normal leading-relaxed"
+                                        rows={2}
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={activityPending}
+                                        className="bg-[#0B1E40] disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-lg hover:bg-[#122b59] transition-colors shadow-sm shrink-0 flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                                    >
+                                        <Send size={14} /> {activityPending ? 'Guardando…' : 'Registrar'}
+                                    </button>
+                                </div>
+                                {activityState.error && <p className="text-xs text-red-600 font-medium">{activityState.error}</p>}
+                            </form>
+                        </div>
+
+                        {/* Listado de la bitácora: la última acción arriba y las anteriores van bajando */}
+                        <div className="flex-1 overflow-y-auto bg-slate-50/50 p-4 sm:p-6 space-y-4">
+                            <div className="flex items-center justify-between text-xs text-slate-400 font-bold uppercase tracking-wider pb-1">
+                                <span>Historial de Gestiones ({lead.activities.length})</span>
+                                <span className="text-[11px] font-normal normal-case text-slate-400">Última acción arriba ↓</span>
+                            </div>
+
+                            {lead.activities.length === 0 ? (
+                                <div className="py-12 text-center text-slate-400 text-xs">
+                                    No hay gestiones registradas aún. Ingresa la primera en el campo superior.
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {lead.activities.map((a, i) => {
+                                        const isFirst = i === 0;
+
+                                        return (
+                                            <div
+                                                key={a.id}
+                                                className={clsx(
+                                                    'bg-white border rounded-xl p-4 transition-all shadow-xs',
+                                                    isFirst ? 'border-amber-300 ring-2 ring-amber-100/70' : 'border-slate-200 hover:border-slate-300'
+                                                )}
+                                            >
+                                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2.5 pb-2 border-b border-slate-100 gap-2">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="font-extrabold text-slate-800 text-sm">{a.authorName}</span>
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wide">
+                                                            {activityTypeLabel(a.type)}
+                                                        </span>
+                                                        {isFirst && (
+                                                            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                                                Última acción
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+                                                        <Clock size={13} className="text-slate-400 shrink-0" />
+                                                        {new Date(a.createdAt).toLocaleString('es-CL', {
+                                                            weekday: 'short',
+                                                            year: 'numeric',
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                        })}
+                                                    </span>
+                                                </div>
+                                                <p className="text-slate-700 text-sm whitespace-pre-wrap leading-relaxed font-medium">{a.text}</p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {/* Mensaje original del formulario posicionado abajo de la bitácora */}
+                            {lead.message && (
+                                <div className="pt-4 border-t border-slate-200/80 mt-6">
+                                    <div className="bg-slate-100/80 border border-slate-200 rounded-xl p-4 relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-1.5 h-full bg-[#0B1E40]"></div>
+                                        <div className="flex items-center justify-between gap-2 mb-2">
+                                            <span className="text-xs font-bold text-[#0B1E40] uppercase tracking-wider flex items-center gap-1.5">
+                                                <Mail size={13} /> Mensaje original del formulario
+                                            </span>
+                                            <span className="text-[11px] text-slate-400">
+                                                Ingreso: {new Date(lead.createdAt).toLocaleDateString('es-CL')}
+                                            </span>
+                                        </div>
+                                        <p className="text-slate-700 text-sm italic font-medium leading-relaxed pl-1">
+                                            &ldquo;{lead.message}&rdquo;
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Cotizaciones ampliada abajo de la bitácora en la columna principal */}
                     <QuotesPanel
                         opportunityId={lead.id}
                         quotes={lead.quotes}
@@ -295,81 +419,6 @@ export function LeadDetail({
                         leadName={lead.name}
                         leadEmail={lead.email}
                     />
-                </div>
-
-                <div className="lg:col-span-2 glass-card flex flex-col h-[520px] sm:h-[650px] lg:h-[750px] overflow-hidden">
-                    {lead.message && (
-                        <div className="p-4 sm:p-6 border-b border-slate-100 bg-white">
-                            <h3 className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-3">Mensaje original del formulario</h3>
-                            <div className="bg-slate-50/50 p-4 sm:p-5 rounded-xl border border-slate-200 relative">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-[#0B1E40] rounded-l-xl"></div>
-                                <p className="text-slate-700 leading-relaxed font-medium italic text-sm sm:text-[15px]">&ldquo;{lead.message}&rdquo;</p>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="flex-1 overflow-y-auto bg-slate-50/50 p-4 sm:p-6 space-y-6">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider text-center relative">
-                            <span className="bg-slate-50/50 px-3 relative z-10">Bitácora de gestiones</span>
-                            <div className="absolute top-1/2 left-0 w-full h-px bg-slate-200 -z-0"></div>
-                        </h4>
-
-                        <div className="space-y-0 pl-2 mt-4 pb-10">
-                            {lead.activities.map((a, i) => {
-                                const isSystem = a.userId === null;
-                                const isLast = i === lead.activities.length - 1;
-
-                                return (
-                                    <div key={a.id} className="relative pl-7 sm:pl-8 pb-6 group">
-                                        {!isLast && <div className="absolute left-[11px] top-6 bottom-[-24px] w-0.5 bg-slate-200"></div>}
-                                        <div className={clsx('absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-slate-50 flex items-center justify-center shadow-sm z-10', isSystem ? 'bg-slate-400' : 'bg-amber-500')}></div>
-
-                                        <div className="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-4 sm:p-5">
-                                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 border-b border-slate-100 pb-3 gap-2">
-                                                <div>
-                                                    <span className="font-extrabold text-slate-800 text-sm sm:text-base">{a.authorName}</span>
-                                                    <span className="ml-2 sm:ml-3 inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 uppercase tracking-wider">
-                                                        {activityTypeLabel(a.type)}
-                                                    </span>
-                                                </div>
-                                                <span className="text-xs font-semibold text-slate-500 flex items-center bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
-                                                    <Clock size={14} className="mr-1.5 text-slate-400 shrink-0" />
-                                                    {new Date(a.createdAt).toLocaleString('es-CL', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                                </span>
-                                            </div>
-                                            <p className="text-slate-700 text-sm sm:text-[15px] whitespace-pre-wrap leading-relaxed font-medium">{a.text}</p>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                            <div ref={chatEndRef} />
-                        </div>
-                    </div>
-
-                    <form ref={noteFormRef} action={activityAction} className="p-3 sm:p-4 bg-white border-t border-slate-100 space-y-2">
-                        <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:space-x-3 bg-slate-50 p-2.5 sm:p-2 rounded-2xl border border-slate-200 focus-within:border-[#0B1E40] focus-within:ring-2 focus-within:ring-[#0B1E40]/20 transition-all">
-                            <div className="flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-1 shrink-0 pb-0.5">
-                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide px-1">Tipo de registro</span>
-                                <select name="type" defaultValue="NOTA" className="bg-slate-200/60 hover:bg-slate-200 border border-slate-300 text-xs sm:text-sm font-semibold text-slate-700 outline-none rounded-lg py-1.5 px-2 cursor-pointer transition-colors">
-                                    {ACTIVITY_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                                </select>
-                            </div>
-
-                            <div className="flex items-end gap-2 flex-1 w-full">
-                                <textarea
-                                    name="text"
-                                    required
-                                    placeholder="Escribe una nota, resumen de llamada o WhatsApp..."
-                                    className="flex-1 bg-transparent border-none p-2 focus:ring-0 outline-none resize-none max-h-32 min-h-[44px] text-sm text-slate-700"
-                                    rows={1}
-                                />
-                                <button type="submit" disabled={activityPending} className="bg-[#0B1E40] disabled:bg-slate-300 disabled:cursor-not-allowed text-white p-3 rounded-xl hover:bg-[#122b59] transition-colors shadow-md shrink-0">
-                                    <Send size={18} />
-                                </button>
-                            </div>
-                        </div>
-                        {activityState.error && <p className="text-xs text-red-600 font-medium text-center">{activityState.error}</p>}
-                    </form>
                 </div>
             </div>
         </div>

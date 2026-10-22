@@ -57,7 +57,17 @@ function money(amount: number) {
     return `$${Math.round(amount).toLocaleString('es-CL')}`;
 }
 
-export function QuoteForm({ initialLead, products }: { initialLead: LeadSummary | null; products: ProductOption[] }) {
+export function QuoteForm({
+    initialLead,
+    products,
+    initialConditions,
+    initialItems,
+}: {
+    initialLead: LeadSummary | null;
+    products: ProductOption[];
+    initialConditions?: string[];
+    initialItems?: ItemDraft[];
+}) {
     const router = useRouter();
     const [selectedLead, setSelectedLead] = useState<LeadSummary | null>(initialLead);
     const [loadingLead, setLoadingLead] = useState(false);
@@ -76,9 +86,13 @@ export function QuoteForm({ initialLead, products }: { initialLead: LeadSummary 
     const [leadEditPending, setLeadEditPending] = useState(false);
 
     // Condiciones comerciales enlistadas (sin textos por defecto)
-    const [conditions, setConditions] = useState<string[]>(['']);
+    const [conditions, setConditions] = useState<string[]>(
+        initialConditions && initialConditions.length > 0 ? initialConditions : ['']
+    );
 
-    const [items, setItems] = useState<ItemDraft[]>([{ productId: '', description: '', quantity: 1, unitPrice: 0 }]);
+    const [items, setItems] = useState<ItemDraft[]>(
+        initialItems && initialItems.length > 0 ? initialItems : [{ productId: '', description: '', quantity: 1, unitPrice: 0 }]
+    );
     const [error, setError] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
 

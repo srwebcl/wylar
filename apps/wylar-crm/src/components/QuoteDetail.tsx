@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Download, Mail, CheckCircle2, XCircle, ExternalLink, Calendar, FileText } from 'lucide-react';
+import { ArrowLeft, Download, Mail, CheckCircle2, XCircle, ExternalLink, Calendar, FileText, Pencil } from 'lucide-react';
 import clsx from 'clsx';
 import { markQuoteAccepted, markQuoteRejected } from '@/actions/quotes';
 import { SendQuoteModal } from '@/components/SendQuoteModal';
@@ -99,6 +99,14 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
+                    <Link
+                        href={`/cotizaciones/nueva?leadId=${quote.opportunity.id}&fromQuoteId=${quote.id}`}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-[#0B1E40] hover:bg-[#122b59] text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
+                        title="Modificar condiciones, ítems o valores generando una nueva versión"
+                    >
+                        <Pencil size={14} /> Editar / Nueva versión
+                    </Link>
+
                     <a
                         href={`/api/quotes/${quote.id}/pdf`}
                         target="_blank"

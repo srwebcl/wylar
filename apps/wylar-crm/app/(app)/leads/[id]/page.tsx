@@ -13,7 +13,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
             where: { id: leadId },
             include: {
                 assignedTo: { omit: { passwordHash: true } },
-                activities: { orderBy: { createdAt: 'asc' } },
+                activities: { orderBy: { createdAt: 'desc' } },
                 client: true,
                 product: { include: { category: true } },
                 quotes: { include: { items: true }, orderBy: { version: 'desc' } },

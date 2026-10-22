@@ -7,20 +7,18 @@ export const dynamic = 'force-dynamic';
 export default async function NuevaCotizacionPage({
     searchParams,
 }: {
-    searchParams: Promise<{ leadId?: string }>;
+    searchParams: Promise<{ leadId?: string; fromQuoteId?: string }>;
 }) {
     await requireUser();
     const params = await searchParams;
     const initialLeadId = params.leadId ? Number(params.leadId) : undefined;
+    const fromQuoteId = params.fromQuoteId ? Number(params.fromQuoteId) : undefined;
 
-    const [initialLead, products] = await Promise.all([
-        // Solo se trae el lead preseleccionado (si viene de la ficha de una
-        // oportunidad) — el resto se busca bajo demanda vía
-        // /api/leads/search, nunca se carga el listado completo acá.
-        initialLeadId
-            ? prisma.lead.findUnique({
-                  where: { id: initialLeadId },
-                  select: { id: true, code: true, name: true, rut: true, email: true, phone: true, company: true, comuna: true },
+    const [fromQuote, products] = await Promise.all([
+        fromQuoteId
+            ? prisma.quote.findUnique({
+                  where: { id: fromQuoteId },
+                  include: { items: true },
               })
             : null,
         prisma.product.findMany({
@@ -30,10 +28,32 @@ export default async function NuevaCotizacionPage({
         }),
     ]);
 
+    const targetLeadId = initialLeadId ?? fromQuote?.opportunityId;
+
+    const initialLead = targetLeadId
+        ? await prisma.lead.findUnique({
+              where: { id: targetLeadId },
+              select: { id: true, code: true, name: true, rut: true, email: true, phone: true, company: true, comuna: true },
+          })
+        : null;
+
+    const initialConditions = fromQuote?.notes
+        ? fromQuote.notes.split('\n').map((l) => l.trim()).filter(Boolean)
+        : undefined;
+
+    const initialItems = fromQuote?.items.map((it) => ({
+        productId: it.productId ? String(it.productId) : '',
+        description: it.description,
+        quantity: it.quantity,
+        unitPrice: Number(it.unitPrice),
+    }));
+
     return (
         <QuoteForm
             initialLead={initialLead}
             products={products.map((p) => ({ id: p.id, name: p.name, price: p.price != null ? Number(p.price) : null }))}
+            initialConditions={initialConditions}
+            initialItems={initialItems}
         />
     );
 }
