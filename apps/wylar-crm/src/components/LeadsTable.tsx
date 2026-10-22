@@ -749,7 +749,6 @@ export function LeadsTable({
                                             >
                                                 {lead.code}
                                             </Link>
-                                            <span className="block text-[11px] text-slate-400">{sourceLabel(lead.source)}</span>
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-1.5">
@@ -821,7 +820,12 @@ export function LeadsTable({
                                                 {statusLabel(lead.status)}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
+                                        <td className="px-4 py-3 text-xs whitespace-nowrap text-slate-600">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700">
+                                                {sourceLabel(lead.source)}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
                                             {new Intl.DateTimeFormat('es-CL', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.createdAt))}
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap text-right">
