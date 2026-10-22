@@ -82,6 +82,7 @@ export const manualLeadSchema = z.object({
     phone: chileanPhoneField,
     company: z.string().trim().max(200).transform((val) => (val ? val.toUpperCase() : val)).optional().nullable(),
     productId: z.coerce.number().int().positive('Selecciona un producto o servicio.'),
+    source: z.string().trim().min(1, 'Selecciona o indica el origen de la oportunidad.').max(80),
     comuna: z.string().trim().max(120).optional().nullable(),
     message: z.string().trim().max(2000).optional().nullable(),
 });

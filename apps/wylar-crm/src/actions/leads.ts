@@ -132,6 +132,74 @@ export async function addLeadActivity(leadId: number, _prevState: LeadFormState,
  * las empresas/instituciones/OTEC no tienen esa restricción dura, solo se
  * les advierte (no bloqueante, ver confirmSimilar).
  */
+export async function getLeadSources(): Promise<{ id: number; name: string }[]> {
+    await requireUser();
+    const defaults = ['Web', 'Instagram', 'Facebook', 'Google Ads', 'Referidos'];
+    try {
+        const rows = await prisma.leadSource.findMany({
+            where: { active: true },
+            orderBy: { id: 'asc' },
+        });
+        if (rows.length === 0) {
+            for (const d of defaults) {
+                await prisma.leadSource.upsert({
+                    where: { name: d },
+                    update: {},
+                    create: { name: d },
+                });
+            }
+            return (
+                await prisma.leadSource.findMany({
+                    where: { active: true },
+                    orderBy: { id: 'asc' },
+                })
+            ).map((r) => ({ id: r.id, name: r.name }));
+        }
+        return rows.map((r) => ({ id: r.id, name: r.name }));
+    } catch {
+        return defaults.map((d, i) => ({ id: i + 1, name: d }));
+    }
+}
+
+export async function createLeadSource(name: string): Promise<{
+    ok: boolean;
+    error?: string;
+    source?: { id: number; name: string };
+}> {
+    const currentUser = await requireUser();
+    const trimmed = name.trim();
+    if (!trimmed) {
+        return { ok: false, error: 'Ingresa el nombre del origen.' };
+    }
+    if (trimmed.length > 80) {
+        return { ok: false, error: 'El nombre del origen no puede exceder los 80 caracteres.' };
+    }
+
+    try {
+        const source = await prisma.leadSource.upsert({
+            where: { name: trimmed },
+            update: { active: true },
+            create: { name: trimmed },
+        });
+
+        await audit(
+            currentUser,
+            'ORIGEN_CREADO',
+            'LeadSource',
+            source.id,
+            `Nuevo origen de oportunidad registrado: ${source.name}`,
+        );
+
+        revalidatePath('/leads');
+        revalidatePath('/dashboard');
+
+        return { ok: true, source: { id: source.id, name: source.name } };
+    } catch (err) {
+        console.error('Error creating lead source:', err);
+        return { ok: false, error: 'No se pudo guardar el origen en la base de datos.' };
+    }
+}
+
 export async function createLeadManual(_prevState: LeadFormState, formData: FormData): Promise<LeadFormState> {
     const currentUser = await requireUser();
 
@@ -143,6 +211,7 @@ export async function createLeadManual(_prevState: LeadFormState, formData: Form
         phone: formData.get('phone'),
         company: formData.get('company') || null,
         productId: formData.get('productId'),
+        source: formData.get('source'),
         comuna: formData.get('comuna') || null,
         message: formData.get('message') || null,
     });
@@ -204,7 +273,7 @@ export async function createLeadManual(_prevState: LeadFormState, formData: Form
             certificationInterest: product.name,
             comuna: normalizedComuna,
             message: data.message ? data.message.trim() : null,
-            source: 'MANUAL',
+            source: data.source,
             sourceDetail: `Ingresado manualmente por ${currentUser.name}.`,
             status: 'NUEVO',
         },
@@ -325,6 +394,7 @@ export async function updateLead(leadId: number, formData: FormData): Promise<Le
     const productIdStr = formData.get('productId') as string;
     const status = formData.get('status') as string;
     const assignedToIdStr = formData.get('assignedToId') as string;
+    const source = (formData.get('source') as string)?.trim() || null;
     const notes = (formData.get('notes') as string)?.trim() || null;
 
     if (!name || !email || !phone) {
@@ -351,6 +421,7 @@ export async function updateLead(leadId: number, formData: FormData): Promise<Le
             comuna,
             productId,
             status: status || lead.status,
+            ...(source ? { source } : {}),
             assignedToId,
             message: notes !== null ? notes : lead.message,
         },

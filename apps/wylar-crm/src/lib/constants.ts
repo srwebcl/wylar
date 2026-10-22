@@ -19,16 +19,27 @@ export type LeadType = (typeof LEAD_TYPES)[number]['value'];
 // prospecto, ver constants.ts#buildLeadsWhere / lib/leadDuplicates.ts).
 export const PERSON_LEAD_TYPES: readonly string[] = ['PERSONA', 'ALUMNO_BECADO'];
 
+export const DEFAULT_LEAD_SOURCES = [
+    'Web',
+    'Instagram',
+    'Facebook',
+    'Google Ads',
+    'Referidos',
+] as const;
+
 export const SOURCES = [
-    { value: 'WEB', label: 'Web (directo)' },
-    { value: 'FACEBOOK', label: 'Facebook' },
-    { value: 'INSTAGRAM', label: 'Instagram' },
+    { value: 'Web', label: 'Web' },
+    { value: 'Instagram', label: 'Instagram' },
+    { value: 'Facebook', label: 'Facebook' },
+    { value: 'Google Ads', label: 'Google Ads' },
+    { value: 'Referidos', label: 'Referidos' },
+    { value: 'WEB', label: 'Web' },
     { value: 'WHATSAPP', label: 'WhatsApp' },
     { value: 'MANUAL', label: 'Ingreso manual' },
     { value: 'OTRO', label: 'Otro' },
 ] as const;
 
-export type LeadSource = (typeof SOURCES)[number]['value'];
+export type LeadSource = string;
 
 // Embudo de ventas (Módulo de Gestión Comercial).
 export const STATUSES = [
@@ -74,8 +85,18 @@ export function leadTypeLabel(value: string): string {
     return LEAD_TYPES.find((t) => t.value === value)?.label ?? value;
 }
 
+const LEGACY_SOURCE_MAP: Record<string, string> = {
+    WEB: 'Web',
+    FACEBOOK: 'Facebook',
+    INSTAGRAM: 'Instagram',
+    WHATSAPP: 'WhatsApp',
+    MANUAL: 'Ingreso manual',
+    OTRO: 'Otro',
+};
+
 export function sourceLabel(value: string): string {
-    return SOURCES.find((s) => s.value === value)?.label ?? value;
+    if (!value) return '';
+    return LEGACY_SOURCE_MAP[value] ?? SOURCES.find((s) => s.value.toLowerCase() === value.toLowerCase())?.label ?? value;
 }
 
 export function statusLabel(value: string): string {

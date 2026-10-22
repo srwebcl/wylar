@@ -25,7 +25,7 @@ export function buildLeadsWhere({ q, type, status, source, assignedToId, categor
     return {
         ...(type ? { type } : {}),
         ...(status ? { status } : {}),
-        ...(source ? { source } : {}),
+        ...(source ? { source: { equals: source, mode: 'insensitive' as const } } : {}),
         ...(assignedToId === 'sin-asignar' ? { assignedToId: null } : assignedToId ? { assignedToId: Number.isInteger(Number(assignedToId)) ? Number(assignedToId) : -1 } : {}),
         ...(productId ? { productId: Number(productId) } : {}),
         ...(categoryId ? { product: { categoryId: Number(categoryId) } } : {}),

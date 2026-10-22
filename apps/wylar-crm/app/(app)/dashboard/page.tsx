@@ -74,6 +74,7 @@ export default async function DashboardPage() {
         activeProfiles,
         certificatesTotal,
         certificatesVigentes,
+        sources,
     ] = await Promise.all([
         prisma.lead.findMany({
             take: 8,
@@ -117,6 +118,7 @@ export default async function DashboardPage() {
         prisma.certificate.count({
             where: { revokedAt: null, OR: [{ expiryDate: null }, { expiryDate: { gte: now } }] },
         }),
+        prisma.leadSource.findMany({ where: { active: true }, orderBy: { id: 'asc' }, select: { id: true, name: true } }),
     ]);
 
     // Métricas de embudo
@@ -148,7 +150,7 @@ export default async function DashboardPage() {
                 </div>
 
                 <div className="flex items-center gap-2.5 flex-wrap">
-                    <CreateLeadModal categories={categories} products={products} />
+                    <CreateLeadModal categories={categories} products={products} sources={sources} />
 
                     <Link
                         href="/cotizaciones/nueva"

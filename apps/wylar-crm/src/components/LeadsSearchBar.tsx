@@ -12,10 +12,12 @@ export function LeadsSearchBar({
     users,
     categories = [],
     products = [],
+    sources = [],
 }: {
     users: User[];
     categories?: { id: number; name: string }[];
     products?: { id: number; name: string; categoryId: number }[];
+    sources?: { id: number; name: string }[];
 }) {
     const router = useRouter();
     const pathname = usePathname();
@@ -96,7 +98,10 @@ export function LeadsSearchBar({
                         <label className="block text-xs font-bold text-slate-500 mb-1">Origen</label>
                         <select defaultValue={searchParams.get('source') ?? ''} onChange={(e) => updateParam('source', e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
                             <option value="">Todos</option>
-                            {SOURCES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                            {Array.from(new Set([...sources.map((s) => s.name), ...SOURCES.map((s) => s.value)])).map((val) => {
+                                const matched = SOURCES.find((s) => s.value === val);
+                                return <option key={val} value={val}>{matched?.label ?? val}</option>;
+                            })}
                         </select>
                     </div>
                     <div>

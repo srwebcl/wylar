@@ -25,7 +25,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
     const page = Math.max(1, Number.parseInt(params.page ?? '1', 10) || 1);
     const where = buildLeadsWhere(params);
 
-    const [leads, total, users, categories, products] = await Promise.all([
+    const [leads, total, users, categories, products, sources] = await Promise.all([
         prisma.lead.findMany({
             where,
             include: { assignedTo: { omit: { passwordHash: true } }, client: true, product: { include: { category: true } } },
@@ -37,6 +37,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         prisma.user.findMany({ where: { active: true }, orderBy: { name: 'asc' }, omit: { passwordHash: true } }),
         prisma.productCategory.findMany({ where: { active: true }, orderBy: { name: 'asc' } }),
         prisma.product.findMany({ where: { active: true }, orderBy: { name: 'asc' }, select: { id: true, name: true, categoryId: true } }),
+        prisma.leadSource.findMany({ where: { active: true }, orderBy: { id: 'asc' }, select: { id: true, name: true } }),
     ]);
 
     const dncMap = await loadDoNotContactMap(leads.map((l) => ({ email: l.email, phone: l.phone })));
@@ -62,12 +63,12 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                     >
                         <FileSpreadsheet size={16} /> Exportar
                     </Link>
-                    <CreateLeadModal categories={categories} products={products} />
+                    <CreateLeadModal categories={categories} products={products} sources={sources} />
                 </div>
             </div>
 
-            <LeadsSearchBar users={users} categories={categories} products={products} />
-            <LeadsTable leads={leads} isAdmin={currentUser.role === 'ADMIN'} dncMap={dncMap} users={users} products={products} />
+            <LeadsSearchBar users={users} categories={categories} products={products} sources={sources} />
+            <LeadsTable leads={leads} isAdmin={currentUser.role === 'ADMIN'} dncMap={dncMap} users={users} products={products} sources={sources} />
 
             <Pagination page={page} totalPages={totalPages} buildHref={(p) => buildPageHref('/leads', params, p)} />
         </div>

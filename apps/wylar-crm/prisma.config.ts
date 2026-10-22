@@ -2,7 +2,9 @@
 // versiones anteriores). La usan los comandos de CLI (migrate, studio,
 // seed); la app en sí (src/lib/prisma.ts) sigue leyendo DATABASE_URL
 // directamente vía el datasource generado.
-import 'dotenv/config';
+import { config } from 'dotenv';
+config({ path: '.env.local' });
+config();
 import { defineConfig } from 'prisma/config';
 
 export default defineConfig({

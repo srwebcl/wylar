@@ -569,3 +569,14 @@ model AuditLog {
   @@index([createdAt])
   @@map("audit_logs")
 }
+
+// Orígenes de oportunidades comerciales configurables dinámicamente.
+model LeadSource {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("lead_sources")
+}
+

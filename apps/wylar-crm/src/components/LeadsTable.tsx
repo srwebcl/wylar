@@ -43,12 +43,14 @@ export function LeadsTable({
     dncMap = new Map(),
     users = [],
     products = [],
+    sources = [],
 }: {
     leads: LeadWithAssignee[];
     isAdmin?: boolean;
     dncMap?: Map<string, string>;
     users?: User[];
     products?: { id: number; name: string; categoryId: number }[];
+    sources?: { id: number; name: string }[];
 }) {
     const [isPending, startTransition] = useTransition();
     const [pendingId, setPendingId] = useState<number | null>(null);
@@ -76,10 +78,17 @@ export function LeadsTable({
     const [editComuna, setEditComuna] = useState('');
     const [editProductId, setEditProductId] = useState<number>(0);
     const [editStatus, setEditStatus] = useState('NUEVO');
+    const [editSource, setEditSource] = useState('Web');
     const [editAssignedToId, setEditAssignedToId] = useState<string>('');
     const [editNotes, setEditNotes] = useState('');
 
     const allIds = useMemo(() => leads.map((l) => l.id), [leads]);
+    const sourceFilterOptions = useMemo(() => {
+        return Array.from(new Set([...sources.map((s) => s.name), ...SOURCES.map((s) => s.value)])).map((val) => {
+            const matched = SOURCES.find((s) => s.value === val);
+            return { value: val, label: matched?.label ?? val };
+        });
+    }, [sources]);
     const isAllSelected = leads.length > 0 && selectedIds.length === leads.length;
     const isSomeSelected = selectedIds.length > 0 && selectedIds.length < leads.length;
 
@@ -113,6 +122,7 @@ export function LeadsTable({
         setEditComuna(lead.comuna ?? '');
         setEditProductId(lead.productId);
         setEditStatus(lead.status);
+        setEditSource(lead.source);
         setEditAssignedToId(lead.assignedToId ? String(lead.assignedToId) : '');
         setEditNotes(lead.message ?? '');
     }
@@ -132,6 +142,7 @@ export function LeadsTable({
         formData.set('comuna', editComuna);
         formData.set('productId', String(editProductId));
         formData.set('status', editStatus);
+        formData.set('source', editSource);
         formData.set('assignedToId', editAssignedToId);
         formData.set('notes', editNotes);
 
@@ -395,13 +406,22 @@ export function LeadsTable({
                                     />
                                 </div>
                                 <div>
-                                    <span className="block text-xs font-medium text-slate-500 mb-1">Responsable comercial</span>
+                                    <span className="block text-xs font-medium text-slate-500 mb-1">Origen de la oportunidad</span>
                                     <Select
-                                        value={editAssignedToId}
-                                        onChange={setEditAssignedToId}
-                                        options={[{ value: '', label: 'Sin asignar' }, ...users.map((u) => ({ value: String(u.id), label: u.name }))]}
+                                        value={editSource}
+                                        onChange={setEditSource}
+                                        options={sourceFilterOptions}
                                     />
                                 </div>
+                            </div>
+
+                            <div>
+                                <span className="block text-xs font-medium text-slate-500 mb-1">Responsable comercial</span>
+                                <Select
+                                    value={editAssignedToId}
+                                    onChange={setEditAssignedToId}
+                                    options={[{ value: '', label: 'Sin asignar' }, ...users.map((u) => ({ value: String(u.id), label: u.name }))]}
+                                />
                             </div>
 
                             <label className="block">
@@ -713,7 +733,7 @@ export function LeadsTable({
                                     filter={{ type: 'select', paramKey: 'assignedToId', options: [{ value: 'sin-asignar', label: 'Sin asignar' }, ...users.map((u) => ({ value: String(u.id), label: u.name }))] }}
                                 />
                                 <Th label="Estado" sortKey="status" filter={{ type: 'select', paramKey: 'status', options: [...STATUSES] }} />
-                                <Th label="Origen" filter={{ type: 'select', paramKey: 'source', options: [...SOURCES] }} />
+                                <Th label="Origen" filter={{ type: 'select', paramKey: 'source', options: sourceFilterOptions }} />
                                 <Th label="Ingreso" sortKey="createdAt" filter={{ type: 'dateRange', paramKey: 'from' }} />
                                 <th className="px-4 py-3.5 text-right text-xs font-semibold text-slate-500">Acciones</th>
                             </tr>
