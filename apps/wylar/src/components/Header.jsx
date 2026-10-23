@@ -1,6 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Building2, Mail, Phone, ShieldCheck, Handshake, Menu, X } from 'lucide-react';
 
+function FacebookIcon({ size = 14, className = "" }) {
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className={className}
+            aria-hidden="true"
+        >
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+        </svg>
+    );
+}
+
+function InstagramIcon({ size = 14, className = "" }) {
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={className}
+            aria-hidden="true"
+        >
+            <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+        </svg>
+    );
+}
+
 export default function Header({ currentPath = '/' }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -18,30 +54,53 @@ export default function Header({ currentPath = '/' }) {
     return (
         <div className="sticky top-0 z-[100] w-full flex flex-col shadow-sm">
             {/* NAVBAR SECUNDARIO (TOP BAR) */}
-            <div className="bg-gradient-to-r from-[#050B14] via-[#0B1E40] to-[#050B14] text-slate-300 text-[13px] py-1 hidden md:block border-b border-white/5 relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
+            <div className="bg-gradient-to-r from-[#0B1E40] to-blue-900 text-slate-200 text-[13px] py-1.5 hidden md:block border-b border-white/10 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center relative z-10">
                     <div className="flex items-center gap-4 lg:gap-5">
-                        <a href="/personas" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/personas') ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
+                        <a href="/personas" className={`flex items-center gap-2 px-3.5 py-1 rounded-full transition-all duration-300 ${isActive('/personas') ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'hover:bg-white/10 hover:text-white'}`}>
                             <Users size={14} /> Personas
                         </a>
-                        <a href="/empresas" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/empresas') ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
+                        <a href="/empresas" className={`flex items-center gap-2 px-3.5 py-1 rounded-full transition-all duration-300 ${isActive('/empresas') ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'hover:bg-white/10 hover:text-white'}`}>
                             <Building2 size={14} /> Empresas
                         </a>
-                        <a href="/otec" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/otec') ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
+                        <a href="/otec" className={`flex items-center gap-2 px-3.5 py-1 rounded-full transition-all duration-300 ${isActive('/otec') ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30' : 'hover:bg-white/10 hover:text-white'}`}>
                             <Handshake size={14} /> OTEC
                         </a>
-                        <a href="/instituciones" className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${isActive('/instituciones') ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'hover:bg-white/5 hover:text-white'}`}>
+                        <a href="/instituciones" className={`flex items-center gap-2 px-3.5 py-1 rounded-full transition-all duration-300 ${isActive('/instituciones') ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'hover:bg-white/10 hover:text-white'}`}>
                             <ShieldCheck size={14} /> Instituciones de Educación
                         </a>
                     </div>
-                    <div className="flex items-center gap-6 font-semibold">
-                        <a href="mailto:contacto@wylar.cl" className="flex items-center gap-2 hover:text-cyan-400 transition-colors">
-                            <Mail size={14} className="text-cyan-500" /> contacto@wylar.cl
+                    <div className="flex items-center gap-5 font-semibold">
+                        <a href="mailto:contacto@wylar.cl" className="flex items-center gap-2 hover:text-white transition-colors">
+                            <Mail size={14} className="text-cyan-400" /> contacto@wylar.cl
                         </a>
-                        <a href="tel:+56929566326" className="flex items-center gap-2 hover:text-cyan-400 transition-colors">
-                            <Phone size={14} className="text-cyan-500" /> +56 9 2956 6326
+                        <a href="tel:+56929566326" className="flex items-center gap-2 hover:text-white transition-colors">
+                            <Phone size={14} className="text-cyan-400" /> +56 9 2956 6326
                         </a>
+                        <span className="h-4 w-px bg-white/20" aria-hidden="true"></span>
+                        <div className="flex items-center gap-2">
+                            <a
+                                href="https://www.facebook.com/wylar.cl"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Facebook de Wylar"
+                                title="Facebook @wylar.cl"
+                                className="w-7 h-7 rounded-full bg-white/10 hover:bg-[#1877F2] text-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-sm"
+                            >
+                                <FacebookIcon size={14} />
+                            </a>
+                            <a
+                                href="https://www.instagram.com/wylar.cl"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Instagram de Wylar"
+                                title="Instagram @wylar.cl"
+                                className="w-7 h-7 rounded-full bg-white/10 hover:bg-gradient-to-tr hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] text-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-sm"
+                            >
+                                <InstagramIcon size={14} />
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -103,8 +162,40 @@ export default function Header({ currentPath = '/' }) {
                         <a href="/empresas" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><Building2 size={24} className="text-blue-600" /> Empresas</a>
                         <a href="/otec" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><Handshake size={24} className="text-violet-500" /> OTEC</a>
                         <a href="/instituciones" className="font-bold text-slate-700 text-xl px-4 py-3 hover:bg-slate-100 rounded-2xl transition-colors flex items-center gap-4"><ShieldCheck size={24} className="text-amber-500" /> Instituciones de Educación</a>
-                        
-                        <div className="mt-8 pb-12">
+                        <div className="h-px bg-slate-200 w-full my-2"></div>
+                        <div className="text-xs font-black text-blue-500 uppercase tracking-widest px-3 mb-1">Contacto y Redes Sociales</div>
+                        <div className="flex flex-col gap-3 px-3 text-slate-700 font-semibold text-sm">
+                            <a href="mailto:contacto@wylar.cl" className="flex items-center gap-3 hover:text-blue-600 transition-colors">
+                                <Mail size={18} className="text-blue-600" /> contacto@wylar.cl
+                            </a>
+                            <a href="tel:+56929566326" className="flex items-center gap-3 hover:text-blue-600 transition-colors">
+                                <Phone size={18} className="text-blue-600" /> +56 9 2956 6326
+                            </a>
+                            <div className="flex items-center gap-3 mt-1">
+                                <a
+                                    href="https://www.facebook.com/wylar.cl"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="Facebook de Wylar"
+                                    title="Facebook @wylar.cl"
+                                    className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-[#1877F2] hover:text-white transition-colors"
+                                >
+                                    <FacebookIcon size={18} />
+                                </a>
+                                <a
+                                    href="https://www.instagram.com/wylar.cl"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="Instagram de Wylar"
+                                    title="Instagram @wylar.cl"
+                                    className="w-10 h-10 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center hover:bg-gradient-to-tr hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] hover:text-white transition-colors"
+                                >
+                                    <InstagramIcon size={18} />
+                                </a>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 pb-12">
                             <a href="/validador" className="bg-gradient-to-r from-[#0B1E40] to-blue-900 text-white font-black text-lg p-5 rounded-full flex items-center justify-center gap-3 shadow-[0_8px_30px_rgba(11,30,64,0.3)] w-full relative overflow-hidden group">
                                 <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
                                 <ShieldCheck size={24} className="relative z-10" />
