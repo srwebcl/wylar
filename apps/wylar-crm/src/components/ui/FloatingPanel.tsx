@@ -32,14 +32,46 @@ export function FloatingPanel({
     align?: 'left' | 'right';
     matchWidth?: boolean;
 }) {
-    const [rect, setRect] = useState<{ top: number; left: number; right: number; width: number } | null>(null);
+    const [coords, setCoords] = useState<{
+        top?: number;
+        bottom?: number;
+        left?: number;
+        right?: number;
+        width?: number;
+        maxHeight?: number;
+    } | null>(null);
 
     useLayoutEffect(() => {
         if (!open || !anchorRef.current) return;
 
         function reposition() {
-            const r = anchorRef.current!.getBoundingClientRect();
-            setRect({ top: r.bottom + 6, left: r.left, right: window.innerWidth - r.right, width: r.width });
+            if (!anchorRef.current) return;
+            const r = anchorRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - r.bottom;
+            const spaceAbove = r.top;
+
+            // Si hay poco espacio abajo (< 230px) y hay más espacio arriba, abrir hacia arriba
+            const openUpwards = spaceBelow < 230 && spaceAbove > spaceBelow;
+
+            if (openUpwards) {
+                const availableHeight = Math.max(120, Math.min(340, spaceAbove - 16));
+                setCoords({
+                    bottom: window.innerHeight - r.top + 6,
+                    left: align === 'left' ? r.left : undefined,
+                    right: align === 'right' ? window.innerWidth - r.right : undefined,
+                    width: matchWidth ? r.width : undefined,
+                    maxHeight: availableHeight,
+                });
+            } else {
+                const availableHeight = Math.max(120, Math.min(340, spaceBelow - 16));
+                setCoords({
+                    top: r.bottom + 6,
+                    left: align === 'left' ? r.left : undefined,
+                    right: align === 'right' ? window.innerWidth - r.right : undefined,
+                    width: matchWidth ? r.width : undefined,
+                    maxHeight: availableHeight,
+                });
+            }
         }
         reposition();
 
@@ -49,25 +81,27 @@ export function FloatingPanel({
             window.removeEventListener('scroll', reposition, true);
             window.removeEventListener('resize', reposition);
         };
-    }, [open, anchorRef]);
+    }, [open, anchorRef, align, matchWidth]);
 
     useEffect(() => {
-        if (!open) setRect(null);
+        if (!open) setCoords(null);
     }, [open]);
 
-    if (!open || !rect || typeof document === 'undefined') return null;
+    if (!open || !coords || typeof document === 'undefined') return null;
 
     return createPortal(
         <div
             data-floating-panel=""
             style={{
                 position: 'fixed',
-                top: rect.top,
-                left: align === 'left' ? rect.left : undefined,
-                right: align === 'right' ? rect.right : undefined,
-                width: matchWidth ? rect.width : undefined,
+                top: coords.top,
+                bottom: coords.bottom,
+                left: coords.left,
+                right: coords.right,
+                width: coords.width,
+                maxHeight: coords.maxHeight,
             }}
-            className="z-[100]"
+            className="z-[200] flex flex-col"
         >
             {children}
         </div>,

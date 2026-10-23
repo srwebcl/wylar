@@ -1,9 +1,14 @@
 import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/auth';
-import { CertificationTitlesManagement } from '@/components/CertificationTitlesManagement';
+import { CertificateConfigHub } from '@/components/CertificateConfigHub';
 
-export default async function CertificacionesPage() {
+export default async function CertificacionesPage({
+    searchParams,
+}: {
+    searchParams?: Promise<Record<string, string | undefined>>;
+}) {
     const currentUser = await requireUser();
+    const params = searchParams ? await searchParams : {};
 
     const [titles, types, categories] = await Promise.all([
         prisma.certificationTitle.findMany({
@@ -14,8 +19,15 @@ export default async function CertificacionesPage() {
         prisma.certificateCategory.findMany({ orderBy: { name: 'asc' } }),
     ]);
 
+    const initialTab = (
+        params.tab === 'tipos' || params.tab === 'categorias' || params.tab === 'certificaciones'
+            ? params.tab
+            : 'certificaciones'
+    ) as 'certificaciones' | 'tipos' | 'categorias';
+
     return (
-        <CertificationTitlesManagement
+        <CertificateConfigHub
+            initialTab={initialTab}
             titles={titles.map((t) => ({
                 id: t.id,
                 name: t.name,

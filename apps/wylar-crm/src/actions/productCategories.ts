@@ -124,3 +124,24 @@ export async function bulkToggleProductCategories(ids: number[], active: boolean
     revalidatePath('/productos/categorias');
     return { success: `${ids.length} categorías ${active ? 'activadas' : 'desactivadas'} exitosamente.` };
 }
+
+/** Actualiza la lista de campos personalizados de una categoría */
+export async function updateCategoryFields(
+    categoryId: number,
+    fields: Array<{ key: string; label: string; type: 'text' | 'number' | 'date' | 'select'; options?: string[]; placeholder?: string }>
+): Promise<ProductCategoryFormState> {
+    const admin = await requireAdmin();
+    const category = await prisma.productCategory.findUnique({ where: { id: categoryId } });
+    if (!category) return { error: 'La categoría no existe.' };
+
+    await prisma.productCategory.update({
+        where: { id: categoryId },
+        data: { fields },
+    });
+
+    await audit(admin, 'CAMPOS_CATEGORIA_ACTUALIZADOS', 'product_category', category.name, `${fields.length} campos configurados`);
+    revalidatePath('/productos');
+    revalidatePath('/productos/categorias');
+    return { success: 'Campos personalizados actualizados exitosamente.' };
+}
+

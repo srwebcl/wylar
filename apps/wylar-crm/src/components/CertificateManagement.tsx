@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
-import { Ban, Download, Pencil, Plus, Settings, ShieldCheck, Trash2 } from 'lucide-react';
+import { AlertCircle, Ban, Check, Download, IdCard, Pencil, Plus, Settings, ShieldCheck, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { issueCertificate, revokeCertificate, updateCertificate, deleteCertificate } from '@/actions/certificates';
 import { createCertificateCategory, createCertificationTitle } from '@/actions/certificateMeta';
@@ -137,6 +137,7 @@ export function CertificateManagement({
 
     const [holderName, setHolderName] = useState('');
     const [holderRut, setHolderRut] = useState('');
+    const [rutError, setRutError] = useState<string | null>(null);
     const [certificationTitle, setCertificationTitle] = useState('');
     const [categoryLabel, setCategoryLabel] = useState(localCategories[0] ?? '');
     const [issueDate, setIssueDate] = useState(todayIso());
@@ -145,6 +146,30 @@ export function CertificateManagement({
     const [detailTemplate, setDetailTemplate] = useState<string>('ninguna');
     const [detailText, setDetailText] = useState('');
     const [completionText, setCompletionText] = useState(types[0]?.completionText ?? 'Ha completado satisfactoriamente el curso de');
+
+    const isRutValid = holderRut.trim().length >= 8 && isValidRut(holderRut);
+
+    function handleRutChange(e: React.ChangeEvent<HTMLInputElement>) {
+        // Sanitiza la entrada: solo números, puntos, guion y K/k
+        const raw = e.target.value.toUpperCase();
+        const clean = raw.replace(/[^0-9K.\-]/g, '').slice(0, 12);
+        setHolderRut(clean);
+        if (rutError) setRutError(null);
+    }
+
+    function handleRutBlur() {
+        const trimmed = holderRut.trim();
+        if (!trimmed) {
+            setRutError(null);
+            return;
+        }
+        if (isValidRut(trimmed)) {
+            setHolderRut(formatRut(trimmed));
+            setRutError(null);
+        } else {
+            setRutError('RUT inválido. Revisa el número y el dígito verificador.');
+        }
+    }
 
     function handleDetailTemplateChange(value: string) {
         setDetailTemplate(value);
@@ -195,6 +220,7 @@ export function CertificateManagement({
     function resetForm() {
         setHolderName('');
         setHolderRut('');
+        setRutError(null);
         setCertificationTitle('');
         setCategoryLabel(localCategories[0] ?? '');
         setIssueDate(todayIso());
@@ -209,6 +235,7 @@ export function CertificateManagement({
     function openCreateForm() {
         setError(null);
         setSuccess(null);
+        setRutError(null);
         setEditingId(null);
         setEditingCode(null);
         resetForm();
@@ -218,6 +245,7 @@ export function CertificateManagement({
     function openEditForm(c: CertificateRow) {
         setError(null);
         setSuccess(null);
+        setRutError(null);
         setEditingId(c.id);
         setEditingCode(c.code);
         setHolderName(c.holderName);
@@ -243,11 +271,21 @@ export function CertificateManagement({
         setError(null);
         setSuccess(null);
 
-        if (!isValidRut(holderRut)) {
-            setError('RUT inválido. Revisa el número y el dígito verificador.');
+        const trimmedRut = holderRut.trim();
+        if (!trimmedRut) {
+            setRutError('Ingresa el RUT del titular.');
+            setError('Debes ingresar el RUT del titular.');
             return;
         }
-        const canonicalRut = formatRut(holderRut);
+
+        if (!isValidRut(trimmedRut)) {
+            setRutError('RUT inválido. Revisa el número y el dígito verificador.');
+            setError('El RUT ingresado no es válido según el algoritmo oficial (módulo 11).');
+            return;
+        }
+        const canonicalRut = formatRut(trimmedRut);
+        setHolderRut(canonicalRut);
+        setRutError(null);
 
         startTransition(async () => {
             let computedExpiryDate = null;
@@ -321,10 +359,10 @@ export function CertificateManagement({
                 <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
                     <Link
                         href="/certificados/configuracion"
-                        title="Tipos y categorías de certificado"
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-3.5 py-2.5 rounded-xl transition-colors text-xs sm:text-sm"
+                        title="Catálogo y Configuración de Certificados"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium px-3.5 py-2.5 rounded-xl transition-colors text-xs sm:text-sm shadow-xs"
                     >
-                        <Settings size={15} /> Tipos y categorías
+                        <Settings size={15} /> Catálogo y Configuración
                     </Link>
                     <button
                         onClick={openCreateForm}
@@ -365,14 +403,47 @@ export function CertificateManagement({
                                 </Field>
 
                                 <Field label="RUT del titular">
-                                    <input
-                                        value={holderRut}
-                                        onChange={(e) => setHolderRut(e.target.value)}
-                                        onBlur={() => { if (isValidRut(holderRut)) setHolderRut(formatRut(holderRut)); }}
-                                        placeholder="12.345.678-9"
-                                        className={inputClass}
-                                        required
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={holderRut}
+                                            onChange={handleRutChange}
+                                            onBlur={handleRutBlur}
+                                            placeholder="12.345.678-5"
+                                            maxLength={12}
+                                            required
+                                            className={`w-full pl-9 pr-9 py-2.5 bg-slate-50 border rounded-lg text-sm font-mono transition-all outline-none text-slate-900 ${
+                                                rutError
+                                                    ? 'border-red-300 ring-2 ring-red-200/60 focus:border-red-500 focus:ring-red-200 focus:bg-white bg-red-50/10'
+                                                    : isRutValid
+                                                    ? 'border-emerald-300 ring-1 ring-emerald-200/50 bg-emerald-50/10 focus:border-emerald-500 focus:ring-emerald-200/60 focus:bg-white'
+                                                    : 'border-slate-200 focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 focus:bg-white'
+                                            }`}
+                                        />
+                                        <div className="absolute left-3 top-2.5 text-slate-400 pointer-events-none">
+                                            <IdCard size={17} />
+                                        </div>
+                                        {isRutValid && (
+                                            <div className="absolute right-3 top-2.5 text-emerald-600 flex items-center" title="RUT válido">
+                                                <Check size={16} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    {rutError ? (
+                                        <p className="text-xs text-red-600 mt-1.5 flex items-center gap-1 font-medium">
+                                            <AlertCircle size={13} className="shrink-0" />
+                                            <span>{rutError}</span>
+                                        </p>
+                                    ) : isRutValid ? (
+                                        <p className="text-[11px] text-emerald-700 mt-1 flex items-center gap-1 font-medium">
+                                            <Check size={12} className="shrink-0 text-emerald-600" />
+                                            <span>RUT válido (Módulo 11 verificado)</span>
+                                        </p>
+                                    ) : (
+                                        <p className="text-[11px] text-slate-400 mt-1">
+                                            Formato: 12.345.678-5 (se valida con dígito verificador)
+                                        </p>
+                                    )}
                                 </Field>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -270,7 +270,10 @@ model ProductCategory {
   // Qué campos extra pide el formulario de producto para esta categoría —
   // ver ATTRIBUTE_TEMPLATES en src/lib/productSpec.ts.
   attributeTemplate String  @default("GENERICO")
-  active             Boolean @default(true)
+  // Campos dinámicos editables por el Admin desde /productos/categorias.
+  // Si tiene elementos, tiene prioridad sobre attributeTemplate.
+  fields            Json?
+  active            Boolean @default(true)
 
   createdAt DateTime @default(now())
 

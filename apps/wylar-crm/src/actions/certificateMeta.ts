@@ -22,6 +22,12 @@ export interface CertificateMetaState {
  * las opciones sugeridas hacia adelante.
  */
 
+function revalidateAll() {
+    revalidatePath('/certificados');
+    revalidatePath('/certificados/configuracion');
+    revalidatePath('/certificados/certificaciones');
+}
+
 export async function createCertificateCategory(_prevState: CertificateMetaState, formData: FormData): Promise<CertificateMetaState> {
     const user = await requireUser();
     const parsed = certificateCategorySchema.safeParse({ name: formData.get('name') });
@@ -32,8 +38,7 @@ export async function createCertificateCategory(_prevState: CertificateMetaState
 
     await prisma.certificateCategory.create({ data: { name: parsed.data.name } });
     await audit(user, 'CATEGORIA_CERTIFICADO_CREADA', 'certificate_category', parsed.data.name);
-    revalidatePath('/certificados');
-    revalidatePath('/certificados/configuracion');
+    revalidateAll();
     return { success: 'Categoría creada.' };
 }
 
@@ -50,8 +55,7 @@ export async function updateCertificateCategory(id: number, _prevState: Certific
 
     await prisma.certificateCategory.update({ where: { id }, data: { name: parsed.data.name } });
     await audit(admin, 'CATEGORIA_CERTIFICADO_EDITADA', 'certificate_category', parsed.data.name, `antes: ${category.name}`);
-    revalidatePath('/certificados');
-    revalidatePath('/certificados/configuracion');
+    revalidateAll();
     return { success: 'Categoría actualizada.' };
 }
 
@@ -62,8 +66,7 @@ export async function deleteCertificateCategory(id: number): Promise<Certificate
 
     await prisma.certificateCategory.delete({ where: { id } });
     await audit(admin, 'CATEGORIA_CERTIFICADO_ELIMINADA', 'certificate_category', category.name);
-    revalidatePath('/certificados');
-    revalidatePath('/certificados/configuracion');
+    revalidateAll();
     return { success: 'Categoría eliminada.' };
 }
 
@@ -80,8 +83,7 @@ export async function createCertificateType(_prevState: CertificateMetaState, fo
 
     await prisma.certificateType.create({ data: parsed.data });
     await audit(user, 'TIPO_CERTIFICADO_CREADO', 'certificate_type', parsed.data.label);
-    revalidatePath('/certificados');
-    revalidatePath('/certificados/configuracion');
+    revalidateAll();
     return { success: 'Tipo creado.' };
 }
 
@@ -101,8 +103,7 @@ export async function updateCertificateType(id: number, _prevState: CertificateM
 
     await prisma.certificateType.update({ where: { id }, data: parsed.data });
     await audit(admin, 'TIPO_CERTIFICADO_EDITADO', 'certificate_type', parsed.data.label, `antes: ${type.label}`);
-    revalidatePath('/certificados');
-    revalidatePath('/certificados/configuracion');
+    revalidateAll();
     return { success: 'Tipo actualizado.' };
 }
 
@@ -113,8 +114,7 @@ export async function deleteCertificateType(id: number): Promise<CertificateMeta
 
     await prisma.certificateType.delete({ where: { id } });
     await audit(admin, 'TIPO_CERTIFICADO_ELIMINADO', 'certificate_type', type.label);
-    revalidatePath('/certificados');
-    revalidatePath('/certificados/configuracion');
+    revalidateAll();
     return { success: 'Tipo eliminado.' };
 }
 
@@ -138,8 +138,7 @@ export async function createCertificationTitle(_prevState: CertificateMetaState,
         },
     });
     await audit(user, 'CERTIFICACION_CREADA', 'certification_title', parsed.data.name);
-    revalidatePath('/certificados');
-    revalidatePath('/certificados/certificaciones');
+    revalidateAll();
     return { success: 'Certificación creada.' };
 }
 
@@ -167,8 +166,7 @@ export async function updateCertificationTitle(id: number, _prevState: Certifica
         },
     });
     await audit(admin, 'CERTIFICACION_EDITADA', 'certification_title', parsed.data.name, `antes: ${title.name}`);
-    revalidatePath('/certificados');
-    revalidatePath('/certificados/certificaciones');
+    revalidateAll();
     return { success: 'Certificación actualizada.' };
 }
 
@@ -179,7 +177,6 @@ export async function deleteCertificationTitle(id: number): Promise<CertificateM
 
     await prisma.certificationTitle.delete({ where: { id } });
     await audit(admin, 'CERTIFICACION_ELIMINADA', 'certification_title', title.name);
-    revalidatePath('/certificados');
-    revalidatePath('/certificados/certificaciones');
+    revalidateAll();
     return { success: 'Certificación eliminada.' };
 }

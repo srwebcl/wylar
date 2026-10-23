@@ -15,6 +15,7 @@ export default async function ProductCategoriesPage() {
                 id: c.id,
                 name: c.name,
                 attributeTemplate: c.attributeTemplate,
+                fields: c.fields as any,
                 active: c.active,
                 productsCount: c._count.products,
             }))}

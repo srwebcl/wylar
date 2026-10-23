@@ -56,9 +56,9 @@ export default async function EditarPerfilPage({ params }: { params: Promise<{ i
                         href="/catalogo"
                         className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#0B1E40] transition-colors mb-2"
                     >
-                        <ArrowLeft size={14} /> Volver a Fichas Web
+                        <ArrowLeft size={14} /> Volver al Catálogo
                     </Link>
-                    <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Editar ficha web</h1>
+                    <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Editar perfil</h1>
                     <p className="text-slate-500 text-sm mt-1">{profile.title}</p>
                 </div>
                 <ProfileWizard initial={initial} />
@@ -106,9 +106,9 @@ export default async function EditarPerfilPage({ params }: { params: Promise<{ i
                     href="/catalogo"
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#0B1E40] transition-colors mb-2"
                 >
-                    <ArrowLeft size={14} /> Volver a Fichas Web
+                    <ArrowLeft size={14} /> Volver al Catálogo
                 </Link>
-                <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Editar ficha web</h1>
+                <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Editar perfil</h1>
                 <p className="text-slate-500 text-sm mt-1">{profile.title}</p>
             </div>
             <ProfileForm initial={initial} />

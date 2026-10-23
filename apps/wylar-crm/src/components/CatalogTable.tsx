@@ -2,15 +2,8 @@
 
 import Link from 'next/link';
 import { useState, useTransition, useMemo } from 'react';
-import { Pencil, Trash2, ExternalLink, Package, Search, Globe } from 'lucide-react';
+import { Pencil, Trash2, ExternalLink, Search, Globe } from 'lucide-react';
 import { deleteProfile } from '@/actions/catalog';
-
-interface LinkedProduct {
-    id: number;
-    name: string;
-    categoryName: string;
-    price: number | null;
-}
 
 interface Row {
     id: number;
@@ -20,12 +13,6 @@ interface Row {
     templateLabel: string;
     isFeatured: boolean;
     active: boolean;
-    linkedProduct: LinkedProduct | null;
-}
-
-function money(value: number | null) {
-    if (value == null) return 'A cotizar';
-    return `$${Math.round(value).toLocaleString('es-CL')}`;
 }
 
 export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: boolean }) {
@@ -40,13 +27,12 @@ export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: 
             const matchTitle = p.title.toLowerCase().includes(q);
             const matchSlug = p.slug.toLowerCase().includes(q);
             const matchCategory = p.category.toLowerCase().includes(q);
-            const matchProduct = p.linkedProduct?.name.toLowerCase().includes(q) ?? false;
-            return matchTitle || matchSlug || matchCategory || matchProduct;
+            return matchTitle || matchSlug || matchCategory;
         });
     }, [profiles, search]);
 
     function handleDelete(id: number, title: string) {
-        if (!confirm(`¿Eliminar la ficha web "${title}" de wylar.cl? Esta acción no se puede deshacer.`)) return;
+        if (!confirm(`¿Eliminar el perfil "${title}" de wylar.cl? Esta acción no se puede deshacer.`)) return;
         setPendingId(id);
         startTransition(async () => {
             await deleteProfile(id);
@@ -58,9 +44,9 @@ export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: 
         return (
             <div className="glass-card bg-white p-12 text-center text-slate-400 border border-slate-200 rounded-2xl shadow-sm">
                 <Globe size={40} className="mx-auto text-slate-300 mb-3" />
-                <p className="font-bold text-slate-700 text-base">Aún no hay fichas web publicadas</p>
+                <p className="font-bold text-slate-700 text-base">Aún no hay perfiles en el catálogo web</p>
                 <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                    Crea la primera ficha para exhibir tus servicios y certificaciones en wylar.cl.
+                    Crea el primer perfil para exhibir tus servicios y certificaciones en wylar.cl.
                 </p>
             </div>
         );
@@ -75,7 +61,7 @@ export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: 
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Buscar por título, categoría web o servicio vinculado..."
+                    placeholder="Buscar por título, slug o categoría..."
                     className="w-full text-sm bg-transparent border-0 focus:outline-none text-slate-900 placeholder:text-slate-400"
                 />
             </div>
@@ -97,19 +83,9 @@ export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: 
                             </div>
                         </div>
 
-                        {/* Catálogo vinculado */}
-                        <div className="pt-2 border-t border-slate-100 space-y-1">
-                            <p className="text-[11px] font-medium text-slate-400">Servicio en catálogo CRM</p>
-                            {p.linkedProduct ? (
-                                <div className="flex items-center gap-1.5 text-xs text-slate-800">
-                                    <Package size={13} className="text-amber-600 shrink-0" />
-                                    <span className="font-semibold">{p.linkedProduct.name}</span>
-                                    <span className="text-slate-400">·</span>
-                                    <span className="text-slate-500">{money(p.linkedProduct.price)}</span>
-                                </div>
-                            ) : (
-                                <p className="text-xs text-slate-400 italic">Sin vincular al catálogo comercial</p>
-                            )}
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                            <span className="font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md">{p.category}</span>
+                            <span className="text-slate-400">{p.templateLabel}</span>
                         </div>
 
                         <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
@@ -125,7 +101,7 @@ export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: 
                                 href={`/catalogo/${p.id}`}
                                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#0B1E40] bg-amber-100/60 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors"
                             >
-                                <Pencil size={13} /> Editar ficha
+                                <Pencil size={13} /> Editar
                             </Link>
                             {isAdmin && (
                                 <button
@@ -143,7 +119,7 @@ export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: 
 
                 {filteredProfiles.length === 0 && (
                     <div className="glass-card bg-white p-8 text-center text-slate-400 text-sm border border-slate-200 rounded-xl">
-                        No se encontraron fichas web con el criterio de búsqueda.
+                        No se encontraron perfiles con el criterio de búsqueda.
                     </div>
                 )}
             </div>
@@ -153,10 +129,10 @@ export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: 
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-semibold text-slate-500">
-                                <th className="px-5 py-3.5">Ficha web (wylar.cl)</th>
-                                <th className="px-5 py-3.5">Categoría web</th>
-                                <th className="px-5 py-3.5">Ítem catálogo CRM (comercial)</th>
+                            <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                <th className="px-5 py-3.5">Perfil Web (wylar.cl)</th>
+                                <th className="px-5 py-3.5">Categoría Web</th>
+                                <th className="px-5 py-3.5">Plantilla</th>
                                 <th className="px-5 py-3.5">Estado</th>
                                 <th className="px-5 py-3.5 text-right">Acciones</th>
                             </tr>
@@ -173,23 +149,8 @@ export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: 
                                             {p.category}
                                         </span>
                                     </td>
-                                    <td className="px-5 py-3.5">
-                                        {p.linkedProduct ? (
-                                            <div className="space-y-0.5">
-                                                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                                                    <Package size={13} className="text-amber-600 shrink-0" />
-                                                    <span>{p.linkedProduct.name}</span>
-                                                </div>
-                                                <p className="text-[11px] text-slate-500 font-medium">
-                                                    {p.linkedProduct.categoryName} · {money(p.linkedProduct.price)}
-                                                </p>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                                                <span className="inline-block w-2 h-2 rounded-full bg-slate-300"></span>
-                                                <span>Solo web (sin producto CRM asociado)</span>
-                                            </div>
-                                        )}
+                                    <td className="px-5 py-3.5 text-slate-500 text-xs">
+                                        {p.templateLabel}
                                     </td>
                                     <td className="px-5 py-3.5">
                                         <div className="flex gap-1.5 flex-wrap">
@@ -217,7 +178,7 @@ export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: 
                                             <Link
                                                 href={`/catalogo/${p.id}`}
                                                 className="p-2 text-slate-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
-                                                title="Editar contenido de la ficha web"
+                                                title="Editar perfil"
                                             >
                                                 <Pencil size={16} />
                                             </Link>
@@ -239,7 +200,7 @@ export function CatalogTable({ profiles, isAdmin }: { profiles: Row[]; isAdmin: 
                             {filteredProfiles.length === 0 && (
                                 <tr>
                                     <td colSpan={5} className="px-5 py-12 text-center text-slate-400 text-sm">
-                                        No se encontraron fichas web con el criterio de búsqueda.
+                                        No se encontraron perfiles con el criterio de búsqueda.
                                     </td>
                                 </tr>
                             )}

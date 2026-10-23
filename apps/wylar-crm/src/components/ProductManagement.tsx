@@ -8,12 +8,12 @@ import {
     Power,
     Settings,
     X,
-    Globe,
-    ExternalLink,
     Search,
     Trash2,
     Loader2,
     CheckCircle2,
+    Package,
+    Tag,
 } from 'lucide-react';
 import {
     createProduct,
@@ -23,7 +23,7 @@ import {
     bulkDeleteProducts,
     bulkToggleProducts,
 } from '@/actions/products';
-import { attributeFieldsFor } from '@/lib/productSpec';
+import { resolveCategoryFields } from '@/lib/productSpec';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
 
@@ -31,13 +31,7 @@ interface CategoryRow {
     id: number;
     name: string;
     attributeTemplate: string;
-}
-
-interface ProfileRow {
-    id: number;
-    title: string;
-    slug?: string;
-    active?: boolean;
+    fields?: unknown;
 }
 
 interface ProductRow {
@@ -48,10 +42,6 @@ interface ProductRow {
     active: boolean;
     categoryId: number;
     categoryName: string;
-    profileId: number | null;
-    profileTitle?: string | null;
-    profileSlug?: string | null;
-    profileActive?: boolean | null;
     attributes: Record<string, string> | null;
 }
 
@@ -66,12 +56,10 @@ function money(value: number | null) {
 export function ProductManagement({
     products,
     categories,
-    profiles,
     isAdmin,
 }: {
     products: ProductRow[];
     categories: CategoryRow[];
-    profiles: ProfileRow[];
     isAdmin: boolean;
 }) {
     const [isPending, startTransition] = useTransition();
@@ -88,72 +76,78 @@ export function ProductManagement({
     // Filtros y búsqueda
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
-    const [webFilter, setWebFilter] = useState<'ALL' | 'WITH_WEB' | 'CRM_ONLY'>('ALL');
+    const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
 
     // Campos del formulario
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState('');
     const [categoryId, setCategoryId] = useState(categories[0]?.id ?? 0);
-    const [profileId, setProfileId] = useState('');
     const [attributes, setAttributes] = useState<Record<string, string>>({});
 
     const category = categories.find((c) => c.id === categoryId);
-    const attributeFields = category ? attributeFieldsFor(category.attributeTemplate) : [];
+    const attributeFields = resolveCategoryFields(category);
 
-    // Estadísticas
+    // Métricas del catálogo CRM
     const stats = useMemo(() => {
         const total = products.length;
-        const withWeb = products.filter((p) => p.profileId != null).length;
-        const crmOnly = total - withWeb;
         const active = products.filter((p) => p.active).length;
-        return { total, withWeb, crmOnly, active };
+        const inactive = total - active;
+        return { total, active, inactive };
     }, [products]);
 
-    // Filtrado interactivo
+    // Productos filtrados
     const filteredProducts = useMemo(() => {
         return products.filter((p) => {
+            // Filtro por búsqueda de texto
             if (search.trim()) {
                 const q = search.toLowerCase();
                 const matchName = p.name.toLowerCase().includes(q);
-                const matchDesc = p.description?.toLowerCase().includes(q) ?? false;
-                const matchCat = p.categoryName.toLowerCase().includes(q);
-                const matchProfile = p.profileTitle?.toLowerCase().includes(q) ?? false;
-                if (!matchName && !matchDesc && !matchCat && !matchProfile) return false;
+                const matchCategory = p.categoryName.toLowerCase().includes(q);
+                const matchDesc = p.description ? p.description.toLowerCase().includes(q) : false;
+                if (!matchName && !matchCategory && !matchDesc) return false;
             }
+
+            // Filtro por categoría
             if (selectedCategory !== 'ALL' && String(p.categoryId) !== selectedCategory) {
                 return false;
             }
-            if (webFilter === 'WITH_WEB' && p.profileId == null) {
-                return false;
-            }
-            if (webFilter === 'CRM_ONLY' && p.profileId != null) {
-                return false;
-            }
+
+            // Filtro por estado
+            if (statusFilter === 'ACTIVE' && !p.active) return false;
+            if (statusFilter === 'INACTIVE' && p.active) return false;
+
             return true;
         });
-    }, [products, search, selectedCategory, webFilter]);
+    }, [products, search, selectedCategory, statusFilter]);
 
-    const filteredIds = useMemo(() => filteredProducts.map((p) => p.id), [filteredProducts]);
-    const isAllSelected = filteredProducts.length > 0 && selectedIds.length === filteredProducts.length;
-    const isSomeSelected = selectedIds.length > 0 && selectedIds.length < filteredProducts.length;
-
+    // Gestión del checkbox maestro (indeterminate state)
     useEffect(() => {
-        if (selectAllRef.current) {
-            selectAllRef.current.indeterminate = isSomeSelected;
-        }
-    }, [isSomeSelected]);
-
-    function toggleSelectAll() {
-        if (isAllSelected) {
-            setSelectedIds([]);
+        if (!selectAllRef.current) return;
+        const total = filteredProducts.length;
+        const selectedCount = selectedIds.length;
+        if (selectedCount === 0) {
+            selectAllRef.current.checked = false;
+            selectAllRef.current.indeterminate = false;
+        } else if (selectedCount === total && total > 0) {
+            selectAllRef.current.checked = true;
+            selectAllRef.current.indeterminate = false;
         } else {
-            setSelectedIds(filteredIds);
+            selectAllRef.current.checked = false;
+            selectAllRef.current.indeterminate = true;
+        }
+    }, [selectedIds, filteredProducts]);
+
+    function handleSelectAll(e: React.ChangeEvent<HTMLInputElement>) {
+        if (e.target.checked) {
+            setSelectedIds(filteredProducts.map((p) => p.id));
+        } else {
+            setSelectedIds([]);
         }
     }
 
-    function toggleSelect(id: number) {
-        setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    function handleToggleRow(id: number) {
+        setSelectedIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
     }
 
     function resetForm() {
@@ -161,7 +155,6 @@ export function ProductManagement({
         setDescription('');
         setPrice('');
         setCategoryId(categories[0]?.id ?? 0);
-        setProfileId('');
         setAttributes({});
     }
 
@@ -181,7 +174,6 @@ export function ProductManagement({
         setDescription(p.description ?? '');
         setPrice(p.price != null ? String(p.price) : '');
         setCategoryId(p.categoryId);
-        setProfileId(p.profileId != null ? String(p.profileId) : '');
         setAttributes(p.attributes ?? {});
         setShowForm(true);
     }
@@ -196,7 +188,7 @@ export function ProductManagement({
         formData.set('name', name);
         formData.set('description', description);
         formData.set('price', price);
-        formData.set('profileId', profileId);
+        formData.set('profileId', '');
         formData.set('attributes', JSON.stringify(attributes));
 
         startTransition(async () => {
@@ -205,7 +197,7 @@ export function ProductManagement({
                 setError(result.error);
                 return;
             }
-            setSuccess(result.success ?? 'Servicio guardado exitosamente.');
+            setSuccess(result.success ?? 'Producto guardado.');
             resetForm();
             setEditingId(null);
             setShowForm(false);
@@ -215,110 +207,122 @@ export function ProductManagement({
     function handleToggle(id: number) {
         setError(null);
         setSuccess(null);
+        setPendingId(id);
         startTransition(async () => {
             const result = await toggleProductActive(id);
+            setPendingId(null);
             if (result.error) setError(result.error);
             else setSuccess(result.success ?? null);
         });
     }
 
-    function handleDelete(id: number, serviceName: string) {
-        if (!confirm(`¿Eliminar "${serviceName}" del catálogo? Esta acción no se puede deshacer.`)) return;
+    function handleDelete(id: number, productName: string) {
+        if (!confirm(`¿Estás seguro de eliminar el producto "${productName}" del catálogo del CRM? Esta acción no se puede deshacer.`)) return;
         setError(null);
         setSuccess(null);
         setPendingId(id);
         startTransition(async () => {
             const result = await deleteProduct(id);
-            if (result.error) setError(result.error);
-            else {
-                setSuccess(result.success ?? 'Servicio eliminado.');
-                setSelectedIds((prev) => prev.filter((x) => x !== id));
-            }
             setPendingId(null);
-        });
-    }
-
-    function handleBulkDelete() {
-        if (!confirm(`¿Eliminar los ${selectedIds.length} servicios seleccionados del catálogo? Esta acción es irreversible.`)) return;
-        setError(null);
-        setSuccess(null);
-        startTransition(async () => {
-            const result = await bulkDeleteProducts(selectedIds);
             if (result.error) setError(result.error);
             else {
-                setSuccess(result.success ?? 'Servicios eliminados exitosamente.');
-                setSelectedIds([]);
+                setSuccess(result.success ?? 'Producto eliminado.');
+                setSelectedIds((prev) => prev.filter((item) => item !== id));
             }
         });
     }
 
     function handleBulkToggle(active: boolean) {
+        if (selectedIds.length === 0) return;
         setError(null);
         setSuccess(null);
         startTransition(async () => {
             const result = await bulkToggleProducts(selectedIds, active);
             if (result.error) setError(result.error);
             else {
-                setSuccess(result.success ?? 'Estado actualizado exitosamente.');
+                setSuccess(result.success ?? `Se actualizaron ${selectedIds.length} productos.`);
+                setSelectedIds([]);
+            }
+        });
+    }
+
+    function handleBulkDelete() {
+        if (selectedIds.length === 0) return;
+        if (!confirm(`¿Eliminar los ${selectedIds.length} productos seleccionados del catálogo del CRM?`)) return;
+        setError(null);
+        setSuccess(null);
+        startTransition(async () => {
+            const result = await bulkDeleteProducts(selectedIds);
+            if (result.error) setError(result.error);
+            else {
+                setSuccess(result.success ?? `Se eliminaron ${selectedIds.length} productos.`);
                 setSelectedIds([]);
             }
         });
     }
 
     return (
-        <div className="space-y-6 relative">
-            {/* Encabezado */}
-            <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="space-y-6">
+            {/* Header del módulo */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Catálogo de servicios</h1>
+                    <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Productos</h1>
                     <p className="text-slate-500 text-sm mt-1">
-                        Catálogo comercial maestro — cursos, certificaciones y calificaciones para cotizar y registrar oportunidades.
+                        Catálogo de productos y servicios para cotizaciones y oportunidades en el CRM. {products.length} en total.
                     </p>
                 </div>
-                <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
                     <Link
                         href="/productos/categorias"
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-4 py-2.5 rounded-xl transition-colors text-sm shadow-sm"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-4 py-2.5 rounded-xl transition-all shadow-xs text-sm"
                     >
-                        <Settings size={16} className="text-slate-500" /> Categorías
+                        <Settings size={15} /> Categorías
                     </Link>
                     <button
                         onClick={openCreateForm}
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm text-sm"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-5 py-2.5 rounded-xl transition-all shadow-xs text-sm"
                     >
-                        <Plus size={18} /> Nuevo servicio
+                        <Plus size={16} /> Nuevo producto
                     </button>
                 </div>
             </div>
 
-            {/* Tarjetas resumen de estado comercial */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Tarjetas de métricas de productos */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <div className="glass-card bg-white p-4 border border-slate-200/80 rounded-xl">
-                    <p className="text-xs font-medium text-slate-500">Total servicios</p>
-                    <p className="text-2xl font-bold text-slate-900 mt-1">{stats.total}</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">{stats.active} activos comercialmente</p>
-                </div>
-                <div className="glass-card bg-white p-4 border border-slate-200/80 rounded-xl">
-                    <p className="text-xs font-medium text-slate-500">Publicados en web</p>
-                    <p className="text-2xl font-bold text-blue-600 mt-1">{stats.withWeb}</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Con ficha de marketing en wylar.cl</p>
-                </div>
-                <div className="glass-card bg-white p-4 border border-slate-200/80 rounded-xl">
-                    <p className="text-xs font-medium text-slate-500">Solo CRM / privados</p>
-                    <p className="text-2xl font-bold text-slate-700 mt-1">{stats.crmOnly}</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Venta directa sin landing pública</p>
-                </div>
-                <div className="glass-card bg-white p-4 border border-slate-200/80 rounded-xl flex flex-col justify-between">
-                    <div>
-                        <p className="text-xs font-medium text-slate-500">Fichas web</p>
-                        <p className="text-xs text-slate-600 mt-1">Edita textos y fotos que ve el público</p>
+                    <div className="flex items-center justify-between">
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Total Productos</p>
+                        <Package size={16} className="text-slate-400" />
                     </div>
-                    <Link
-                        href="/catalogo"
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:text-amber-900 transition-colors mt-2"
-                    >
-                        Administrar fichas web <ExternalLink size={12} />
-                    </Link>
+                    <p className="text-2xl font-black text-slate-900 mt-1">{stats.total}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">En el catálogo del CRM</p>
+                </div>
+
+                <div className="glass-card bg-white p-4 border border-slate-200/80 rounded-xl">
+                    <div className="flex items-center justify-between">
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Activos</p>
+                        <CheckCircle2 size={16} className="text-emerald-500" />
+                    </div>
+                    <p className="text-2xl font-black text-emerald-600 mt-1">{stats.active}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Disponibles para cotizaciones</p>
+                </div>
+
+                <div className="glass-card bg-white p-4 border border-slate-200/80 rounded-xl">
+                    <div className="flex items-center justify-between">
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Inactivos</p>
+                        <Power size={16} className="text-slate-400" />
+                    </div>
+                    <p className="text-2xl font-black text-slate-600 mt-1">{stats.inactive}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Desactivados temporalmente</p>
+                </div>
+
+                <div className="glass-card bg-white p-4 border border-slate-200/80 rounded-xl">
+                    <div className="flex items-center justify-between">
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Categorías</p>
+                        <Tag size={16} className="text-amber-500" />
+                    </div>
+                    <p className="text-2xl font-black text-amber-700 mt-1">{categories.length}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Familias comerciales</p>
                 </div>
             </div>
 
@@ -348,7 +352,7 @@ export function ProductManagement({
                             {selectedIds.length}
                         </span>
                         <span className="text-xs font-semibold text-slate-200 hidden sm:inline">
-                            {selectedIds.length === 1 ? 'servicio seleccionado' : 'servicios seleccionados'}
+                            {selectedIds.length === 1 ? 'producto seleccionado' : 'productos seleccionados'}
                         </span>
                     </div>
 
@@ -402,12 +406,12 @@ export function ProductManagement({
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Buscar por nombre, categoría o ficha web..."
+                        placeholder="Buscar por nombre, descripción o categoría..."
                         className="w-full pl-9 pr-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:bg-white text-slate-900 transition-all"
                     />
                 </div>
                 <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <div className="flex-1 sm:w-48">
+                    <div className="flex-1 sm:w-52">
                         <Select
                             value={selectedCategory}
                             onChange={setSelectedCategory}
@@ -416,12 +420,12 @@ export function ProductManagement({
                     </div>
                     <div className="flex-1 sm:w-44">
                         <Select
-                            value={webFilter}
-                            onChange={(v) => setWebFilter(v as typeof webFilter)}
+                            value={statusFilter}
+                            onChange={(v) => setStatusFilter(v as typeof statusFilter)}
                             options={[
-                                { value: 'ALL', label: 'Todo el catálogo' },
-                                { value: 'WITH_WEB', label: 'Publicados en Web' },
-                                { value: 'CRM_ONLY', label: 'Solo CRM (Privados)' },
+                                { value: 'ALL', label: 'Todos los estados' },
+                                { value: 'ACTIVE', label: 'Solo activos' },
+                                { value: 'INACTIVE', label: 'Solo inactivos' },
                             ]}
                         />
                     </div>
@@ -429,7 +433,7 @@ export function ProductManagement({
             </div>
 
             {/* Modal de creación / edición */}
-            <Modal open={showForm} onClose={() => setShowForm(false)} title={editingId != null ? 'Editar servicio del catálogo' : 'Nuevo servicio en el catálogo'}>
+            <Modal open={showForm} onClose={() => setShowForm(false)} title={editingId != null ? 'Editar producto' : 'Nuevo producto'}>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <p className="text-xs text-slate-500 -mt-2">Disponible inmediatamente para oportunidades y cotizaciones del CRM.</p>
 
@@ -442,18 +446,18 @@ export function ProductManagement({
                         </label>
 
                         <label className="block">
-                            <span className="block text-sm font-medium text-slate-700 mb-1.5">Nombre del servicio / curso</span>
+                            <span className="block text-sm font-medium text-slate-700 mb-1.5">Nombre del producto / curso</span>
                             <input
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="Ej: Soldador Calificado 3G / Cuidador de Personas Mayores"
+                                placeholder="Ej: Soldador Calificado 3G / Operador Grúa Horquilla"
                                 className={inputClass}
                                 required
                             />
                         </label>
 
                         <label className="block">
-                            <span className="block text-sm font-medium text-slate-700 mb-1.5">Descripción comercial (opcional)</span>
+                            <span className="block text-sm font-medium text-slate-700 mb-1.5">Descripción (opcional)</span>
                             <textarea
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
@@ -474,25 +478,6 @@ export function ProductManagement({
                                 className={inputClass}
                             />
                         </label>
-
-                        {/* Ficha Web vinculada */}
-                        <div className="p-3.5 bg-blue-50/60 border border-blue-200/70 rounded-xl space-y-2">
-                            <div className="flex items-center gap-2">
-                                <Globe size={16} className="text-blue-700" />
-                                <span className="text-sm font-medium text-navy-900">
-                                    Ficha Web pública en wylar.cl
-                                </span>
-                            </div>
-                            <p className="text-xs text-slate-600">
-                                Vincula este servicio a su landing page de marketing en el sitio web para sincronizar consultas y cotizaciones entrantes.
-                            </p>
-                            <Select
-                                value={profileId}
-                                onChange={setProfileId}
-                                placeholder="Ninguna (Solo CRM / Venta privada sin web)"
-                                options={[{ value: '', label: 'Ninguna (Solo CRM / Venta privada sin web)' }, ...profiles.map((p) => ({ value: String(p.id), label: `${p.title}${p.slug ? ` (/perfil/${p.slug})` : ''}` }))]}
-                            />
-                        </div>
 
                         {attributeFields.length > 0 && (
                             <div className="space-y-3 border-t border-slate-100 pt-3">
@@ -535,13 +520,13 @@ export function ProductManagement({
                             disabled={isPending}
                             className="bg-[#0B1E40] text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#122b59] transition-colors disabled:opacity-60 text-sm shadow-sm"
                         >
-                            {isPending ? 'Guardando…' : editingId != null ? 'Guardar cambios' : 'Crear en catálogo'}
+                            {isPending ? 'Guardando…' : editingId != null ? 'Guardar cambios' : 'Crear producto'}
                         </button>
                     </div>
                 </form>
             </Modal>
 
-            {/* Listado de servicios */}
+            {/* Listado de productos */}
             <div className="space-y-3">
                 {/* Vista móvil: tarjetas táctiles */}
                 <div className="block lg:hidden space-y-3">
@@ -549,71 +534,52 @@ export function ProductManagement({
                         <label className="inline-flex items-center gap-2 cursor-pointer hover:text-[#0B1E40] transition-colors">
                             <input
                                 type="checkbox"
-                                checked={isAllSelected}
-                                onChange={toggleSelectAll}
-                                className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
+                                ref={selectAllRef}
+                                onChange={handleSelectAll}
+                                className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/20"
                             />
-                            <span>{isAllSelected ? 'Deseleccionar todos' : 'Seleccionar todos'}</span>
+                            <span>Seleccionar todos</span>
                         </label>
-                        <span>{filteredProducts.length} servicios</span>
+                        <span>{filteredProducts.length} productos</span>
                     </div>
 
                     {filteredProducts.map((p) => {
                         const isSelected = selectedIds.includes(p.id);
-
                         return (
                             <div
                                 key={p.id}
-                                className={`glass-card bg-white p-4 space-y-3 border rounded-xl transition-all ${
-                                    isSelected ? 'border-amber-400 ring-2 ring-amber-400/20 bg-amber-50/20' : 'border-slate-200/80'
-                                } ${p.active ? '' : 'opacity-65'}`}
+                                className={`glass-card bg-white p-4 space-y-3 border rounded-xl shadow-xs transition-all ${
+                                    isSelected ? 'border-amber-400 bg-amber-50/20 ring-1 ring-amber-400' : 'border-slate-200'
+                                } ${p.active ? '' : 'opacity-60'}`}
                             >
-                                <div className="flex items-start justify-between gap-2">
-                                    <div className="flex items-start gap-2.5 min-w-0">
-                                        <input
-                                            type="checkbox"
-                                            checked={isSelected}
-                                            onChange={() => toggleSelect(p.id)}
-                                            className="mt-1 w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
-                                        />
-                                        <div className="space-y-0.5 min-w-0">
-                                            <p className="font-bold text-slate-900 text-sm truncate">{p.name}</p>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
-                                                    {p.categoryName}
-                                                </span>
-                                                <span className="text-xs font-extrabold text-[#0B1E40]">{money(p.price)}</span>
-                                            </div>
+                                <div className="flex items-start gap-3">
+                                    <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        onChange={() => handleToggleRow(p.id)}
+                                        className="mt-1 w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/20 shrink-0"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <p className="font-bold text-slate-900 text-sm">{p.name}</p>
+                                            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 ${p.active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                {p.active ? 'Activo' : 'Inactivo'}
+                                            </span>
+                                        </div>
+                                        {p.description && (
+                                            <p className="text-xs text-slate-500 mt-1 line-clamp-2">{p.description}</p>
+                                        )}
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+                                                {p.categoryName}
+                                            </span>
+                                            <span className="text-xs font-black text-slate-800">
+                                                {money(p.price)}
+                                            </span>
                                         </div>
                                     </div>
-                                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 ${p.active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                                        {p.active ? 'Activo' : 'Inactivo'}
-                                    </span>
                                 </div>
 
-                                {/* Estado web */}
-                                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                                    <span className="text-slate-500 font-medium">Presencia web:</span>
-                                    {p.profileId != null ? (
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
-                                                <Globe size={11} /> wylar.cl
-                                            </span>
-                                            <Link
-                                                href={`/catalogo/${p.profileId}`}
-                                                className="text-[11px] font-bold text-amber-700 hover:underline inline-flex items-center gap-0.5"
-                                            >
-                                                Editar web <ExternalLink size={10} />
-                                            </Link>
-                                        </div>
-                                    ) : (
-                                        <span className="text-[11px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md">
-                                            Solo CRM (Privado)
-                                        </span>
-                                    )}
-                                </div>
-
-                                {/* Acciones */}
                                 {isAdmin && (
                                     <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                                         <button
@@ -624,7 +590,7 @@ export function ProductManagement({
                                         </button>
                                         <button
                                             onClick={() => handleToggle(p.id)}
-                                            disabled={isPending}
+                                            disabled={isPending && pendingId === p.id}
                                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors disabled:opacity-50"
                                         >
                                             <Power size={13} /> {p.active ? 'Desactivar' : 'Activar'}
@@ -632,168 +598,118 @@ export function ProductManagement({
                                         <button
                                             onClick={() => handleDelete(p.id, p.name)}
                                             disabled={isPending && pendingId === p.id}
-                                            className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition-colors disabled:opacity-50"
-                                            title="Eliminar servicio"
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors disabled:opacity-50"
                                         >
-                                            {isPending && pendingId === p.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                                            <Trash2 size={13} /> Eliminar
                                         </button>
                                     </div>
                                 )}
                             </div>
                         );
                     })}
-
-                    {filteredProducts.length === 0 && (
-                        <div className="glass-card bg-white p-8 text-center text-slate-400 text-sm border border-slate-200 rounded-xl">
-                            No se encontraron servicios con los filtros seleccionados.
-                        </div>
-                    )}
                 </div>
 
-                {/* Vista desktop: tabla HubSpot / GHL style */}
-                <div className="hidden lg:block glass-card bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-sm">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="bg-slate-50/90 border-b border-slate-200 text-left text-xs font-semibold text-slate-500">
-                                    <th className="px-4 py-3.5 w-10 text-center">
-                                        <input
-                                            ref={selectAllRef}
-                                            type="checkbox"
-                                            checked={isAllSelected}
-                                            onChange={toggleSelectAll}
-                                            className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
-                                            title={isAllSelected ? 'Deseleccionar todos' : 'Seleccionar todos en esta página'}
-                                        />
-                                    </th>
-                                    <th className="px-4 py-3.5">Servicio / certificación</th>
-                                    <th className="px-4 py-3.5">Categoría</th>
-                                    <th className="px-4 py-3.5">Precio base</th>
-                                    <th className="px-4 py-3.5">Ficha web (wylar.cl)</th>
-                                    <th className="px-4 py-3.5">Estado</th>
-                                    <th className="px-4 py-3.5 text-right">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {filteredProducts.map((p) => {
-                                    const isSelected = selectedIds.includes(p.id);
-
-                                    return (
-                                        <tr
-                                            key={p.id}
-                                            className={`transition-colors ${
-                                                isSelected ? 'bg-amber-50/40 hover:bg-amber-50/60' : 'hover:bg-slate-50/70'
-                                            } ${p.active ? '' : 'opacity-60 bg-slate-50/30'}`}
-                                        >
-                                            <td className="px-4 py-3 text-center">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={isSelected}
-                                                    onChange={() => toggleSelect(p.id)}
-                                                    className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-3.5">
-                                                <p className="font-bold text-slate-900">{p.name}</p>
-                                                {p.description && (
-                                                    <p className="text-xs text-slate-400 mt-0.5 line-clamp-1 max-w-sm">{p.description}</p>
+                {/* Vista desktop: tabla estructurada */}
+                <div className="hidden lg:block glass-card bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="bg-slate-50/80 border-b border-slate-200 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <th className="px-5 py-3.5 w-12 text-center">
+                                    <input
+                                        type="checkbox"
+                                        ref={selectAllRef}
+                                        onChange={handleSelectAll}
+                                        className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/20 cursor-pointer"
+                                    />
+                                </th>
+                                <th className="px-5 py-3.5">Nombre del Producto</th>
+                                <th className="px-5 py-3.5">Categoría</th>
+                                <th className="px-5 py-3.5">Precio Base</th>
+                                <th className="px-5 py-3.5">Estado</th>
+                                <th className="px-5 py-3.5 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {filteredProducts.map((p) => {
+                                const isSelected = selectedIds.includes(p.id);
+                                return (
+                                    <tr
+                                        key={p.id}
+                                        className={`hover:bg-slate-50/70 transition-colors ${
+                                            isSelected ? 'bg-amber-50/40' : ''
+                                        } ${p.active ? '' : 'opacity-60 bg-slate-50/30'}`}
+                                    >
+                                        <td className="px-5 py-3.5 text-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={() => handleToggleRow(p.id)}
+                                                className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/20 cursor-pointer"
+                                            />
+                                        </td>
+                                        <td className="px-5 py-3.5">
+                                            <p className="font-bold text-slate-900">{p.name}</p>
+                                            {p.description && (
+                                                <p className="text-xs text-slate-400 mt-0.5 line-clamp-1 max-w-sm">{p.description}</p>
+                                            )}
+                                        </td>
+                                        <td className="px-5 py-3.5">
+                                            <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
+                                                {p.categoryName}
+                                            </span>
+                                        </td>
+                                        <td className="px-5 py-3.5 font-black text-slate-800">
+                                            {money(p.price)}
+                                        </td>
+                                        <td className="px-5 py-3.5">
+                                            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${p.active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-slate-100 text-slate-500'}`}>
+                                                {p.active ? 'Activo' : 'Inactivo'}
+                                            </span>
+                                        </td>
+                                        <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                                            <div className="flex items-center justify-end gap-1">
+                                                {isAdmin && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => openEditForm(p)}
+                                                            className="p-2 text-slate-400 hover:text-[#0B1E40] hover:bg-slate-100 rounded-lg transition-colors"
+                                                            title="Editar producto"
+                                                        >
+                                                            <Pencil size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleToggle(p.id)}
+                                                            disabled={isPending && pendingId === p.id}
+                                                            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+                                                            title={p.active ? 'Desactivar para cotizaciones nuevas' : 'Activar'}
+                                                        >
+                                                            {isPending && pendingId === p.id ? <Loader2 size={16} className="animate-spin" /> : <Power size={16} />}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(p.id, p.name)}
+                                                            disabled={isPending && pendingId === p.id}
+                                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                                            title="Eliminar producto"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </>
                                                 )}
-                                            </td>
-                                            <td className="px-4 py-3.5">
-                                                <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
-                                                    {p.categoryName}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3.5 font-bold text-slate-800">
-                                                {money(p.price)}
-                                            </td>
-                                            <td className="px-4 py-3.5">
-                                                {p.profileId != null ? (
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200/60 px-2.5 py-0.5 rounded-full">
-                                                                <Globe size={12} className="text-blue-600" /> Publicado en Web
-                                                            </span>
-                                                            <Link
-                                                                href={`/catalogo/${p.profileId}`}
-                                                                className="text-xs text-amber-700 hover:text-amber-900 font-bold inline-flex items-center gap-0.5 hover:underline"
-                                                                title="Editar textos, imágenes y bloques de marketing"
-                                                            >
-                                                                Editar ficha <ExternalLink size={11} />
-                                                            </Link>
-                                                        </div>
-                                                        {p.profileTitle && (
-                                                            <p className="text-[11px] text-slate-500 font-medium truncate max-w-xs">
-                                                                {p.profileTitle}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full">
-                                                            Solo CRM (Privado)
-                                                        </span>
-                                                        {isAdmin && (
-                                                            <button
-                                                                onClick={() => openEditForm(p)}
-                                                                className="text-xs text-slate-500 hover:text-blue-700 font-semibold underline decoration-dotted"
-                                                            >
-                                                                + Asociar web
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-3.5">
-                                                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${p.active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-slate-100 text-slate-500'}`}>
-                                                    {p.active ? 'Activo' : 'Inactivo'}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3.5">
-                                                <div className="flex items-center justify-end gap-1">
-                                                    {isAdmin && (
-                                                        <>
-                                                            <button
-                                                                onClick={() => openEditForm(p)}
-                                                                className="p-1.5 text-slate-400 hover:text-[#0B1E40] hover:bg-slate-100 rounded-lg transition-colors"
-                                                                title="Editar servicio"
-                                                            >
-                                                                <Pencil size={15} />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleToggle(p.id)}
-                                                                disabled={isPending}
-                                                                className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors disabled:opacity-50"
-                                                                title={p.active ? 'Desactivar para cotizaciones nuevas' : 'Activar'}
-                                                            >
-                                                                <Power size={15} />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleDelete(p.id, p.name)}
-                                                                disabled={isPending && pendingId === p.id}
-                                                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                                                                title="Eliminar servicio del catálogo"
-                                                            >
-                                                                {isPending && pendingId === p.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
-                                                            </button>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-
-                                {filteredProducts.length === 0 && (
-                                    <tr>
-                                        <td colSpan={7} className="px-5 py-12 text-center text-slate-400 text-sm">
-                                            No se encontraron servicios registrados con los filtros actuales.
+                                            </div>
                                         </td>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                );
+                            })}
+
+                            {filteredProducts.length === 0 && (
+                                <tr>
+                                    <td colSpan={6} className="px-5 py-12 text-center text-slate-400 text-sm">
+                                        No se encontraron productos registrados con los filtros actuales.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

@@ -83,9 +83,9 @@ export function Select({
             </button>
 
             <FloatingPanel anchorRef={containerRef} open={isOpen} matchWidth>
-                <div id={listboxId} role="listbox" className="bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden">
+                <div id={listboxId} role="listbox" className="bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-full">
                     {showSearch && (
-                        <div className="p-2 border-b border-slate-100 bg-slate-50/70">
+                        <div className="p-2 border-b border-slate-100 bg-slate-50/70 shrink-0">
                             <div className="relative flex items-center">
                                 <Search size={14} className="absolute left-3 text-slate-400 pointer-events-none" />
                                 <input
@@ -99,7 +99,7 @@ export function Select({
                             </div>
                         </div>
                     )}
-                    <div className="max-h-64 overflow-y-auto p-1">
+                    <div className="overflow-y-auto p-1 min-h-0 flex-1 overscroll-contain">
                         {filtered.length === 0 ? (
                             <div className="p-3 text-center text-sm text-slate-400">Sin resultados</div>
                         ) : (
@@ -112,12 +112,12 @@ export function Select({
                                         role="option"
                                         aria-selected={isSelected}
                                         onClick={() => handleSelect(o)}
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between transition-colors cursor-pointer ${
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between gap-2 transition-colors cursor-pointer ${
                                             isSelected ? 'bg-amber-50 text-navy-900 font-semibold' : 'hover:bg-slate-50 text-slate-700'
                                         }`}
                                     >
-                                        <span className="truncate">{o.label}</span>
-                                        {isSelected && <Check size={14} className="shrink-0" />}
+                                        <span className="text-left leading-snug">{o.label}</span>
+                                        {isSelected && <Check size={14} className="shrink-0 text-amber-600" />}
                                     </button>
                                 );
                             })

@@ -5,26 +5,18 @@ import { ProductManagement } from '@/components/ProductManagement';
 export default async function ProductosPage() {
     const currentUser = await requireUser();
 
-    const [products, categories, profiles] = await Promise.all([
+    const [products, categories] = await Promise.all([
         prisma.product.findMany({
-            include: {
-                category: true,
-                profile: { select: { id: true, title: true, slug: true, active: true } },
-            },
+            include: { category: true },
             orderBy: { name: 'asc' },
         }),
         prisma.productCategory.findMany({ orderBy: { name: 'asc' } }),
-        prisma.profile.findMany({
-            orderBy: { title: 'asc' },
-            select: { id: true, title: true, slug: true, active: true },
-        }),
     ]);
 
     return (
         <ProductManagement
             isAdmin={currentUser.role === 'ADMIN'}
             categories={categories}
-            profiles={profiles}
             products={products.map((p) => ({
                 id: p.id,
                 name: p.name,
@@ -33,10 +25,6 @@ export default async function ProductosPage() {
                 active: p.active,
                 categoryId: p.categoryId,
                 categoryName: p.category.name,
-                profileId: p.profileId,
-                profileTitle: p.profile?.title ?? null,
-                profileSlug: p.profile?.slug ?? null,
-                profileActive: p.profile?.active ?? null,
                 attributes: (p.attributes as Record<string, string> | null) ?? null,
             }))}
         />

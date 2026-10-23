@@ -62,3 +62,17 @@ export const PRODUCT_ATTRIBUTE_SPECS: Record<AttributeTemplate, ProductAttribute
 export function attributeFieldsFor(template: string): ProductAttributeField[] {
     return PRODUCT_ATTRIBUTE_SPECS[template as AttributeTemplate] ?? [];
 }
+
+export function resolveCategoryFields(category?: {
+    attributeTemplate?: string | null;
+    fields?: unknown;
+} | null): ProductAttributeField[] {
+    if (!category) return [];
+    if (Array.isArray(category.fields) && category.fields.length > 0) {
+        return category.fields as ProductAttributeField[];
+    }
+    if (category.attributeTemplate) {
+        return attributeFieldsFor(category.attributeTemplate);
+    }
+    return [];
+}
