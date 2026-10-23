@@ -22,7 +22,10 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
             skip: (page - 1) * PAGE_SIZE,
         }),
         prisma.certificate.count({ where }),
-        prisma.certificationTitle.findMany({ orderBy: { name: 'asc' } }),
+        prisma.certificationTitle.findMany({
+            orderBy: { name: 'asc' },
+            include: { type: true, category: true },
+        }),
         prisma.certificateCategory.findMany({ orderBy: { name: 'asc' } }),
         prisma.certificateType.findMany({ orderBy: { label: 'asc' } }),
     ]);
@@ -35,7 +38,17 @@ export default async function CertificadosPage({ searchParams }: { searchParams:
                 isAdmin={currentUser.role === 'ADMIN'}
                 total={total}
                 certificationTitles={certificationTitleRows.map((r) => r.name)}
+                certificationTitleDetails={certificationTitleRows.map((r) => ({
+                    id: r.id,
+                    name: r.name,
+                    typeId: r.typeId,
+                    typeCompletionText: r.type?.completionText ?? null,
+                    typeLabel: r.type?.label ?? null,
+                    categoryId: r.categoryId,
+                    categoryName: r.category?.name ?? null,
+                }))}
                 categories={categoryRows.map((c) => c.name)}
+                categoryList={categoryRows.map((c) => ({ id: c.id, name: c.name }))}
                 types={typeRows}
                 certificates={certificates.map((c) => {
                     const status = certificateStatus(c.expiryDate, c.revokedAt);

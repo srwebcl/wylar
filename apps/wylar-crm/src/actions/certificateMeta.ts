@@ -120,13 +120,23 @@ export async function deleteCertificateType(id: number): Promise<CertificateMeta
 
 export async function createCertificationTitle(_prevState: CertificateMetaState, formData: FormData): Promise<CertificateMetaState> {
     const user = await requireUser();
-    const parsed = certificationTitleSchema.safeParse({ name: formData.get('name') });
+    const parsed = certificationTitleSchema.safeParse({
+        name: formData.get('name'),
+        typeId: formData.get('typeId'),
+        categoryId: formData.get('categoryId'),
+    });
     if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Datos inválidos.' };
 
     const existing = await prisma.certificationTitle.findUnique({ where: { name: parsed.data.name } });
     if (existing) return { error: 'Ya existe esa certificación.' };
 
-    await prisma.certificationTitle.create({ data: { name: parsed.data.name } });
+    await prisma.certificationTitle.create({
+        data: {
+            name: parsed.data.name,
+            typeId: parsed.data.typeId ?? null,
+            categoryId: parsed.data.categoryId ?? null,
+        },
+    });
     await audit(user, 'CERTIFICACION_CREADA', 'certification_title', parsed.data.name);
     revalidatePath('/certificados');
     revalidatePath('/certificados/certificaciones');
@@ -135,7 +145,11 @@ export async function createCertificationTitle(_prevState: CertificateMetaState,
 
 export async function updateCertificationTitle(id: number, _prevState: CertificateMetaState, formData: FormData): Promise<CertificateMetaState> {
     const admin = await requireAdmin();
-    const parsed = certificationTitleSchema.safeParse({ name: formData.get('name') });
+    const parsed = certificationTitleSchema.safeParse({
+        name: formData.get('name'),
+        typeId: formData.get('typeId'),
+        categoryId: formData.get('categoryId'),
+    });
     if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Datos inválidos.' };
 
     const title = await prisma.certificationTitle.findUnique({ where: { id } });
@@ -144,7 +158,14 @@ export async function updateCertificationTitle(id: number, _prevState: Certifica
     const clash = await prisma.certificationTitle.findUnique({ where: { name: parsed.data.name } });
     if (clash && clash.id !== id) return { error: 'Ya existe otra certificación con ese nombre.' };
 
-    await prisma.certificationTitle.update({ where: { id }, data: { name: parsed.data.name } });
+    await prisma.certificationTitle.update({
+        where: { id },
+        data: {
+            name: parsed.data.name,
+            typeId: parsed.data.typeId ?? null,
+            categoryId: parsed.data.categoryId ?? null,
+        },
+    });
     await audit(admin, 'CERTIFICACION_EDITADA', 'certification_title', parsed.data.name, `antes: ${title.name}`);
     revalidatePath('/certificados');
     revalidatePath('/certificados/certificaciones');

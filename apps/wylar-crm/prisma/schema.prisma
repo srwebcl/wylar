@@ -490,6 +490,8 @@ model CertificateCategory {
   name      String   @unique
   createdAt DateTime @default(now())
 
+  titles    CertificationTitle[]
+
   @@map("certificate_categories")
 }
 
@@ -503,14 +505,22 @@ model CertificateType {
 
   createdAt DateTime @default(now())
 
+  titles    CertificationTitle[]
+
   @@map("certificate_types")
 }
 
 model CertificationTitle {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
+  id         Int                  @id @default(autoincrement())
+  name       String               @unique
+  typeId     Int?
+  type       CertificateType?     @relation(fields: [typeId], references: [id], onDelete: SetNull)
+  categoryId Int?
+  category   CertificateCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt  DateTime             @default(now())
 
+  @@index([typeId])
+  @@index([categoryId])
   @@map("certification_titles")
 }
 

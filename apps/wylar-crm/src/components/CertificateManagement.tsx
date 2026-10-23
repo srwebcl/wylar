@@ -74,19 +74,38 @@ const DETAIL_TEMPLATES: { value: string; label: string; text: string }[] = [
     { value: 'personalizada', label: 'Personalizado...', text: '' },
 ];
 
+export interface CertificationTitleDetail {
+    id: number;
+    name: string;
+    typeId?: number | null;
+    typeCompletionText?: string | null;
+    typeLabel?: string | null;
+    categoryId?: number | null;
+    categoryName?: string | null;
+}
+
+export interface CategoryItem {
+    id: number;
+    name: string;
+}
+
 export function CertificateManagement({
     certificates,
     isAdmin,
     total,
     certificationTitles,
+    certificationTitleDetails,
     categories,
+    categoryList,
     types,
 }: {
     certificates: CertificateRow[];
     isAdmin: boolean;
     total: number;
     certificationTitles: string[];
+    certificationTitleDetails?: CertificationTitleDetail[];
     categories: string[];
+    categoryList?: CategoryItem[];
     types: CertificateTypeOption[];
 }) {
     const [isPending, startTransition] = useTransition();
@@ -131,6 +150,21 @@ export function CertificateManagement({
         if (template && template.value !== 'personalizada') setDetailText(template.text);
     }
 
+    function handleCertificationTitleChange(val: string) {
+        setCertificationTitle(val);
+        const match = certificationTitleDetails?.find(
+            (item) => item.name.trim().toLowerCase() === val.trim().toLowerCase(),
+        );
+        if (match) {
+            if (match.categoryName) {
+                setCategoryLabel(match.categoryName);
+            }
+            if (match.typeCompletionText) {
+                setCompletionText(match.typeCompletionText);
+            }
+        }
+    }
+
     async function handleCreateCategory(name: string) {
         const formData = new FormData();
         formData.set('name', name);
@@ -146,6 +180,11 @@ export function CertificateManagement({
     async function handleCreateCertificationTitle(name: string) {
         const formData = new FormData();
         formData.set('name', name);
+        const foundType = types.find((t) => t.completionText === completionText);
+        if (foundType) formData.set('typeId', String(foundType.id));
+        const foundCat = categoryList?.find((c) => c.name === categoryLabel);
+        if (foundCat) formData.set('categoryId', String(foundCat.id));
+
         // Si falla es porque ya existe (otro usuario la creó mientras tanto) — igual queda disponible para elegir.
         await createCertificationTitle({}, formData);
         setLocalCertificationTitles((prev) => (prev.includes(name) ? prev : [...prev, name]));
@@ -318,7 +357,7 @@ export function CertificateManagement({
                             <Field label="Nombre de la certificación">
                                 <SearchableCreatableSelect
                                     value={certificationTitle}
-                                    onChange={setCertificationTitle}
+                                    onChange={handleCertificationTitleChange}
                                     options={localCertificationTitles}
                                     onCreate={handleCreateCertificationTitle}
                                     placeholder="Busca o crea una certificación…"

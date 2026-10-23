@@ -293,6 +293,14 @@ export const certificateTypeSchema = z.object({
 
 export const certificationTitleSchema = z.object({
     name: z.string().trim().min(2, 'Ingresa el nombre de la certificación.').max(300),
+    typeId: z.preprocess(
+        (v) => (v === '' || v === null || v === undefined ? null : Number(v)),
+        z.number().int().positive('Selecciona un tipo de certificado.').nullable().optional()
+    ),
+    categoryId: z.preprocess(
+        (v) => (v === '' || v === null || v === undefined ? null : Number(v)),
+        z.number().int().positive('Selecciona una categoría de certificado.').nullable().optional()
+    ),
 });
 
 export const certificateSchema = z.object({
