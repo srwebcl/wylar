@@ -152,7 +152,7 @@ export function CertificateManagement({
     function handleRutChange(e: React.ChangeEvent<HTMLInputElement>) {
         // Sanitiza la entrada: solo números, puntos, guion y K/k
         const raw = e.target.value.toUpperCase();
-        const clean = raw.replace(/[^0-9K.\-]/g, '').slice(0, 12);
+        const clean = raw.replace(/[^0-9K.-]/g, '').slice(0, 12);
         setHolderRut(clean);
         if (rutError) setRutError(null);
     }

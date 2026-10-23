@@ -34,6 +34,8 @@ export const SOURCES = [
     { value: 'Google Ads', label: 'Google Ads' },
     { value: 'Referidos', label: 'Referidos' },
     { value: 'WEB', label: 'Web' },
+    { value: 'FACEBOOK', label: 'Facebook' },
+    { value: 'INSTAGRAM', label: 'Instagram' },
     { value: 'WHATSAPP', label: 'WhatsApp' },
     { value: 'MANUAL', label: 'Ingreso manual' },
     { value: 'OTRO', label: 'Otro' },

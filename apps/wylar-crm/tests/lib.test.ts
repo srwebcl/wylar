@@ -91,7 +91,7 @@ describe('buildLeadsWhere', () => {
     it('combina filtros y busca en varios campos', () => {
         const where = buildLeadsWhere({ q: 'juan', status: 'NUEVO', source: 'WEB' });
         expect(where.status).toBe('NUEVO');
-        expect(where.source).toBe('WEB');
+        expect(where.source).toEqual({ equals: 'WEB', mode: 'insensitive' });
         expect(where.OR).toHaveLength(10);
     });
     it('responsable: sin asignar, número válido y basura', () => {
