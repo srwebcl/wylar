@@ -9,6 +9,7 @@ import { CertificatesSearchBar } from '@/components/CertificatesSearchBar';
 import { SearchableCreatableSelect } from '@/components/SearchableCreatableSelect';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
+import { CertificateDiplomaPreview } from '@/components/CertificateDiplomaPreview';
 import { isValidRut, formatRut } from '@/lib/rut';
 
 interface CertificateRow {
@@ -113,6 +114,7 @@ export function CertificateManagement({
     const [success, setSuccess] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [editingCode, setEditingCode] = useState<string | null>(null);
     const [localCategories, setLocalCategories] = useState(categories);
     const [localCertificationTitles, setLocalCertificationTitles] = useState(certificationTitles);
 
@@ -201,12 +203,14 @@ export function CertificateManagement({
         setDetailTemplate('ninguna');
         setDetailText('');
         setCompletionText(types[0]?.completionText ?? 'Ha completado satisfactoriamente el curso de');
+        setEditingCode(null);
     }
 
     function openCreateForm() {
         setError(null);
         setSuccess(null);
         setEditingId(null);
+        setEditingCode(null);
         resetForm();
         setShowForm(true);
     }
@@ -215,6 +219,7 @@ export function CertificateManagement({
         setError(null);
         setSuccess(null);
         setEditingId(c.id);
+        setEditingCode(c.code);
         setHolderName(c.holderName);
         setHolderRut(c.holderRut);
         setCertificationTitle(c.certificationTitle);
@@ -335,105 +340,188 @@ export function CertificateManagement({
             {!showForm && error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
             {!showForm && success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
 
-            <Modal open={showForm} onClose={() => setShowForm(false)} title={editingId != null ? 'Editar certificado' : 'Emitir certificado'} maxWidth="max-w-2xl">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                        {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
-                        {success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
+            <Modal
+                open={showForm}
+                onClose={() => setShowForm(false)}
+                title={editingId != null ? 'Editar certificado' : 'Emitir certificado'}
+                maxWidth="max-w-6xl"
+            >
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    {/* Columna Izquierda: Formulario de datos */}
+                    <div className="lg:col-span-5 space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
+                            {success && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl">{success}</div>}
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            <Field label="Nombre completo del titular">
-                                <input value={holderName} onChange={(e) => setHolderName(e.target.value)} className={inputClass} required />
-                            </Field>
-                            <Field label="RUT del titular">
-                                <input
-                                    value={holderRut}
-                                    onChange={(e) => setHolderRut(e.target.value)}
-                                    onBlur={() => { if (isValidRut(holderRut)) setHolderRut(formatRut(holderRut)); }}
-                                    placeholder="12.345.678-9"
-                                    className={inputClass}
-                                    required
-                                />
-                            </Field>
-                            <Field label="Nombre de la certificación">
-                                <SearchableCreatableSelect
-                                    value={certificationTitle}
-                                    onChange={handleCertificationTitleChange}
-                                    options={localCertificationTitles}
-                                    onCreate={handleCreateCertificationTitle}
-                                    placeholder="Busca o crea una certificación…"
-                                    createLabel="Crear certificación"
-                                />
-                            </Field>
-                            <Field label="Categoría de certificación">
-                                <SearchableCreatableSelect
-                                    value={categoryLabel}
-                                    onChange={setCategoryLabel}
-                                    options={localCategories}
-                                    onCreate={handleCreateCategory}
-                                    placeholder="Busca o crea una categoría…"
-                                    createLabel="Crear categoría"
-                                />
-                            </Field>
-                            <Field label="Fecha de emisión">
-                                <input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className={inputClass} required />
-                            </Field>
-                            <Field label="Vigencia">
-                                <div className="flex flex-col gap-2">
-                                    <Select
-                                        value={expiryMode}
-                                        onChange={setExpiryMode}
-                                        options={[
-                                            { value: 'indefinida', label: 'Indefinida (sin vencimiento)' },
-                                            { value: '1', label: '1 año' },
-                                            { value: '2', label: '2 años' },
-                                            { value: '3', label: '3 años' },
-                                            { value: 'personalizada', label: 'Personalizada...' },
-                                        ]}
-                                    />
-                                    {expiryMode === 'personalizada' && (
-                                        <input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} className={inputClass} required />
-                                    )}
-                                </div>
-                            </Field>
-                            <Field label="Tipo de certificado">
-                                <Select
-                                    value={completionText}
-                                    onChange={setCompletionText}
-                                    options={types.map((t) => ({ value: t.completionText, label: t.label }))}
-                                />
-                            </Field>
-                        </div>
-
-                        <Field label="Texto bajo la certificación (opcional, va en el PDF)">
-                            <div className="flex flex-col gap-2">
-                                <Select
-                                    value={detailTemplate}
-                                    onChange={handleDetailTemplateChange}
-                                    options={DETAIL_TEMPLATES.map((t) => ({ value: t.value, label: t.label }))}
-                                />
-                                {detailTemplate !== 'ninguna' && (
-                                    <textarea
-                                        value={detailText}
-                                        onChange={(e) => setDetailText(e.target.value)}
-                                        rows={4}
-                                        placeholder="Describe duración, fechas, nota obtenida, vigencia, etc."
+                            <div className="space-y-3.5">
+                                <Field label="Nombre completo del titular">
+                                    <input
+                                        value={holderName}
+                                        onChange={(e) => setHolderName(e.target.value)}
+                                        placeholder="Ej. Juan Pérez González"
                                         className={inputClass}
+                                        required
                                     />
-                                )}
-                            </div>
-                        </Field>
+                                </Field>
 
-                        <div className="flex justify-end pt-2 border-t border-slate-100">
-                            <button
-                                type="submit"
-                                disabled={isPending}
-                                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-6 py-2.5 rounded-xl transition-colors disabled:opacity-60"
-                            >
-                                <ShieldCheck size={16} />
-                                {editingId != null ? (isPending ? 'Guardando…' : 'Guardar cambios') : isPending ? 'Emitiendo…' : 'Emitir certificado'}
-                            </button>
-                        </div>
-                </form>
+                                <Field label="RUT del titular">
+                                    <input
+                                        value={holderRut}
+                                        onChange={(e) => setHolderRut(e.target.value)}
+                                        onBlur={() => { if (isValidRut(holderRut)) setHolderRut(formatRut(holderRut)); }}
+                                        placeholder="12.345.678-9"
+                                        className={inputClass}
+                                        required
+                                    />
+                                </Field>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <Field label="Certificación">
+                                        <SearchableCreatableSelect
+                                            value={certificationTitle}
+                                            onChange={handleCertificationTitleChange}
+                                            options={localCertificationTitles}
+                                            onCreate={handleCreateCertificationTitle}
+                                            placeholder="Busca o crea…"
+                                            createLabel="Crear"
+                                        />
+                                    </Field>
+
+                                    <Field label="Categoría">
+                                        <SearchableCreatableSelect
+                                            value={categoryLabel}
+                                            onChange={setCategoryLabel}
+                                            options={localCategories}
+                                            onCreate={handleCreateCategory}
+                                            placeholder="Busca o crea…"
+                                            createLabel="Crear"
+                                        />
+                                    </Field>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <Field label="Fecha de emisión">
+                                        <input
+                                            type="date"
+                                            value={issueDate}
+                                            onChange={(e) => setIssueDate(e.target.value)}
+                                            className={inputClass}
+                                            required
+                                        />
+                                    </Field>
+
+                                    <Field label="Vigencia">
+                                        <div className="flex flex-col gap-2">
+                                            <Select
+                                                value={expiryMode}
+                                                onChange={setExpiryMode}
+                                                options={[
+                                                    { value: 'indefinida', label: 'Indefinida (sin vencimiento)' },
+                                                    { value: '1', label: '1 año' },
+                                                    { value: '2', label: '2 años' },
+                                                    { value: '3', label: '3 años' },
+                                                    { value: 'personalizada', label: 'Personalizada...' },
+                                                ]}
+                                            />
+                                            {expiryMode === 'personalizada' && (
+                                                <input
+                                                    type="date"
+                                                    value={expiryDate}
+                                                    onChange={(e) => setExpiryDate(e.target.value)}
+                                                    className={inputClass}
+                                                    required
+                                                />
+                                            )}
+                                        </div>
+                                    </Field>
+                                </div>
+
+                                {/* Bloque destacado 1: Tipo de certificado */}
+                                <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                                            <span className="w-2 h-2 rounded-full bg-amber-500 ring-2 ring-amber-500/20" />
+                                            Tipo de certificado
+                                        </label>
+                                        <span className="text-[11px] text-amber-800 font-semibold">
+                                            Frase previa en el diploma
+                                        </span>
+                                    </div>
+                                    <Select
+                                        value={completionText}
+                                        onChange={setCompletionText}
+                                        options={types.map((t) => ({
+                                            value: t.completionText,
+                                            label: `${t.label} («${t.completionText}…»)`,
+                                        }))}
+                                    />
+                                    <p className="text-[11px] text-amber-800/80 leading-tight">
+                                        Se imprime directamente antes del nombre de la certificación. Observa cómo cambia en el pre-formato a la derecha.
+                                    </p>
+                                </div>
+
+                                {/* Bloque destacado 2: Texto bajo la certificación */}
+                                <div className="p-3.5 rounded-xl bg-sky-50/70 border border-sky-200/80 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-xs font-bold text-sky-950 flex items-center gap-1.5">
+                                            <span className="w-2 h-2 rounded-full bg-sky-500 ring-2 ring-sky-500/20" />
+                                            Texto bajo la certificación (opcional)
+                                        </label>
+                                        <span className="text-[11px] text-sky-800 font-semibold">
+                                            Párrafo en el diploma
+                                        </span>
+                                    </div>
+                                    <Select
+                                        value={detailTemplate}
+                                        onChange={handleDetailTemplateChange}
+                                        options={DETAIL_TEMPLATES.map((t) => ({ value: t.value, label: t.label }))}
+                                    />
+                                    {detailTemplate !== 'ninguna' && (
+                                        <textarea
+                                            value={detailText}
+                                            onChange={(e) => setDetailText(e.target.value)}
+                                            rows={3}
+                                            placeholder="Describe duración, fechas, nota obtenida, vigencia, etc."
+                                            className={`${inputClass} text-xs leading-relaxed`}
+                                        />
+                                    )}
+                                    <p className="text-[11px] text-sky-800/80 leading-tight">
+                                        {detailTemplate === 'ninguna'
+                                            ? 'No se incluirá párrafo adicional bajo la certificación en el PDF.'
+                                            : 'Puedes usar una plantilla predeterminada o redactar tu propio texto.'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end pt-3 border-t border-slate-100">
+                                <button
+                                    type="submit"
+                                    disabled={isPending}
+                                    className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-[#0B1E40] font-bold px-6 py-2.5 rounded-xl transition-colors disabled:opacity-60 shadow-sm text-sm"
+                                >
+                                    <ShieldCheck size={16} />
+                                    {editingId != null ? (isPending ? 'Guardando…' : 'Guardar cambios') : isPending ? 'Emitiendo…' : 'Emitir certificado'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* Columna Derecha: Pre-formato del diploma en vivo */}
+                    <div className="lg:col-span-7 lg:sticky lg:top-0">
+                        <CertificateDiplomaPreview
+                            holderName={holderName}
+                            holderRut={holderRut}
+                            certificationTitle={certificationTitle}
+                            categoryLabel={categoryLabel}
+                            completionText={completionText}
+                            detailText={detailText}
+                            issueDate={issueDate}
+                            expiryMode={expiryMode}
+                            expiryDate={expiryDate}
+                            code={editingCode ?? 'WYL-PREVIEW'}
+                        />
+                    </div>
+                </div>
             </Modal>
 
             {certificates.length === 0 ? (
