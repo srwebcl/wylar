@@ -141,10 +141,21 @@ export default function Header({ currentPath = '/' }) {
                         </a>
                     </nav>
 
-                    {/* Mobile Menu Button */}
-                    <button className="md:hidden text-slate-900 p-2 hover:bg-slate-100 rounded-lg transition-colors" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-                        {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
-                    </button>
+                    {/* En mobile no hay espacio para el nav completo, pero el CTA de
+                        validación es demasiado importante para esconderlo detrás del
+                        menú hamburguesa — queda visible de inmediato junto al logo. */}
+                    <div className="md:hidden flex items-center gap-2">
+                        <a
+                            href="/validador"
+                            className="flex items-center gap-1.5 bg-gradient-to-r from-[#0B1E40] to-blue-900 text-white px-3.5 py-2 rounded-full font-bold text-xs shadow-sm active:scale-95 transition-transform"
+                        >
+                            <ShieldCheck size={15} />
+                            <span>Validar</span>
+                        </a>
+                        <button className="text-slate-900 p-2 hover:bg-slate-100 rounded-lg transition-colors" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Abrir menú">
+                            {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Mobile Nav Menu (Full Screen) */}

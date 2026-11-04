@@ -1,0 +1,291 @@
+---
+// Modal de captura de datos que se interpone antes de cualquier botón de
+// WhatsApp del sitio: antes, esos clics no dejaban ningún rastro en el CRM
+// (el visitante se iba directo a WhatsApp sin quedar registrado como
+// oportunidad). Se incluye una sola vez en Layout.astro, así que está
+// disponible en todas las páginas sin tener que repetirlo.
+//
+// Cualquier botón que deba abrir WhatsApp usa [data-whatsapp-gate] en vez de
+// un href directo a wa.me, con estos data-* opcionales:
+//   data-wa-phone      número destino (por defecto el de Wylar)
+//   data-wa-text       mensaje prellenado para WhatsApp
+//   data-product-id    si ya se conoce el servicio de interés (ej. en una
+//                       ficha de certificación), se omite el selector
+import { COMUNAS } from '../lib/comunas.js';
+---
+
+<div id="wa-gate-modal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4" aria-hidden="true">
+    <div id="wa-gate-backdrop" class="absolute inset-0 bg-[#050B14]/70 backdrop-blur-sm"></div>
+
+    <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="wa-gate-title"
+        class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+    >
+        <button
+            id="wa-gate-close"
+            aria-label="Cerrar"
+            type="button"
+            class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+
+        <div class="p-6 sm:p-8">
+            <div class="flex items-center gap-2.5 mb-1.5">
+                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                </span>
+                <h3 id="wa-gate-title" class="text-lg font-bold text-slate-900">Antes de escribirnos</h3>
+            </div>
+            <p class="text-slate-500 text-sm mb-6 font-medium">Para iniciar la conversación por WhatsApp, primero déjanos tus datos.</p>
+
+            <form id="wa-gate-form" class="space-y-4">
+                <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden" />
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nombre completo</label>
+                    <input name="name" type="text" class="w-full px-3 py-2.5 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none transition-all text-[15px] font-medium" placeholder="Su nombre" required />
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">RUT</label>
+                        <input name="rut" type="text" class="wa-gate-rut w-full px-3 py-2.5 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none transition-all text-[15px] font-medium" placeholder="12.345.678-9" required />
+                        <p class="wa-gate-rut-error hidden text-xs text-red-600 font-medium mt-1"></p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Teléfono</label>
+                        <input name="phone" type="tel" class="wa-gate-phone w-full px-3 py-2.5 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none transition-all text-[15px] font-medium" placeholder="+56 9 XXXXXXXX" required />
+                        <p class="wa-gate-phone-error hidden text-xs text-red-600 font-medium mt-1"></p>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Correo</label>
+                    <input name="email" type="email" class="w-full px-3 py-2.5 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none transition-all text-[15px] font-medium" placeholder="correo@ejemplo.com" required />
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Comuna</label>
+                        <input
+                            name="comuna"
+                            list="wa-gate-comunas-list"
+                            type="text"
+                            class="w-full px-3 py-2.5 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none transition-all text-[15px] font-medium"
+                            placeholder="Tu comuna..."
+                            autocomplete="off"
+                        />
+                        <datalist id="wa-gate-comunas-list">
+                            {COMUNAS.map((c) => (
+                                <option value={c.name}>{c.name} ({c.region})</option>
+                            ))}
+                        </datalist>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Modalidad</label>
+                        <select name="type" class="w-full px-3 py-2.5 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none transition-all cursor-pointer text-[15px] font-medium text-slate-700">
+                            <option value="PERSONA">Persona</option>
+                            <option value="EMPRESA">Empresa / Institución</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="wa-gate-product-field">
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Servicio de tu interés</label>
+                    <select name="productId" id="wa-gate-product-select" class="w-full px-3 py-2.5 bg-slate-50 rounded-lg border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none transition-all cursor-pointer text-[15px] font-medium text-slate-700" required>
+                        <option value="" disabled selected>Cargando catálogo...</option>
+                    </select>
+                </div>
+
+                <label class="flex items-start gap-2.5 text-xs text-slate-600 cursor-pointer">
+                    <input type="checkbox" name="consent" required class="mt-0.5 w-4 h-4 shrink-0 rounded border-slate-300 accent-emerald-600" />
+                    <span>He leído y acepto la <a href="/politicas-privacidad" target="_blank" rel="noreferrer" class="font-bold text-blue-700 hover:underline">Política de Privacidad</a> y autorizo el uso de mis datos para responder esta solicitud.</span>
+                </label>
+
+                <p id="wa-gate-feedback" class="hidden text-sm font-medium rounded-lg p-3"></p>
+
+                <button type="submit" id="wa-gate-submit" class="w-full bg-[#25D366] hover:bg-[#1ebc59] disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold text-sm py-3 rounded-xl transition-colors flex items-center justify-center gap-2 mt-2 shadow-lg">
+                    <span id="wa-gate-submit-label">Continuar a WhatsApp</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    import { submitLead } from '../lib/crm.js';
+    import { getProductList } from '../lib/products.js';
+    import { isValidRut, formatRut } from '../lib/rut.js';
+    import { isValidChileanMobile, formatChileanMobile } from '../lib/phone.js';
+
+    const modal = document.getElementById('wa-gate-modal');
+    const backdrop = document.getElementById('wa-gate-backdrop');
+    const closeBtn = document.getElementById('wa-gate-close');
+    const form = document.getElementById('wa-gate-form') as HTMLFormElement | null;
+    const feedback = document.getElementById('wa-gate-feedback');
+    const submitBtn = document.getElementById('wa-gate-submit') as HTMLButtonElement | null;
+    const submitLabel = document.getElementById('wa-gate-submit-label');
+    const defaultLabel = submitLabel?.textContent ?? '';
+    const rutInput = document.querySelector<HTMLInputElement>('.wa-gate-rut');
+    const rutError = document.querySelector<HTMLParagraphElement>('.wa-gate-rut-error');
+    const phoneInput = document.querySelector<HTMLInputElement>('.wa-gate-phone');
+    const phoneError = document.querySelector<HTMLParagraphElement>('.wa-gate-phone-error');
+    const productField = document.getElementById('wa-gate-product-field');
+    const productSelect = document.getElementById('wa-gate-product-select') as HTMLSelectElement | null;
+
+    let pendingTarget: { phone: string; text: string; productId: string } | null = null;
+    let productsLoaded = false;
+
+    async function ensureProductOptions() {
+        if (productsLoaded || !productSelect) return;
+        try {
+            const products = await getProductList();
+            const groups: Record<string, typeof products> = {};
+            for (const p of products) (groups[p.categoryName] ??= []).push(p);
+            productSelect.innerHTML =
+                '<option value="" disabled selected>Selecciona un servicio...</option>' +
+                Object.entries(groups)
+                    .map(
+                        ([categoryName, options]) =>
+                            `<optgroup label="${categoryName}">` +
+                            options.map((p) => `<option value="${p.id}">${p.name}</option>`).join('') +
+                            '</optgroup>',
+                    )
+                    .join('');
+            productsLoaded = true;
+        } catch {
+            productSelect.innerHTML = '<option value="" disabled selected>No se pudo cargar el catálogo</option>';
+        }
+    }
+
+    function openModal(trigger: HTMLElement) {
+        pendingTarget = {
+            phone: trigger.dataset.waPhone || '56929566326',
+            text: trigger.dataset.waText || 'Hola, quisiera más información.',
+            productId: trigger.dataset.productId || '',
+        };
+
+        if (productField && productSelect) {
+            if (pendingTarget.productId) {
+                productField.classList.add('hidden');
+                productSelect.required = false;
+            } else {
+                productField.classList.remove('hidden');
+                productSelect.required = true;
+                void ensureProductOptions();
+            }
+        }
+
+        modal!.classList.remove('hidden');
+        modal!.classList.add('flex');
+        modal!.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        const firstInput = modal!.querySelector<HTMLInputElement>('input:not([type="hidden"])');
+        if (firstInput) setTimeout(() => firstInput.focus(), 50);
+    }
+
+    function closeModal() {
+        modal!.classList.add('hidden');
+        modal!.classList.remove('flex');
+        modal!.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    if (modal && backdrop && closeBtn) {
+        document.querySelectorAll<HTMLElement>('[data-whatsapp-gate]').forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal(btn);
+            });
+        });
+
+        backdrop.addEventListener('click', closeModal);
+        closeBtn.addEventListener('click', closeModal);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+        });
+    }
+
+    if (form && feedback && submitBtn && rutInput && rutError && phoneInput && phoneError) {
+        rutInput.addEventListener('blur', () => {
+            if (!rutInput.value.trim()) return;
+            if (isValidRut(rutInput.value)) {
+                rutInput.value = formatRut(rutInput.value);
+                rutError.classList.add('hidden');
+            } else {
+                rutError.textContent = 'RUT inválido. Revisa el número y el dígito verificador.';
+                rutError.classList.remove('hidden');
+            }
+        });
+
+        phoneInput.addEventListener('blur', () => {
+            if (!phoneInput.value.trim()) return;
+            const formatted = isValidChileanMobile(phoneInput.value) ? phoneInput.value : formatChileanMobile(phoneInput.value);
+            if (formatted) {
+                phoneInput.value = formatted;
+                phoneError.classList.add('hidden');
+            } else {
+                phoneError.textContent = 'Teléfono inválido. Debe ser un celular chileno, ej: +56 9 1234 5678.';
+                phoneError.classList.remove('hidden');
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!pendingTarget) return;
+            const data = new FormData(form);
+            if (data.get('website')) return; // honeypot
+
+            const rutOk = isValidRut(rutInput.value);
+            const phoneCanonical = isValidChileanMobile(phoneInput.value) ? phoneInput.value : formatChileanMobile(phoneInput.value);
+            rutError.classList.toggle('hidden', rutOk);
+            if (!rutOk) rutError.textContent = 'RUT inválido. Revisa el número y el dígito verificador.';
+            phoneError.classList.toggle('hidden', Boolean(phoneCanonical));
+            if (!phoneCanonical) phoneError.textContent = 'Teléfono inválido. Debe ser un celular chileno, ej: +56 9 1234 5678.';
+            if (!rutOk || !phoneCanonical) return;
+
+            const canonicalRut = formatRut(rutInput.value);
+            rutInput.value = canonicalRut;
+            phoneInput.value = phoneCanonical;
+
+            const normalizedName = String(data.get('name') || '').trim().toUpperCase();
+            const normalizedEmail = String(data.get('email') || '').trim().toLowerCase();
+            const comunaVal = String(data.get('comuna') || '').trim() || null;
+            const productId = pendingTarget.productId || String(data.get('productId') || '');
+
+            feedback.classList.add('hidden');
+            submitBtn.disabled = true;
+            if (submitLabel) submitLabel.textContent = 'Enviando...';
+
+            try {
+                await submitLead({
+                    type: data.get('type'),
+                    name: normalizedName,
+                    rut: canonicalRut,
+                    email: normalizedEmail,
+                    phone: phoneCanonical,
+                    comuna: comunaVal,
+                    productId: Number(productId),
+                    message: 'Contacto solicitado vía botón de WhatsApp del sitio.',
+                });
+
+                const waMessage = `${pendingTarget.text} Mis datos: ${normalizedName} — ${phoneCanonical}.`;
+                const waUrl = `https://wa.me/${pendingTarget.phone}?text=${encodeURIComponent(waMessage)}`;
+
+                feedback.textContent = '¡Listo! Quedaste registrado — abriendo WhatsApp...';
+                feedback.className = 'text-sm font-medium rounded-lg p-3 bg-emerald-50 text-emerald-700 border border-emerald-200';
+                form.reset();
+
+                window.open(waUrl, '_blank', 'noopener,noreferrer');
+                setTimeout(closeModal, 1200);
+            } catch (err) {
+                feedback.textContent = err instanceof Error ? err.message : 'No pudimos enviar tu solicitud.';
+                feedback.className = 'text-sm font-medium rounded-lg p-3 bg-red-50 text-red-700 border border-red-200';
+            } finally {
+                submitBtn.disabled = false;
+                if (submitLabel) submitLabel.textContent = defaultLabel;
+            }
+        });
+    }
+</script>

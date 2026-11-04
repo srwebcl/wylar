@@ -198,9 +198,16 @@ const quienesIcons = [Users, Building2, GraduationCap];
                 <button type="button" data-open-form class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-[#0B1E40] font-bold text-sm uppercase tracking-widest px-7 py-3.5 rounded-xl transition-all shadow-lg">
                     Solicitar Cotización
                 </button>
-                <a href="https://wa.me/56929566326" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm uppercase tracking-widest px-7 py-3.5 rounded-xl transition-all backdrop-blur-sm">
+                <button
+                    type="button"
+                    data-whatsapp-gate
+                    data-wa-phone="56929566326"
+                    data-wa-text={`Hola, quisiera más información sobre la certificación de ${perfil.title}.`}
+                    data-product-id={product?.id}
+                    class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm uppercase tracking-widest px-7 py-3.5 rounded-xl transition-all backdrop-blur-sm"
+                >
                     Contactar por WhatsApp
-                </a>
+                </button>
             </div>
         </div>
     </section>
