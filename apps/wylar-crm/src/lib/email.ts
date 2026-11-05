@@ -11,7 +11,10 @@ import type { Lead } from '@prisma/client';
 const FROM = 'WYLAR Casa Certificadora <notificaciones@wylar.cl>';
 const REPLY_TO = 'contacto@wylar.cl';
 const TEAM_EMAIL = 'contacto@wylar.cl';
-const LOGO_BLANCO_URL = 'https://www.wylar.cl/images/logo-blanco.webp';
+// PNG, no WebP: la mayoría de los clientes de correo (Gmail incluido) no
+// respetan el canal alfa de WebP y lo aplanan a un fondo negro sólido
+// detrás del logo — PNG sí tiene soporte universal de transparencia en email.
+const LOGO_BLANCO_URL = 'https://www.wylar.cl/images/logo-blanco.png';
 const CRM_APP_URL = process.env.PUBLIC_CRM_ORIGIN || 'https://crm.wylar.cl';
 
 function getResend() {
