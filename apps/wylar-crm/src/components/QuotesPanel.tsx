@@ -115,11 +115,8 @@ export function QuotesPanel({
                                 {quotes.map((q) => (
                                     <tr key={q.id} className="hover:bg-slate-50/80 transition-colors">
                                         <td className="py-3.5 px-4 font-extrabold text-[#0B1E40] whitespace-nowrap">
-                                            <Link href={`/cotizaciones/${q.id}`} className="hover:underline flex items-center gap-1.5 text-sm">
+                                            <Link href={`/cotizaciones/${q.id}`} className="hover:underline text-sm">
                                                 {q.code}
-                                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
-                                                    v{q.version}
-                                                </span>
                                             </Link>
                                         </td>
                                         <td className="py-3.5 px-4 text-slate-500 whitespace-nowrap">

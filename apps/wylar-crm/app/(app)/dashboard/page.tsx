@@ -429,11 +429,6 @@ export default async function DashboardPage() {
                                                 <Link href={`/cotizaciones/${quote.id}`} className="hover:underline">
                                                     {quote.code}
                                                 </Link>
-                                                {quote.version > 1 && (
-                                                    <span className="ml-1 text-[10px] text-slate-400 font-normal">
-                                                        v{quote.version}
-                                                    </span>
-                                                )}
                                             </td>
                                             <td className="py-3 px-4">
                                                 <Link

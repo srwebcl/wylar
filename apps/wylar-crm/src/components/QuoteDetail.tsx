@@ -84,9 +84,6 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
                     <div>
                         <div className="flex items-center gap-2.5">
                             <h1 className="text-2xl font-black text-slate-900">{quote.code}</h1>
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
-                                Versión {quote.version}
-                            </span>
                             <span className={clsx('text-xs font-bold px-3 py-1 rounded-full border shadow-xs', STATUS_STYLE[quote.status])}>
                                 {STATUS_LABEL[quote.status] ?? quote.status}
                             </span>

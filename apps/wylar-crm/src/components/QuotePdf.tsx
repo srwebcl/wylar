@@ -380,7 +380,6 @@ export interface QuotePdfProps {
 
 export function QuotePdf({
     code,
-    version,
     issueDate,
     validityDays = 15,
     notes,
@@ -415,7 +414,7 @@ export function QuotePdf({
 
                     <View style={styles.quoteMetaBox}>
                         <Text style={styles.quoteTitle}>COTIZACIÓN</Text>
-                        <Text style={styles.quoteCode}>{code} <Text style={{ fontSize: 9, color: TEXT_MUTED }}>v{version}</Text></Text>
+                        <Text style={styles.quoteCode}>{code}</Text>
                         <View style={styles.metaRow}>
                             <Text style={styles.metaLabel}>Fecha de emisión:</Text>
                             <Text style={styles.metaValue}>{dateFormatted}</Text>

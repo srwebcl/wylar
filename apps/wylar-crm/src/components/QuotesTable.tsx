@@ -373,17 +373,12 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                                         className="mt-1 w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500/30 cursor-pointer"
                                     />
                                     <div className="min-w-0">
-                                        <div className="flex items-center gap-1.5 flex-wrap">
-                                            <Link
-                                                href={`/cotizaciones/${q.id}`}
-                                                className="font-black text-[#0B1E40] hover:text-amber-600 transition-colors text-sm"
-                                            >
-                                                {q.code}
-                                            </Link>
-                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">
-                                                v{q.version}
-                                            </span>
-                                        </div>
+                                        <Link
+                                            href={`/cotizaciones/${q.id}`}
+                                            className="font-black text-[#0B1E40] hover:text-amber-600 transition-colors text-sm"
+                                        >
+                                            {q.code}
+                                        </Link>
                                         <p className="font-bold text-slate-800 text-xs mt-0.5 truncate">{clientName}</p>
                                         {company && (
                                             <span className="text-[11px] text-slate-500 inline-flex items-center gap-1">
@@ -513,17 +508,12 @@ export function QuotesTable({ quotes }: { quotes: QuoteRow[] }) {
                                             />
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap">
-                                            <div className="flex items-center gap-1.5">
-                                                <Link
-                                                    href={`/cotizaciones/${q.id}`}
-                                                    className="font-black text-xs text-[#0B1E40] hover:text-amber-600 hover:underline"
-                                                >
-                                                    {q.code}
-                                                </Link>
-                                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">
-                                                    v{q.version}
-                                                </span>
-                                            </div>
+                                            <Link
+                                                href={`/cotizaciones/${q.id}`}
+                                                className="font-black text-xs text-[#0B1E40] hover:text-amber-600 hover:underline"
+                                            >
+                                                {q.code}
+                                            </Link>
                                         </td>
 
                                         <td className="px-4 py-3 whitespace-nowrap">
