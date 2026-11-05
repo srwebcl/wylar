@@ -406,7 +406,7 @@ export function QuotePdf({
                         <Image src={logoPath} style={styles.logoImage} />
                         <Text style={styles.institutionTitle}>Centro de Evaluación y Certificación de Competencias Laborales</Text>
                         <Text style={styles.institutionDetails}>
-                            Acreditado por ChileValora · Certificadora Wylar SpA{'\n'}
+                            Acreditado por ChileValora · Certificadora Wylar Ltda.{'\n'}
                             RUT: 78.011.059-7 · contacto@wylar.cl · +56 9 2956 6326{'\n'}
                             Av. Libertador Bernardo O&apos;Higgins 252, Santiago · Río Blanco 1371, Arica
                         </Text>
@@ -523,9 +523,9 @@ export function QuotePdf({
                         <View style={styles.bankBlock}>
                             <Text style={styles.conditionTitle}>Datos de Transferencia Bancaria</Text>
                             <Text style={styles.bankText}>
-                                Banco Santander · Cuenta Corriente N°: 87654321-0{'\n'}
-                                Titular: Certificadora Wylar SpA · RUT: 78.011.059-7{'\n'}
-                                Comprobante a: pagos@wylar.cl / contacto@wylar.cl
+                                Banco Santander · Cuenta Chequera Electrónica N°: 01072204359{'\n'}
+                                Titular: Certificadora Wylar Ltda. · RUT: 78.011.059-7{'\n'}
+                                Comprobante a: contacto@wylar.cl
                             </Text>
                         </View>
                     </View>
