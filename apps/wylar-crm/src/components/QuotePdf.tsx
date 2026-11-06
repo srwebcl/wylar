@@ -523,7 +523,7 @@ export function QuotePdf({
                         <View style={styles.bankBlock}>
                             <Text style={styles.conditionTitle}>Datos de Transferencia Bancaria</Text>
                             <Text style={styles.bankText}>
-                                Banco Santander · Cuenta Chequera Electrónica N°: 01072204359{'\n'}
+                                Banco Estado · Cuenta Chequera Electrónica N°: 01072204359{'\n'}
                                 Titular: Certificadora Wylar Ltda. · RUT: 78.011.059-7{'\n'}
                                 Comprobante a: contacto@wylar.cl
                             </Text>
