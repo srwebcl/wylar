@@ -15,6 +15,13 @@ const nextConfig: NextConfig = {
   // propio. En Vercel se omite — arma su propio output y no lo necesita
   // (`process.env.VERCEL` está siempre definido ahí en build time).
   output: process.env.VERCEL ? undefined : 'standalone',
+  // Las acciones de subida de archivos (imágenes hasta 5MB, PDFs hasta 15MB)
+  // van como Server Actions: el límite por defecto de Next (1MB) las rechazaba.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '20mb',
+    },
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },
