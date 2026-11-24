@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { ImagePlus, Loader2, X } from 'lucide-react';
 import { uploadPopupImage } from '@/actions/upload';
+import { compressImageFile } from '@/lib/compressImage';
 
 /** Igual que ImageUploadField, pero además captura el ancho/alto natural de
  * la imagen (leyéndola en el navegador) — el sitio los usa para armar el
@@ -32,8 +33,9 @@ export function PopupImageUploadField({
         setError(null);
         setIsUploading(true);
 
+        const compressed = await compressImageFile(file, { maxDimension: 1400 });
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', compressed);
         const result = await uploadPopupImage(formData);
 
         if (result.error) {

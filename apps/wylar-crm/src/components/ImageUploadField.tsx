@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { ImagePlus, Loader2, X } from 'lucide-react';
 import { uploadProfileImage } from '@/actions/upload';
+import { compressImageFile } from '@/lib/compressImage';
 
 export function ImageUploadField({ value, onChange }: { value: string; onChange: (url: string) => void }) {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -14,8 +15,9 @@ export function ImageUploadField({ value, onChange }: { value: string; onChange:
         setError(null);
         setIsUploading(true);
 
+        const compressed = await compressImageFile(file);
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', compressed);
         const result = await uploadProfileImage(formData);
 
         setIsUploading(false);
