@@ -6,7 +6,10 @@ import { corsHeaders } from '@/lib/publicApi';
 // servicio de interés" en sus formularios de contacto. También expone
 // profileId, para que la ficha de un perfil resuelva automáticamente qué
 // producto le corresponde (ver SidebarForm.astro / ContactModal.astro).
-const CDN_CACHE = 'public, s-maxage=30, stale-while-revalidate=120';
+// Ventana amplia a propósito: el plan Free de Neon suspende el cómputo tras
+// 5 min de inactividad, así que una caché más corta que eso nunca deja que
+// la base llegue a dormir con tráfico normal (ver catalog/route.ts).
+const CDN_CACHE = 'public, s-maxage=300, stale-while-revalidate=1800';
 
 export async function OPTIONS(request: Request) {
     return new Response(null, { status: 204, headers: corsHeaders(request.headers.get('origin')) });
