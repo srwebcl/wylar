@@ -554,6 +554,39 @@ model HeroSlide {
   @@map("hero_slides")
 }
 
+// --- Módulo de Pop-ups (wylar.cl) ---
+//
+// Ventanas emergentes promocionales de wylar.cl. GET /api/public/popups las
+// expone ya filtradas según la página actual del visitante (ver
+// showOnAllPages/pages/showOnProfilePages).
+model Popup {
+  id     Int     @id @default(autoincrement())
+  title  String // uso interno del CRM, nunca se muestra en el sitio
+  active Boolean @default(true)
+
+  image       String
+  // Dimensión natural de la imagen subida — permite que el sitio arme el
+  // modal con el aspect-ratio real (object-fit: contain) en vez de recortar
+  // o deformar la imagen para llenar un tamaño de caja fijo.
+  imageWidth  Int?
+  imageHeight Int?
+
+  // NONE | INTERNAL | EXTERNAL — "INTERNAL" cubre tanto páginas fijas del
+  // sitio como fichas de perfil (/perfil/slug), linkHref ya viene resuelto.
+  linkType String  @default("NONE")
+  linkHref String?
+
+  // Dónde se muestra: si showOnAllPages es true, se ignoran pages/showOnProfilePages.
+  showOnAllPages     Boolean  @default(true)
+  pages              String[] @default([])
+  showOnProfilePages Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("popups")
+}
+
 // --- Infraestructura ---
 
 // Contadores para limitar peticiones (login, formularios públicos, validador,

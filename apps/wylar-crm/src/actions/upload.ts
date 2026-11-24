@@ -53,6 +53,36 @@ export async function uploadProfileImage(formData: FormData): Promise<UploadImag
     }
 }
 
+/** Sube la imagen de un pop-up a Vercel Blob y devuelve su URL pública. */
+export async function uploadPopupImage(formData: FormData): Promise<UploadImageResult> {
+    await requireUser();
+
+    const file = formData.get('file');
+    if (!(file instanceof File)) {
+        return { error: 'No se recibió ningún archivo.' };
+    }
+    if (!ALLOWED_TYPES.includes(file.type)) {
+        return { error: 'Formato no soportado. Usa JPG, PNG, WEBP o AVIF.' };
+    }
+    if (file.size > MAX_BYTES) {
+        return { error: 'La imagen pesa más de 5MB. Comprímela e intenta de nuevo.' };
+    }
+
+    const detected = detectImageType(new Uint8Array(await file.slice(0, 16).arrayBuffer()));
+    if (!detected || !ALLOWED_TYPES.includes(detected.mime)) {
+        return { error: 'El archivo no es una imagen válida (JPG, PNG, WEBP o AVIF).' };
+    }
+
+    const filename = `popups/${Date.now()}-${randomUUID().slice(0, 8)}.${detected.ext}`;
+
+    try {
+        const blob = await put(filename, file, { access: 'public', contentType: detected.mime });
+        return { url: blob.url };
+    } catch {
+        return { error: 'No se pudo subir la imagen. Intenta de nuevo.' };
+    }
+}
+
 const MAX_PDF_BYTES = 15 * 1024 * 1024; // 15MB
 
 // Firma real de un PDF: siempre empieza con "%PDF-" (0x25 0x50 0x44 0x46 0x2D).

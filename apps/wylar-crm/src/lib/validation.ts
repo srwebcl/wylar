@@ -334,3 +334,33 @@ export const heroSlideSchema = z.object({
 });
 
 export type HeroSlideInput = z.infer<typeof heroSlideSchema>;
+
+// --- Módulo de Pop-ups (wylar.cl) ---
+
+const POPUP_LINK_TYPE_VALUES = ['NONE', 'INTERNAL', 'EXTERNAL'] as const;
+
+export const popupSchema = z
+    .object({
+        title: z.string().trim().min(1, 'Ponle un nombre interno al pop-up (no se muestra en el sitio).').max(120),
+        active: z.boolean().default(true),
+        image: z.string().trim().min(1, 'Falta la imagen.').max(500).refine(isSafeUrl, 'La imagen debe ser una ruta que empiece con "/" o una URL https://.'),
+        imageWidth: z.coerce.number().int().positive().optional().nullable(),
+        imageHeight: z.coerce.number().int().positive().optional().nullable(),
+        linkType: z.enum(POPUP_LINK_TYPE_VALUES).default('NONE'),
+        linkHref: z
+            .string()
+            .trim()
+            .max(500)
+            .optional()
+            .nullable()
+            .refine((v) => !v || isSafeUrl(v), 'El destino debe ser una ruta que empiece con "/" o una URL https://.'),
+        showOnAllPages: z.boolean().default(true),
+        pages: z.array(z.string().trim().min(1)).default([]),
+        showOnProfilePages: z.boolean().default(false),
+    })
+    .refine((data) => data.linkType === 'NONE' || !!data.linkHref, {
+        message: 'Selecciona el destino del enlace o cambia el tipo a "Sin enlace".',
+        path: ['linkHref'],
+    });
+
+export type PopupInput = z.infer<typeof popupSchema>;

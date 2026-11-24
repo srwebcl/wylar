@@ -6,9 +6,10 @@ import { corsHeaders } from '@/lib/publicApi';
 // apps/wylar/src/lib/hero.js). Los slides "de perfil destacado" no viven
 // acá — el sitio los agrega aparte a partir de GET /api/public/catalog.
 
-// Caché de CDN: la base se consulta como máximo cada ~30 s por región, aunque el
-// sitio reciba mucho tráfico; los cambios del CRM se ven en menos de 2.5 minutos.
-const CDN_CACHE = 'public, s-maxage=30, stale-while-revalidate=120';
+// Ventana amplia a propósito: el plan Free de Neon suspende el cómputo tras
+// 5 min de inactividad, así que una caché más corta que eso nunca deja que
+// la base llegue a dormir con tráfico normal (ver catalog/route.ts).
+const CDN_CACHE = 'public, s-maxage=300, stale-while-revalidate=1800';
 
 export async function OPTIONS(request: Request) {
     return new Response(null, { status: 204, headers: corsHeaders(request.headers.get('origin')) });

@@ -9,6 +9,7 @@ const ACTION_LABELS: Record<string, string> = {
     PERFIL_ACTUALIZADO: 'Perfil actualizado',
     PERFIL_ELIMINADO: 'Perfil eliminado',
     BANNER_ELIMINADO: 'Banner eliminado',
+    POPUP_ELIMINADO: 'Pop-up eliminado',
     USUARIO_CREADO: 'Usuario creado',
     USUARIO_ACTIVADO: 'Usuario activado',
     USUARIO_DESACTIVADO: 'Usuario desactivado',
