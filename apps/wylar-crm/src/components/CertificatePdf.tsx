@@ -69,10 +69,10 @@ const styles = StyleSheet.create({
     qrDate: { fontSize: 8, color: MUTED, marginTop: 2 },
 
     signatureBlock: { alignItems: 'center', position: 'relative' },
-    signatureImage: { width: 118, height: 38, objectFit: 'contain' },
-    stampOverSignature: { width: 72, height: 72, position: 'absolute', top: -40, left: 60, opacity: 0.9 },
-    signatureLine: { borderTopWidth: 1, borderTopColor: INK, width: 150, marginTop: 1 },
-    signerName: { fontSize: 9.5, fontWeight: 700, color: NAVY, marginTop: 5 },
+    signatureImage: { width: 189, height: 61, objectFit: 'contain' },
+    stampOverSignature: { width: 115, height: 115, position: 'absolute', top: -64, left: 96, opacity: 0.9 },
+    signatureLine: { borderTopWidth: 1, borderTopColor: INK, width: 190, marginTop: 1 },
+    signerName: { fontSize: 9.5, fontWeight: 700, color: NAVY, marginTop: 6 },
     signerRole: { fontSize: 8, color: MUTED, marginTop: 1 },
 
     // --- Centro ---
